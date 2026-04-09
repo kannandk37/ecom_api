@@ -1,0 +1,14 @@
+The New COD Workflow
+Order Placement: User orders 3 items (A, B, C). One Order and one Invoice are created. Status: Ordered / Unpaid.
+
+Partial Shipment: Item A arrives. The delivery agent collects money for Item A only.
+
+Payment Recording: * A Payment record is created for the price of Item A.
+
+OrderItem A status changes to delivered and paymentStatus to paid.
+
+InvoiceItem for A is marked paid.
+
+Invoice Update: The system checks if B and C are paid. Since they aren't, the main Invoice and Order remain partially paid.
+
+Completion: Once Item C arrives and is paid for, the system sees all linked OrderItems are paid and marks the entire Order as Completed.

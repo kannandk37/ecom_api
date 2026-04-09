@@ -1,0 +1,26 @@
+$files = @(
+   "src\app.ts",
+   "src\server.ts",
+   "src\config\db.ts",
+   "src\middlewares\authMiddleware.ts",
+   "src\middlewares\errorMiddleware.ts",
+   "src\types\index.d.ts"
+ ) foreach ($f in $files) { New-Item -ItemType File -Force -Path $f }
+
+
+module structure
+$m = "user"; @(
+   "src\modules\$m\entity",
+   "src\modules\$m\business",
+   "src\modules\$m\data\persistor\transformer",
+   "src\modules\$m\data\schema",
+   "src\modules\$m\router\transformer"
+ ) | ForEach-Object { New-Item -ItemType Directory -Force -Path $_ }; @(
+   "src\modules\$m\entity\index.ts",
+   "src\modules\$m\business\index.ts",
+   "src\modules\$m\data\persistor\transformer\index.ts",
+   "src\modules\$m\data\persistor\index.ts",
+   "src\modules\$m\data\schema\index.ts",
+   "src\modules\$m\router\transformer\index.ts",
+   "src\modules\$m\router\index.ts"
+ ) | ForEach-Object { New-Item -ItemType File -Force -Path $_ }
