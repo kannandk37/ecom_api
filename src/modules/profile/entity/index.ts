@@ -6,7 +6,6 @@ export class Profile {
     user?: User;
     name?: string;
     email?: string;
-    password?: string; // Hashed password
     mobile?: string;
     role?: Role;
     profilePic?: string;
