@@ -72,7 +72,7 @@ export function paymentEntityToPaymentRecord(payment: Payment): object {
     }
 
     if (payment.orderItems && payment.orderItems.length > 0) {
-        record.orderItems = orderItemEntitiesToOrderItemRecords(payment.orderItems);
+        record.orderItems = payment.orderItems.map((item) => new ObjectId(item.id));
     }
 
     return record;

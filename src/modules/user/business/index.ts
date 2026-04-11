@@ -32,4 +32,15 @@ export class UserManagement {
             }
         });
     }
+
+    async users() {
+        return new Promise<User[]>(async (resolve, reject) => {
+            try {
+                let userPersistor = new UserPersistor();
+                resolve(await userPersistor.users());
+            } catch (error) {
+                reject(error)
+            }
+        });
+    }
 }

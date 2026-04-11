@@ -1,4 +1,4 @@
-import { invoiceItemEntitiesToInvoiceItemRecords, invoiceItemRecordsToInvoiceItemEntities } from "../../../../invoice_item/data/persistor/transformer";
+import { invoiceItemRecordsToInvoiceItemEntities } from "../../../../invoice_item/data/persistor/transformer";
 import { Invoice, InvoiceStatus } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -44,7 +44,7 @@ export function invoiceEntityToInvoiceRecord(invoice: Invoice): object {
     }
 
     if (invoice.invoiceItems && invoice.invoiceItems.length > 0) {
-        record.invoiceItems = invoiceItemEntitiesToInvoiceItemRecords(invoice.invoiceItems);
+        record.invoiceItems = invoice.invoiceItems.map((item) => new ObjectId(item.id));
     }
 
     if (invoice.totalAmount !== undefined) {

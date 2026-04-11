@@ -1,5 +1,5 @@
-import { orderEntityToOrderRecord, orderRecordToOrderEntity } from "../../../../order/data/persistor/transformer";
-import { userEntityToUserRecord, userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
+import { orderRecordToOrderEntity } from "../../../../order/data/persistor/transformer";
+import { userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
 import { Cart } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -36,12 +36,12 @@ export function cartEntityToCartRecord(cart: Cart): object {
         record._id = new ObjectId(cart.id);
     }
 
-    if (cart.user) {
-        record.user = userEntityToUserRecord(cart.user);
+    if (cart.user?.id) {
+        record.user = new ObjectId(cart.user.id);
     }
 
-    if (cart.order) {
-        record.order = orderEntityToOrderRecord(cart.order);
+    if (cart.order?.id) {
+        record.order = new ObjectId(cart.order.id);
     }
 
     return record;

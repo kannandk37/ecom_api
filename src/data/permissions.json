@@ -84,6 +84,34 @@
     "isSystem": true
   },
   {
+    "resource": "profile",
+    "action": "create",
+    "key": "profile:create",
+    "description": "Add profiles",
+    "isSystem": true
+  },
+  {
+    "resource": "profile",
+    "action": "read",
+    "key": "profile:read",
+    "description": "View profiles",
+    "isSystem": true
+  },
+  {
+    "resource": "profile",
+    "action": "update",
+    "key": "profile:update",
+    "description": "Edit profile",
+    "isSystem": true
+  },
+  {
+    "resource": "profile",
+    "action": "delete",
+    "key": "profile:delete",
+    "description": "Delete profiles",
+    "isSystem": true
+  },
+  {
     "resource": "variant",
     "action": "create",
     "key": "variant:create",

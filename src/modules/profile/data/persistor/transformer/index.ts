@@ -59,8 +59,8 @@ export function profileEntityToProfileRecord(profile: Profile) {
         record._id = new ObjectId(profile.id);
     }
 
-    if (profile.user) {
-        record.user = userEntityToUserRecord(profile.user);
+    if (profile.user?.id) {
+        record.user = new ObjectId(profile.user.id);
     }
 
     if (profile.name) {
@@ -75,8 +75,8 @@ export function profileEntityToProfileRecord(profile: Profile) {
         record.mobile = profile.mobile;
     }
 
-    if (profile.role) {
-        record.role = roleEntityToRoleRecord(profile.role);
+    if (profile.role?.id) {
+        record.role = new ObjectId(profile.role.id);
     }
 
     if (profile.profilePic) {
@@ -91,4 +91,18 @@ export function profileEntityToProfileRecord(profile: Profile) {
         record.lastLogin = profile.lastLogin;
     }
     return record;
+}
+
+export function profilesRecordsToprofilesEntities(profileRecords: any[]): Profile[] {
+    if (!profileRecords || profileRecords.length === 0) {
+        return [];
+    }
+    return profileRecords.map((record) => profileRecordToProfileEntity(record));
+}
+
+export function profilesEntitiesToProfilesRecords(profiles: Profile[]): object[] {
+    if (!profiles || profiles.length === 0) {
+        return [];
+    }
+    return profiles.map((profile) => profileEntityToProfileRecord(profile));
 }

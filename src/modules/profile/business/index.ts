@@ -35,4 +35,26 @@ export class ProfileManagement {
             }
         });
     }
+
+    async profileByEmail(email: string) {
+        return new Promise<Profile>(async (resolve, reject) => {
+            try {
+                let profilePersistor = new ProfilePersistor();
+                resolve(await profilePersistor.profileByEmail(email));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async profileByUserId(userId: string) {
+        return new Promise<Profile>(async (resolve, reject) => {
+            try {
+                let profilePersistor = new ProfilePersistor();
+                resolve(await profilePersistor.profileByUserId(userId));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
 }

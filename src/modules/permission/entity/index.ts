@@ -14,6 +14,7 @@ export enum PermissionResources {
     ORDER_ITEM = 'orderitem',
     INVOICE = 'invoice',
     INVOICE_ITEM = 'invoiceitem',
+    PROFILE = 'profile',
     PAYMENT = 'payment',
     ADDRESS = 'address',
     DELIVERY = 'delivery',

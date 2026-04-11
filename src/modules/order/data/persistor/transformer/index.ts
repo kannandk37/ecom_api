@@ -66,20 +66,20 @@ export function orderEntityToOrderRecord(order: Order): object {
         record._id = new ObjectId(order.id);
     }
 
-    if (order.user) {
-        record.user = userRecordToUserEntity(order.user);
+    if (order.user?.id) {
+        record.user = new ObjectId(order.user.id);
     }
 
     if (order.orderItems && order.orderItems.length > 0) {
-        record.orderItems = orderItemEntitiesToOrderItemRecords(order.orderItems);
+        record.orderItems = order.orderItems.map((item) => new ObjectId(item.id));
     }
 
     if (order.billingAddress) {
-        record.billingAddress = addressEntityToAddressRecord(order.billingAddress);
+        record.billingAddress = new ObjectId(order.billingAddress?.id);
     }
 
     if (order.deliveryAddress) {
-        record.deliveryAddress = addressEntityToAddressRecord(order.deliveryAddress);
+        record.deliveryAddress = new ObjectId(order.deliveryAddress?.id);
     }
 
     if (order.totalPrice !== undefined) {
@@ -94,8 +94,8 @@ export function orderEntityToOrderRecord(order: Order): object {
         record.promocode = order.promocode;
     }
 
-    if (order.invoice) {
-        record.invoice = invoiceRecordToInvoiceEntity(order.invoice);
+    if (order.invoice?.id) {
+        record.invoice = new ObjectId(order.invoice.id);
     }
 
     if (order.status) {

@@ -1,5 +1,5 @@
 import { permissionsRawDataToPermissionsEntities } from "../../../permission/router/transformer";
-import { Role } from "../../entity";
+import { Role, RoleName } from "../../entity";
 
 export function roleRawDatumToRoleEntity(raw: any): Role {
     let role = new Role();
@@ -13,7 +13,7 @@ export function roleRawDatumToRoleEntity(raw: any): Role {
     }
 
     if (raw.name) {
-        role.name = raw.name;
+        role.name = raw.name as RoleName;
     }
 
     if (raw.permissions) {

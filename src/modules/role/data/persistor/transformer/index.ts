@@ -1,5 +1,5 @@
-import { permissionEntitiesToPermissionRecords, permissionRecordsToPermissionEntities } from "../../../../permission/data/persistor/transformer";
-import { Role } from "../../../entity";
+import { permissionsRecordsToPermissionsEntities } from "../../../../permission/data/persistor/transformer";
+import { Role, RoleName } from "../../../entity";
 import { ObjectId } from "mongodb";
 
 export function roleRecordToRoleEntity(roleRecord: any): Role {
@@ -14,7 +14,7 @@ export function roleRecordToRoleEntity(roleRecord: any): Role {
     }
 
     if (roleRecord.name) {
-        role.name = roleRecord.name;
+        role.name = roleRecord.name as RoleName;
     }
 
     if (roleRecord.description) {
@@ -22,7 +22,7 @@ export function roleRecordToRoleEntity(roleRecord: any): Role {
     }
 
     if (roleRecord.permissions && roleRecord.permissions.length > 0) {
-        role.permissions = permissionRecordsToPermissionEntities(roleRecord.permissions);
+        role.permissions = permissionsRecordsToPermissionsEntities(roleRecord.permissions);
     }
 
     if (roleRecord.isSystemRole !== undefined) {
@@ -32,7 +32,7 @@ export function roleRecordToRoleEntity(roleRecord: any): Role {
     return role;
 }
 
-export function roleEntityToRoleRecord(role: Role): object {
+export function roleEntityToRoleRecord(role: Role): any {
     let record: any = {};
 
     if (role === null) {
@@ -52,7 +52,7 @@ export function roleEntityToRoleRecord(role: Role): object {
     }
 
     if (role.permissions && role.permissions.length > 0) {
-        record.permissions = permissionEntitiesToPermissionRecords(role.permissions);
+        record.permissions = role.permissions.map((item) => new ObjectId(item.id));
     }
 
     if (role.isSystemRole !== undefined) {
@@ -62,14 +62,14 @@ export function roleEntityToRoleRecord(role: Role): object {
     return record;
 }
 
-export function roleRecordsToRoleEntities(roleRecords: any[]): Role[] {
+export function rolesRecordsToRolesEntities(roleRecords: any[]): Role[] {
     if (!roleRecords || roleRecords.length === 0) {
         return [];
     }
     return roleRecords.map((record) => roleRecordToRoleEntity(record));
 }
 
-export function roleEntitiesToRoleRecords(roles: Role[]): object[] {
+export function rolesEntitiesToRolesRecords(roles: Role[]): object[] {
     if (!roles || roles.length === 0) {
         return [];
     }

@@ -1,5 +1,4 @@
-import { Response, Router } from "express";
-import { Request } from "express";
+import { Request, Response, Router } from "express";
 import { UserAccountManagement } from "../business/index";
 import { userAccountInfoToUserAccountEntity } from "./transformer";
 import { UserManagement } from "../../user/business";
@@ -12,6 +11,8 @@ import ApiError from "../../../exceptions/apierror";
 import { User } from "../../user/entity";
 import { Profile } from "../../profile/entity";
 import mongoose from "mongoose";
+import { RoleManagement } from "../../role/business";
+import { RoleName } from "../../role/entity";
 
 export const userAccountRouter = Router();
 
@@ -21,9 +22,15 @@ userAccountRouter.post(
         try {
             // create user entity
             let user = new User();
+
+            // by default all are customer role only for this route
+            let role = await new RoleManagement().getRoleByName(RoleName.CUSTOMER);
+            user.roles = [role];
+
             let userManagement = new UserManagement();
             // create profile entity
             let profile = new Profile();
+            profile.role = role;
             profile.name = request.body.name;
             profile.email = request.body.email;
             if (request.body.mobile) {
@@ -32,14 +39,14 @@ userAccountRouter.post(
             let profileManagement = new ProfileManagement();
             // create user Account entity
             let userAccount = new UserAccount();
-            userAccount.accountIdentifier = request.body.email;
+            userAccount.email = request.body.email;
             userAccount.status = AccountStatus.ACTIVE;
             userAccount.password = request.body.password;
             userAccount.conformationCode = null;
             userAccount.resetConfirmationCode = null;
             userAccount.passwordResetedOn = new Date();
             let userAccountManagement = new UserAccountManagement();
-            let existingUserAccount = await userAccountManagement.userAccountByAccountIdentifier(userAccount);
+            let existingUserAccount = await userAccountManagement.userAccountByEmail(userAccount);
             if (!existingUserAccount) {
                 // await sequelize.transaction(async (transaction: Transaction) => {
                 // user = await userManagement.createUser(user, transaction);
@@ -60,6 +67,7 @@ userAccountRouter.post(
                         // 3. Link and Add Account
                         userAccount.user = newUser;
                         await userAccountManagement.addEmailAccount(userAccount, session);
+                        user = newUser;
                     });
 
                     console.log("Transaction committed successfully.");
@@ -89,7 +97,9 @@ userAccountRouter.post(
     async (request: Request, response: Response) => {
         try {
             let userAccountManagement = new UserAccountManagement();
-            let userAccountInfo = request.body
+            let userAccountInfo = new UserAccount();
+            userAccountInfo.email = request.body.email;
+            userAccountInfo.password = request.body.password;
             let userAccount = userAccountInfoToUserAccountEntity(userAccountInfo)
             let token = await userAccountManagement.loginExistingUser(userAccount);
             response.send(new SuccessResponse({ token: token }, "Login in successful", StatusCodes.CREATED));

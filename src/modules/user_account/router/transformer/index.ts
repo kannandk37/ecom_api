@@ -16,8 +16,8 @@ export function userAccountInfoToUserAccountEntity(userAccountInfo: any) {
         userAccount.user = userRawDatumToUserEntity(userAccountInfo.user);
     }
 
-    if (userAccountInfo.accountIdentifier) {
-        userAccount.accountIdentifier = userAccountInfo.accountIdentifier;
+    if (userAccountInfo.email) {
+        userAccount.email = userAccountInfo.email;
     }
 
     if (userAccountInfo.status) {

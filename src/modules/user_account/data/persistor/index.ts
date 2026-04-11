@@ -7,12 +7,12 @@ import ApiError from "../../../../exceptions/apierror";
 import { StatusCodes } from "http-status-codes";
 
 export class UserAccountPersistor {
-    async userAccountByAccountIdentifier(userAccount: UserAccount): Promise<UserAccount> {
+    async userAccountByEmail(userAccount: UserAccount): Promise<UserAccount> {
         return new Promise(async (resolve, reject) => {
             try {
                 let existingUserAccount: any = await UserAccountModel.findOne(
                     {
-                        accountIdentifier: userAccount.accountIdentifier
+                        email: userAccount.email
                     });
                 resolve(userAccountRecordToUserAccountEntity(existingUserAccount));
             } catch (error) {
@@ -25,7 +25,7 @@ export class UserAccountPersistor {
         return new Promise(async (resolve, reject) => {
             try {
                 let foundExistingUser = await UserAccountModel.findOne({
-                    accountIdentifier: userAccount.accountIdentifier
+                    email: userAccount.email
                 }).session(transaction);
                 if (foundExistingUser) {
                     // throw new Error("user email already exists!!..")

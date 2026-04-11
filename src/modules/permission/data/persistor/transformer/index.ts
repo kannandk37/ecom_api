@@ -1,7 +1,7 @@
 import { Permission, PermissionActions, PermissionResources } from "../../../entity";
 import { ObjectId } from "mongodb";
 
-export function permissionRecordToPermissionsEntity(permissionRecord: any): Permission {
+export function permissionRecordToPermissionEntity(permissionRecord: any): Permission {
     let permission = new Permission();
 
     if (permissionRecord === null) {
@@ -35,7 +35,7 @@ export function permissionRecordToPermissionsEntity(permissionRecord: any): Perm
     return permission;
 }
 
-export function permissionEntityToPermissionsRecord(permission: Permission) {
+export function permissionEntityToPermissionRecord(permission: Permission) {
     let record: any = {};
 
     if (permission === null) {
@@ -69,16 +69,16 @@ export function permissionEntityToPermissionsRecord(permission: Permission) {
     return record;
 }
 
-export function permissionRecordsToPermissionEntities(permissionRecords: any[]): Permission[] {
+export function permissionsRecordsToPermissionsEntities(permissionRecords: any[]): Permission[] {
     if (!permissionRecords || permissionRecords.length === 0) {
         return [];
     }
-    return permissionRecords.map((record) => permissionRecordToPermissionsEntity(record));
+    return permissionRecords.map((record) => permissionRecordToPermissionEntity(record));
 }
 
-export function permissionEntitiesToPermissionRecords(permissions: Permission[]): object[] {
+export function permissionsEntitiesToPermissionsRecords(permissions: Permission[]): object[] {
     if (!permissions || permissions.length === 0) {
         return [];
     }
-    return permissions.map((permission) => permissionEntityToPermissionsRecord(permission));
+    return permissions.map((permission) => permissionEntityToPermissionRecord(permission));
 }

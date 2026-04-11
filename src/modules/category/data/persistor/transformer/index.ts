@@ -50,8 +50,8 @@ export function categoryEntityToCategoryRecord(category: Category): object {
         record.description = category.description;
     }
 
-    if (category.subCategory) {
-        record.subCategory = categoryEntityToCategoryRecord(category.subCategory);
+    if (category.subCategory?.id) {
+        record.subCategory = new ObjectId(category.subCategory.id);
     }
 
     if (category.image) {

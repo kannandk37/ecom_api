@@ -10,7 +10,7 @@ export enum AccountStatus {
 export class UserAccount {
     id?: string
     user?: User
-    accountIdentifier?: string
+    email?: string
     status?: AccountStatus
     conformationCode?: string
     resetConfirmationCode?: string

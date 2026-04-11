@@ -1,4 +1,4 @@
-import { userEntityToUserRecord, userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
+import { userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
 import { Address, AddressType } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -63,8 +63,8 @@ export function addressEntityToAddressRecord(address: Address): object {
         record._id = new ObjectId(address.id);
     }
 
-    if (address.user) {
-        record.user = userEntityToUserRecord(address.user);
+    if (address.user?.id) {
+        record.user = new ObjectId(address.user.id);
     }
 
     if (address.line1) {

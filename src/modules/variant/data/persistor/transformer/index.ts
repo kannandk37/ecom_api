@@ -55,8 +55,8 @@ export function variantEntityToVariantRecord(variant: Variant): object {
         record._id = new ObjectId(variant.id);
     }
 
-    if (variant.product) {
-        record.product = productEntityToProductRecord(variant.product);
+    if (variant.product?.id) {
+        record.product = new ObjectId(variant.product.id);
     }
 
     if (variant.type) {

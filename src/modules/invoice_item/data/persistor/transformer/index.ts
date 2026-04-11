@@ -1,9 +1,9 @@
-import { invoiceEntityToInvoiceRecord, invoiceRecordToInvoiceEntity } from "../../../../invoice/data/persistor/transformer";
+import { invoiceRecordToInvoiceEntity } from "../../../../invoice/data/persistor/transformer";
 import { PaymentStatus } from "../../../../payment/entity";
 import { InvoiceItem } from "../../../entity";
 import { ObjectId } from "mongodb";
-import { orderItemEntityToOrderItemRecord, orderItemRecordToOrderItemEntity } from "../../../../order_item/data/persistor/transformer";
-import { paymentEntityToPaymentRecord, paymentRecordToPaymentEntity } from "../../../../payment/data/persistor/transformer";
+import { orderItemRecordToOrderItemEntity } from "../../../../order_item/data/persistor/transformer";
+import { paymentRecordToPaymentEntity } from "../../../../payment/data/persistor/transformer";
 
 export function invoiceItemRecordToInvoiceItemEntity(invoiceItemRecord: any): InvoiceItem {
     let invoiceItem = new InvoiceItem();
@@ -54,20 +54,20 @@ export function invoiceItemEntityToInvoiceItemRecord(invoiceItem: InvoiceItem): 
         record._id = new ObjectId(invoiceItem.id);
     }
 
-    if (invoiceItem.invoice) {
-        record.invoice = invoiceEntityToInvoiceRecord(invoiceItem.invoice);
+    if (invoiceItem.invoice?.id) {
+        record.invoice = new ObjectId(invoiceItem.invoice.id);
     }
 
-    if (invoiceItem.orderItem) {
-        record.orderItem = orderItemEntityToOrderItemRecord(invoiceItem.orderItem);
+    if (invoiceItem.orderItem?.id) {
+        record.orderItem = new ObjectId(invoiceItem.orderItem.id);
     }
 
     if (invoiceItem.amount !== undefined) {
         record.amount = invoiceItem.amount;
     }
 
-    if (invoiceItem.payment) {
-        record.payment = paymentEntityToPaymentRecord(invoiceItem.payment);
+    if (invoiceItem.payment?.id) {
+        record.payment = new ObjectId(invoiceItem.payment.id);
     }
 
     if (invoiceItem.paidOn) {

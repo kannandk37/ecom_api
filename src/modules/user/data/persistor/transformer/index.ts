@@ -1,4 +1,4 @@
-import { roleEntitiesToRoleRecords, roleRecordsToRoleEntities } from "../../../../role/data/persistor/transformer";
+import { rolesEntitiesToRolesRecords, rolesRecordsToRolesEntities } from "../../../../role/data/persistor/transformer";
 import { User } from "../../../entity"
 import { ObjectId } from "mongodb";
 
@@ -12,7 +12,7 @@ export function userRecordToUserEntity(userRecord: any) {
     }
 
     if (userRecord.roles?.length > 0) {
-        user.roles = roleRecordsToRoleEntities(userRecord.roles);
+        user.roles = rolesRecordsToRolesEntities(userRecord.roles);
     }
 
     return user;
@@ -30,13 +30,13 @@ export function userEntityToUserRecord(user: User) {
     }
 
     if (user.roles && user.roles.length > 0) {
-        record.roles = roleEntitiesToRoleRecords(user.roles);
+        record.roles = user.roles.map((item) => new ObjectId(item.id));
     }
 
     return record;
 }
 
-export function userRecordsToUserEntities(userRecords: any[]) {
+export function usersRecordsToUsersEntities(userRecords: any[]) {
     let users: User[] = [];
     userRecords.forEach(element => {
         let user = userRecordToUserEntity(element)
@@ -45,7 +45,7 @@ export function userRecordsToUserEntities(userRecords: any[]) {
     return users
 }
 
-export function userEntitiesToUserRecords(users: User[]) {
+export function usersEntitiesToUsersRecords(users: User[]) {
     let records: any[] = [];
     users.forEach(user => {
         let record = userEntityToUserRecord(user);

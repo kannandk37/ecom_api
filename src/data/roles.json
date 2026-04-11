@@ -1,0 +1,419 @@
+[
+  {
+    "name": "customer",
+    "permissions": [
+      {
+        "key": "category:read"
+      },
+      {
+        "key": "brand:read"
+      },
+      {
+        "key": "product:read"
+      },
+      {
+        "key": "profile:read"
+      },
+      {
+        "key": "profile:update"
+      },
+      {
+        "key": "profile:delete"
+      },
+      {
+        "key": "variant:read"
+      },
+      {
+        "key": "order:create"
+      },
+      {
+        "key": "order:read"
+      },
+      {
+        "key": "order:update"
+      },
+      {
+        "key": "order:delete"
+      },
+      {
+        "key": "address:create"
+      },
+      {
+        "key": "address:read"
+      },
+      {
+        "key": "address:update"
+      },
+      {
+        "key": "address:delete"
+      },
+      {
+        "key": "user:read"
+      },
+      {
+        "key": "user:update"
+      },
+      {
+        "key": "user:delete"
+      }
+    ],
+    "description": "this role is for customers with ecommerce shopping access only",
+    "isSystemRole": false
+  },
+  {
+    "name": "admin",
+    "permissions": [
+      {
+        "key": "category:create"
+      },
+      {
+        "key": "category:read"
+      },
+      {
+        "key": "category:update"
+      },
+      {
+        "key": "category:delete"
+      },
+      {
+        "key": "brand:create"
+      },
+      {
+        "key": "brand:read"
+      },
+      {
+        "key": "brand:update"
+      },
+      {
+        "key": "brand:delete"
+      },
+      {
+        "key": "product:create"
+      },
+      {
+        "key": "product:read"
+      },
+      {
+        "key": "product:update"
+      },
+      {
+        "key": "product:delete"
+      },
+      {
+        "key": "profile:create"
+      },
+      {
+        "key": "profile:read"
+      },
+      {
+        "key": "profile:update"
+      },
+      {
+        "key": "profile:delete"
+      },
+      {
+        "key": "variant:create"
+      },
+      {
+        "key": "variant:read"
+      },
+      {
+        "key": "variant:update"
+      },
+      {
+        "key": "variant:delete"
+      },
+      {
+        "key": "order:create"
+      },
+      {
+        "key": "order:read"
+      },
+      {
+        "key": "order:update"
+      },
+      {
+        "key": "order:delete"
+      },
+      {
+        "key": "orderitem:create"
+      },
+      {
+        "key": "orderitem:read"
+      },
+      {
+        "key": "orderitem:update"
+      },
+      {
+        "key": "orderitem:delete"
+      },
+      {
+        "key": "invoice:create"
+      },
+      {
+        "key": "invoice:read"
+      },
+      {
+        "key": "invoice:update"
+      },
+      {
+        "key": "invoice:delete"
+      },
+      {
+        "key": "invoiceitem:create"
+      },
+      {
+        "key": "invoiceitem:read"
+      },
+      {
+        "key": "invoiceitem:update"
+      },
+      {
+        "key": "invoiceitem:delete"
+      },
+      {
+        "key": "payment:create"
+      },
+      {
+        "key": "payment:read"
+      },
+      {
+        "key": "payment:update"
+      },
+      {
+        "key": "payment:delete"
+      },
+      {
+        "key": "address:create"
+      },
+      {
+        "key": "address:read"
+      },
+      {
+        "key": "address:update"
+      },
+      {
+        "key": "address:delete"
+      },
+      {
+        "key": "delivery:create"
+      },
+      {
+        "key": "delivery:read"
+      },
+      {
+        "key": "delivery:update"
+      },
+      {
+        "key": "delivery:delete"
+      },
+      {
+        "key": "warehouse:read"
+      },
+      {
+        "key": "warehouse:update"
+      },
+      {
+        "key": "user:read"
+      },
+      {
+        "key": "user:update"
+      },
+      {
+        "key": "useraccount:read"
+      },
+      {
+        "key": "useraccount:update"
+      }
+    ],
+    "description": "this role is for admin users with limited access",
+    "isSystemRole": false
+  },
+  {
+    "name": "superadmin",
+    "permissions": [
+      {
+        "key": "category:create"
+      },
+      {
+        "key": "category:read"
+      },
+      {
+        "key": "category:update"
+      },
+      {
+        "key": "category:delete"
+      },
+      {
+        "key": "brand:create"
+      },
+      {
+        "key": "brand:read"
+      },
+      {
+        "key": "brand:update"
+      },
+      {
+        "key": "brand:delete"
+      },
+      {
+        "key": "product:create"
+      },
+      {
+        "key": "product:read"
+      },
+      {
+        "key": "product:update"
+      },
+      {
+        "key": "product:delete"
+      },
+      {
+        "key": "profile:create"
+      },
+      {
+        "key": "profile:read"
+      },
+      {
+        "key": "profile:update"
+      },
+      {
+        "key": "profile:delete"
+      },
+      {
+        "key": "variant:create"
+      },
+      {
+        "key": "variant:read"
+      },
+      {
+        "key": "variant:update"
+      },
+      {
+        "key": "variant:delete"
+      },
+      {
+        "key": "order:create"
+      },
+      {
+        "key": "order:read"
+      },
+      {
+        "key": "order:update"
+      },
+      {
+        "key": "order:delete"
+      },
+      {
+        "key": "orderitem:create"
+      },
+      {
+        "key": "orderitem:read"
+      },
+      {
+        "key": "orderitem:update"
+      },
+      {
+        "key": "orderitem:delete"
+      },
+      {
+        "key": "invoice:create"
+      },
+      {
+        "key": "invoice:read"
+      },
+      {
+        "key": "invoice:update"
+      },
+      {
+        "key": "invoice:delete"
+      },
+      {
+        "key": "invoiceitem:create"
+      },
+      {
+        "key": "invoiceitem:read"
+      },
+      {
+        "key": "invoiceitem:update"
+      },
+      {
+        "key": "invoiceitem:delete"
+      },
+      {
+        "key": "payment:create"
+      },
+      {
+        "key": "payment:read"
+      },
+      {
+        "key": "payment:update"
+      },
+      {
+        "key": "payment:delete"
+      },
+      {
+        "key": "address:create"
+      },
+      {
+        "key": "address:read"
+      },
+      {
+        "key": "address:update"
+      },
+      {
+        "key": "address:delete"
+      },
+      {
+        "key": "delivery:create"
+      },
+      {
+        "key": "delivery:read"
+      },
+      {
+        "key": "delivery:update"
+      },
+      {
+        "key": "delivery:delete"
+      },
+      {
+        "key": "warehouse:create"
+      },
+      {
+        "key": "warehouse:read"
+      },
+      {
+        "key": "warehouse:update"
+      },
+      {
+        "key": "warehouse:delete"
+      },
+      {
+        "key": "user:create"
+      },
+      {
+        "key": "user:read"
+      },
+      {
+        "key": "user:update"
+      },
+      {
+        "key": "user:delete"
+      },
+      {
+        "key": "useraccount:create"
+      },
+      {
+        "key": "useraccount:read"
+      },
+      {
+        "key": "useraccount:update"
+      },
+      {
+        "key": "useraccount:delete"
+      }
+    ],
+    "description": "this role is for superadmin with full access",
+    "isSystemRole": true
+  }
+]

@@ -1,4 +1,4 @@
-import { categoryEntityToCategoryRecord, categoryRecordToCategoryEntity } from "../../../../category/data/persistor/transformer";
+import { categoryRecordToCategoryEntity } from "../../../../category/data/persistor/transformer";
 import { Brand } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -51,8 +51,8 @@ export function brandEntityToBrandRecord(brand: Brand): object {
         record.description = brand.description;
     }
 
-    if (brand.category) {
-        record.category = categoryEntityToCategoryRecord(brand.category);
+    if (brand.category?.id) {
+        record.category = new ObjectId(brand.category.id);
     }
 
     if (brand.image) {

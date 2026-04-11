@@ -66,7 +66,7 @@ export function orderItemEntityToOrderItemRecord(orderItem: OrderItem): object {
     }
 
     if (orderItem.product) {
-        record.product = productEntityToProductRecord(orderItem.product);
+        record.product = new ObjectId(orderItem.product.id);
     }
 
     if (orderItem.price !== undefined) {
@@ -82,7 +82,7 @@ export function orderItemEntityToOrderItemRecord(orderItem: OrderItem): object {
     }
 
     if (orderItem.variant) {
-        record.variant = variantEntityToVariantRecord(orderItem.variant);
+        record.variant = new ObjectId(orderItem.variant.id);
     }
 
     if (orderItem.quantity !== undefined) {

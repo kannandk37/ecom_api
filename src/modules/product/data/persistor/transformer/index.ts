@@ -105,16 +105,16 @@ export function productEntityToProductRecord(product: Product): object {
         record.shortDescription = product.shortDescription;
     }
 
-    if (product.category) {
-        record.category = categoryEntityToCategoryRecord(product.category);
+    if (product.category?.id) {
+        record.category = new ObjectId(product.category.id);
     }
 
-    if (product.brand) {
-        record.brand = brandEntityToBrandRecord(product.brand);
+    if (product.brand?.id) {
+        record.brand = new ObjectId(product.brand.id);
     }
 
     if (product.variants && product.variants.length > 0) {
-        record.variants = variantEntitiesToVariantRecords(product.variants);
+        record.variants = product.variants.map((item) => new ObjectId(item.id));
     }
 
     if (product.price !== undefined) {

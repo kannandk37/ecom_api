@@ -23,4 +23,15 @@ export class PermissionManagement {
             }
         });
     }
+
+    async getPermissionsByKeys(keys: string[]): Promise<Permission[]> {
+        return new Promise<Permission[]>(async (resolve, reject) => {
+            try {
+                let permissionPersistor = new PermissionPersistor();
+                resolve(await permissionPersistor.getPermissionsByKeys(keys))
+            } catch (error) {
+                reject(error)
+            }
+        });
+    }
 }

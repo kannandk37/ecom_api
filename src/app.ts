@@ -4,13 +4,17 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 
 import { errorHandler, errorLogger, invalidPathHandler, notFound } from './middlewares/errorMiddleware';
 import { userAccountRouter } from './modules/user_account/router';
 import { PermissionManagement } from './modules/permission/business';
-import path from 'path';
-import fs from 'fs';
 import { permissionsRawDataToPermissionsEntities } from './modules/permission/router/transformer';
+import { userRouter } from './modules/user/router';
+import { rolesRawDataToRolesEntities } from './modules/role/router/transformer';
+import { RoleManagement } from './modules/role/business';
+import { roleRouter } from './modules/role/router';
 
 dotenv.config();
 
@@ -69,6 +73,22 @@ async function seedPermissions(): Promise<void> {
     console.log(`✔ Permissions seeded — created: ${created}, skipped (already exist): ${skipped}`);
 }
 
+async function seedRoles(): Promise<void> {
+
+    const filePath = path.join(__dirname, './data/roles.json');
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    const rawList: any[] = JSON.parse(raw);
+    const entities = rolesRawDataToRolesEntities(rawList);
+
+    for (const record of entities) {
+        const permissions = await new PermissionManagement().getPermissionsByKeys(record.permissions.map(item => item.key));
+        record.permissions = permissions;
+        await new RoleManagement().createOrUpdateRole(record);
+    }
+
+    console.log(`✔ Role seeded`);
+}
+
 
 app.get(
     "/api",
@@ -77,12 +97,30 @@ app.get(
     }
 );
 
-seedPermissions().catch((error) => {
-    console.error("Error seeding permissions:", error);
-});
+// Seeders
+async function seeders() {
+
+    try {
+        await seedPermissions();
+    } catch (error) {
+        console.error("Error seeding permissions:", error);
+    }
+
+    try {
+        await seedRoles();
+    } catch (error) {
+        console.error("Error seeding roles", error);
+    }
+
+}
+
+
+seeders();
 
 // Routes
 app.use('/api', userAccountRouter);
+app.use('/api/users', userRouter);
+app.use('/api/roles', roleRouter);
 
 
 // Error Handlers

@@ -17,8 +17,8 @@ export function userAccountRecordToUserAccountEntity(userAccountRecord: any): Us
         userAccount.user = userRecordToUserEntity(userAccountRecord.user);
     }
 
-    if (userAccountRecord.accountIdentifier) {
-        userAccount.accountIdentifier = userAccountRecord.accountIdentifier;
+    if (userAccountRecord.email) {
+        userAccount.email = userAccountRecord.email;
     }
 
     if (userAccountRecord.conformationCode) {
@@ -57,12 +57,12 @@ export function userAccountEntityToUserAccountRecord(userAccount: UserAccount): 
         record._id = new ObjectId(userAccount.id);
     }
 
-    if (userAccount.user) {
-        record.user = userEntityToUserRecord(userAccount.user);
+    if (userAccount.user?.id) {
+        record.user = new ObjectId(userAccount.user.id);
     }
 
-    if (userAccount.accountIdentifier) {
-        record.accountIdentifier = userAccount.accountIdentifier;
+    if (userAccount.email) {
+        record.email = userAccount.email;
     }
 
     if (userAccount.status) {
