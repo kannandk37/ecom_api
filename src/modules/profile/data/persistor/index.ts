@@ -1,19 +1,14 @@
 import mongoose from "mongoose";
 import { Profile } from "../../entity";
 import { ProfileModel } from "../schema";
-import { profileRecordToProfileEntity } from "./transformer";
+import { profileEntityToProfileRecord, profileRecordToProfileEntity } from "./transformer";
 import { ObjectId } from "mongodb";
 export class ProfilePersistor {
     async persistProfile(profile: Profile, transaction?: mongoose.ClientSession): Promise<Profile> {
         return new Promise(async (resolve, reject) => {
             try {
-                let persistedProfileRecord: any = await ProfileModel.create([
-                    {
-                        name: profile.name,
-                        email: profile.email,
-                        user: new ObjectId(profile.user?.id),
-                        mobile: profile.mobile,
-                    }], { session: transaction });
+                let profileRecordData = profileEntityToProfileRecord(profile);
+                let persistedProfileRecord: any = await ProfileModel.create([profileRecordData], { session: transaction });
                 resolve(profileRecordToProfileEntity(persistedProfileRecord));
             } catch (error) {
                 reject(error);

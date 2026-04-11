@@ -1,16 +1,15 @@
 import mongoose from "mongoose";
 import { User } from "../../entity";
 import { UserModel } from "../schema";
-import { userRecordToUserEntity } from "./transformer";
+import { userEntityToUserRecord, userRecordToUserEntity } from "./transformer";
 import { ObjectId } from "mongodb";
 
 export class UserPersistor {
     async persistUser(user: User, transaction?: mongoose.ClientSession): Promise<User> {
         return new Promise(async (resolve, reject) => {
             try {
-                let userRecord = await UserModel.create([{
-                    roles: user.roles?.map((role) => new ObjectId(role.id))
-                }], { session: transaction });
+                let userRecordData = userEntityToUserRecord(user);
+                let userRecord = await UserModel.create([userRecordData], { session: transaction });
                 resolve(userRecordToUserEntity(userRecord))
             } catch (error) {
                 reject(error)
@@ -22,7 +21,7 @@ export class UserPersistor {
         return new Promise(async (resolve, reject) => {
             try {
                 let userRecord = await UserModel.findOne(
-                    { id: id }
+                    { _id: new ObjectId(id) }
                 );
                 resolve(userRecordToUserEntity(userRecord))
             } catch (error) {
