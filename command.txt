@@ -24,3 +24,7 @@ $m = "user"; @(
    "src\modules\$m\router\transformer\index.ts",
    "src\modules\$m\router\index.ts"
  ) | ForEach-Object { New-Item -ItemType File -Force -Path $_ }
+
+
+
+ mongo db start -> mongod --dbpath "C:\db\db-27019" --port 27019 --bind_ip 127.0.0.1 --replSet rs0 --keyFile "C:\db\db-27019\mongodb-keyfile.txt"

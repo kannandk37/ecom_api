@@ -12,7 +12,7 @@ export class UserAccountPersistor {
             try {
                 let existingUserAccount: any = await UserAccountModel.findOne(
                     {
-                        where: { accountIdentifier: userAccount.accountIdentifier }
+                        accountIdentifier: userAccount.accountIdentifier
                     });
                 resolve(userAccountRecordToUserAccountEntity(existingUserAccount));
             } catch (error) {

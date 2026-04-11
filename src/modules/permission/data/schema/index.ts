@@ -1,11 +1,12 @@
 import { Schema, model } from 'mongoose';
+import { PermissionActions, PermissionResources } from '../../entity';
 
 const PermissionSchema = new Schema({
-    name: { type: String, required: true },
-    slug: { type: String, unique: true, index: true }, // Fast lookup for middleware checks
-    module: { type: String, index: true },
-    action: { type: String, enum: ['create', 'read', 'update', 'delete', 'manage'] },
+    description: { type: String, required: true },
+    key: { type: String, unique: true, index: true },
+    resource: { type: String, enum: PermissionResources, index: true },
+    action: { type: String, enum: PermissionActions, required: true },
     isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
-export const Permission = model('permissions', PermissionSchema);
+export const PermissionModel = model('permissions', PermissionSchema);

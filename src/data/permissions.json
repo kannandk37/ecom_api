@@ -1,0 +1,394 @@
+[
+  {
+    "resource": "category",
+    "action": "create",
+    "key": "category:create",
+    "description": "Add categories",
+    "isSystem": true
+  },
+  {
+    "resource": "category",
+    "action": "read",
+    "key": "category:read",
+    "description": "View categories",
+    "isSystem": true
+  },
+  {
+    "resource": "category",
+    "action": "update",
+    "key": "category:update",
+    "description": "Edit categories",
+    "isSystem": true
+  },
+  {
+    "resource": "category",
+    "action": "delete",
+    "key": "category:delete",
+    "description": "Delete categories",
+    "isSystem": true
+  },
+  {
+    "resource": "brand",
+    "action": "create",
+    "key": "brand:create",
+    "description": "Add brands",
+    "isSystem": true
+  },
+  {
+    "resource": "brand",
+    "action": "read",
+    "key": "brand:read",
+    "description": "View brands",
+    "isSystem": true
+  },
+  {
+    "resource": "brand",
+    "action": "update",
+    "key": "brand:update",
+    "description": "Edit brand",
+    "isSystem": true
+  },
+  {
+    "resource": "brand",
+    "action": "delete",
+    "key": "brand:delete",
+    "description": "Delete brands",
+    "isSystem": true
+  },
+  {
+    "resource": "product",
+    "action": "create",
+    "key": "product:create",
+    "description": "Add products",
+    "isSystem": true
+  },
+  {
+    "resource": "product",
+    "action": "read",
+    "key": "product:read",
+    "description": "View products",
+    "isSystem": true
+  },
+  {
+    "resource": "product",
+    "action": "update",
+    "key": "product:update",
+    "description": "Edit product",
+    "isSystem": true
+  },
+  {
+    "resource": "product",
+    "action": "delete",
+    "key": "product:delete",
+    "description": "Delete products",
+    "isSystem": true
+  },
+  {
+    "resource": "variant",
+    "action": "create",
+    "key": "variant:create",
+    "description": "Add variants",
+    "isSystem": true
+  },
+  {
+    "resource": "variant",
+    "action": "read",
+    "key": "variant:read",
+    "description": "View variants",
+    "isSystem": true
+  },
+  {
+    "resource": "variant",
+    "action": "update",
+    "key": "variant:update",
+    "description": "Edit variant details",
+    "isSystem": true
+  },
+  {
+    "resource": "variant",
+    "action": "delete",
+    "key": "variant:delete",
+    "description": "Delete variants",
+    "isSystem": true
+  },
+  {
+    "resource": "order",
+    "action": "create",
+    "key": "order:create",
+    "description": "Add orders",
+    "isSystem": true
+  },
+  {
+    "resource": "order",
+    "action": "read",
+    "key": "order:read",
+    "description": "View orders",
+    "isSystem": true
+  },
+  {
+    "resource": "order",
+    "action": "update",
+    "key": "order:update",
+    "description": "Update order",
+    "isSystem": true
+  },
+  {
+    "resource": "order",
+    "action": "delete",
+    "key": "order:delete",
+    "description": "Delete orders",
+    "isSystem": true
+  },
+  {
+    "resource": "orderitem",
+    "action": "create",
+    "key": "orderitem:create",
+    "description": "Add order items",
+    "isSystem": true
+  },
+  {
+    "resource": "orderitem",
+    "action": "read",
+    "key": "orderitem:read",
+    "description": "View order items",
+    "isSystem": true
+  },
+  {
+    "resource": "orderitem",
+    "action": "update",
+    "key": "orderitem:update",
+    "description": "Edit order items",
+    "isSystem": true
+  },
+  {
+    "resource": "orderitem",
+    "action": "delete",
+    "key": "orderitem:delete",
+    "description": "Delete order items",
+    "isSystem": true
+  },
+  {
+    "resource": "invoice",
+    "action": "create",
+    "key": "invoice:create",
+    "description": "Add invoices",
+    "isSystem": true
+  },
+  {
+    "resource": "invoice",
+    "action": "read",
+    "key": "invoice:read",
+    "description": "View invoices",
+    "isSystem": true
+  },
+  {
+    "resource": "invoice",
+    "action": "update",
+    "key": "invoice:update",
+    "description": "Edit invoices",
+    "isSystem": true
+  },
+  {
+    "resource": "invoice",
+    "action": "delete",
+    "key": "invoice:delete",
+    "description": "Delete invoices",
+    "isSystem": true
+  },
+  {
+    "resource": "invoiceitem",
+    "action": "create",
+    "key": "invoiceitem:create",
+    "description": "Add invoice items",
+    "isSystem": true
+  },
+  {
+    "resource": "invoiceitem",
+    "action": "read",
+    "key": "invoiceitem:read",
+    "description": "View invoice items",
+    "isSystem": true
+  },
+  {
+    "resource": "invoiceitem",
+    "action": "update",
+    "key": "invoiceitem:update",
+    "description": "Edit invoice items",
+    "isSystem": true
+  },
+  {
+    "resource": "invoiceitem",
+    "action": "delete",
+    "key": "invoiceitem:delete",
+    "description": "Delete invoice items",
+    "isSystem": true
+  },
+  {
+    "resource": "payment",
+    "action": "create",
+    "key": "payment:create",
+    "description": "Add payments",
+    "isSystem": true
+  },
+  {
+    "resource": "payment",
+    "action": "read",
+    "key": "payment:read",
+    "description": "View payment",
+    "isSystem": true
+  },
+  {
+    "resource": "payment",
+    "action": "update",
+    "key": "payment:update",
+    "description": "Update payment",
+    "isSystem": true
+  },
+  {
+    "resource": "payment",
+    "action": "delete",
+    "key": "payment:delete",
+    "description": "Delete payment",
+    "isSystem": true
+  },
+  {
+    "resource": "address",
+    "action": "create",
+    "key": "address:create",
+    "description": "Add addresses",
+    "isSystem": true
+  },
+  {
+    "resource": "address",
+    "action": "read",
+    "key": "address:read",
+    "description": "View addresses",
+    "isSystem": true
+  },
+  {
+    "resource": "address",
+    "action": "update",
+    "key": "address:update",
+    "description": "Edit addresses",
+    "isSystem": true
+  },
+  {
+    "resource": "address",
+    "action": "delete",
+    "key": "address:delete",
+    "description": "Delete addresses",
+    "isSystem": true
+  },
+  {
+    "resource": "delivery",
+    "action": "create",
+    "key": "delivery:create",
+    "description": "Add delivery",
+    "isSystem": true
+  },
+  {
+    "resource": "delivery",
+    "action": "read",
+    "key": "delivery:read",
+    "description": "View delivery",
+    "isSystem": true
+  },
+  {
+    "resource": "delivery",
+    "action": "update",
+    "key": "delivery:update",
+    "description": "Update delivery",
+    "isSystem": true
+  },
+  {
+    "resource": "delivery",
+    "action": "delete",
+    "key": "delivery:delete",
+    "description": "Delete delivery",
+    "isSystem": true
+  },
+  {
+    "resource": "warehouse",
+    "action": "create",
+    "key": "warehouse:create",
+    "description": "Add warehouses",
+    "isSystem": true
+  },
+  {
+    "resource": "warehouse",
+    "action": "read",
+    "key": "warehouse:read",
+    "description": "View warehouse",
+    "isSystem": true
+  },
+  {
+    "resource": "warehouse",
+    "action": "update",
+    "key": "warehouse:update",
+    "description": "Edit warehouse",
+    "isSystem": true
+  },
+  {
+    "resource": "warehouse",
+    "action": "delete",
+    "key": "warehouse:delete",
+    "description": "Delete warehouses",
+    "isSystem": true
+  },
+  {
+    "resource": "user",
+    "action": "create",
+    "key": "user:create",
+    "description": "Add user",
+    "isSystem": true
+  },
+  {
+    "resource": "user",
+    "action": "read",
+    "key": "user:read",
+    "description": "View user",
+    "isSystem": true
+  },
+  {
+    "resource": "user",
+    "action": "update",
+    "key": "user:update",
+    "description": "Edit user",
+    "isSystem": true
+  },
+  {
+    "resource": "user",
+    "action": "delete",
+    "key": "user:delete",
+    "description": "Delete users",
+    "isSystem": true
+  },
+  {
+    "resource": "useraccount",
+    "action": "create",
+    "key": "useraccount:create",
+    "description": "Add user accounts",
+    "isSystem": true
+  },
+  {
+    "resource": "useraccount",
+    "action": "read",
+    "key": "useraccount:read",
+    "description": "View user account",
+    "isSystem": true
+  },
+  {
+    "resource": "useraccount",
+    "action": "update",
+    "key": "useraccount:update",
+    "description": "Edit user account",
+    "isSystem": true
+  },
+  {
+    "resource": "useraccount",
+    "action": "delete",
+    "key": "useraccount:delete",
+    "description": "Delete user accounts",
+    "isSystem": true
+  }
+]

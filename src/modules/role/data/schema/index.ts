@@ -7,4 +7,4 @@ const RoleSchema = new Schema({
     isSystemRole: { type: Boolean, default: false }
 }, { timestamps: true });
 
-export const Role = model('roles', RoleSchema);
+export const RoleModel = model('roles', RoleSchema);

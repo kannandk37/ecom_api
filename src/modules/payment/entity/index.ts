@@ -19,7 +19,6 @@ export class Payment {
     referenceId?: string; // Transaction reference from the bank
     status?: PaymentStatus;
     paidAmount?: number;
-    // Added:
     paymentMethod?: PaymentMethod; // Crucial for accounting and refunds
     orderItems?: OrderItem[]
 }

@@ -1,3 +1,4 @@
+import { Brand } from "../../brand/entity";
 import { Category } from "../../category/entity";
 import { Variant } from "../../variant/entity";
 
@@ -31,7 +32,7 @@ export class Product {
     description?: string;
     shortDescription?: string;
     category?: Category;
-    brandId?: string;
+    brand?: Brand;
     variants?: Variant[];
     price?: number;
     weight?: string;

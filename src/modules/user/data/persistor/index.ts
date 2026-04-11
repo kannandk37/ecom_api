@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { User } from "../../entity";
 import { UserModel } from "../schema";
-import { userRecordTouserEntity } from "./transformer";
+import { userRecordToUserEntity } from "./transformer";
 import { ObjectId } from "mongodb";
 
 export class UserPersistor {
@@ -11,7 +11,7 @@ export class UserPersistor {
                 let userRecord = await UserModel.create([{
                     roles: user.roles?.map((role) => new ObjectId(role.id))
                 }], { session: transaction });
-                resolve(userRecordTouserEntity(userRecord))
+                resolve(userRecordToUserEntity(userRecord))
             } catch (error) {
                 reject(error)
             }
@@ -22,10 +22,9 @@ export class UserPersistor {
         return new Promise(async (resolve, reject) => {
             try {
                 let userRecord = await UserModel.findOne(
-                    {
-                        where: { id: id }
-                    });
-                resolve(userRecordTouserEntity(userRecord))
+                    { id: id }
+                );
+                resolve(userRecordToUserEntity(userRecord))
             } catch (error) {
                 console.log(error)
                 reject(error)

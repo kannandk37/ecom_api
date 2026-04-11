@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: natures_candy_db
+    ports:
+      - "27019:27017" # Maps your local 27019 to the container's 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: adminUser
+      MONGO_INITDB_ROOT_PASSWORD: adminPass123
+    # This command enables both the Replica Set (for transactions) and Auth
+    command: ["--replSet", "rs0", "--bind_ip_all", "--auth"]
+    volumes:
+      - C:/db/db-27019:data/db
+    restart: always
+volumes:
+  mongo_data:

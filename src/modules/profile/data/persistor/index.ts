@@ -25,7 +25,7 @@ export class ProfilePersistor {
         return new Promise(async (resolve, reject) => {
             try {
                 let profileRecord: any = await ProfileModel.findOne({
-                    where: { email: email }
+                    email: email
                 });
                 resolve(profileRecordToProfileEntity(profileRecord));
             } catch (error) {
@@ -38,7 +38,7 @@ export class ProfilePersistor {
         return new Promise(async (resolve, reject) => {
             try {
                 let profileRecord = await ProfileModel.findOne({
-                    where: { user: new ObjectId(userId) }
+                    user: new ObjectId(userId)
                 });
                 resolve(profileRecordToProfileEntity(profileRecord));
             } catch (error) {

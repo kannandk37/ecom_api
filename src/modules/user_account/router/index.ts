@@ -31,7 +31,7 @@ userAccountRouter.post(
             };
             let profileManagement = new ProfileManagement();
             // create user Account entity
-            let userAccount = new UserAccount(user);
+            let userAccount = new UserAccount();
             userAccount.accountIdentifier = request.body.email;
             userAccount.status = AccountStatus.ACTIVE;
             userAccount.password = request.body.password;

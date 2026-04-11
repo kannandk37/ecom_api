@@ -15,4 +15,4 @@ const AddressSchema = new Schema({
     timestamps: true // Automatically adds createdAt and updatedAt
 });
 
-export const Address = model('addresses', AddressSchema);
+export const AddressModel = model('addresses', AddressSchema);

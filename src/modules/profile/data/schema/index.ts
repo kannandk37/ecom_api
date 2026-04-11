@@ -7,7 +7,8 @@ export const ProfileSchema = new Schema({
     mobile: { type: String, unique: true, required: true, index: true },
     role: { type: Schema.Types.ObjectId, ref: 'roles' },
     profilePic: { type: String },
-    isEmailVerified: { type: Boolean, default: false }
+    isEmailVerified: { type: Boolean, default: false },
+    lastLogin: { type: Date, required: true }
 }, { timestamps: true });
 
 export const ProfileModel = model('profiles', ProfileSchema);

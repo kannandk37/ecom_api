@@ -1,3 +1,5 @@
+import { InvoiceItem } from "../../invoice_item/entity";
+
 export enum InvoiceStatus {
     PAID = 'paid',
     PARTIALLY_PAID = 'partially paid',
@@ -8,7 +10,7 @@ export enum InvoiceStatus {
 
 export class Invoice {
     id?: string;
-    invoiceItemIds?: string[];
+    invoiceItems?: InvoiceItem[];
     totalAmount?: number;
     status?: InvoiceStatus;
     createdAt?: Date;

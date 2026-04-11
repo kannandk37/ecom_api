@@ -1,11 +1,12 @@
-import { User } from "../../../../user/entity";
+import { userEntityToUserRecord, userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
 import { UserAccount } from "../../../entity";
+import { ObjectId } from "mongodb";
 
 export function userAccountRecordToUserAccountEntity(userAccountRecord: any): UserAccount {
-    let user = new User();
-    let userAccount = new UserAccount(user);
+    let userAccount = new UserAccount();
+
     if (userAccountRecord === null) {
-        return userAccount;
+        return userAccount = null;
     };
 
     if (userAccountRecord._id) {
@@ -13,9 +14,9 @@ export function userAccountRecordToUserAccountEntity(userAccountRecord: any): Us
     }
 
     if (userAccountRecord.user) {
-        user.id = userAccountRecord.user._id?.toString();
+        userAccount.user = userRecordToUserEntity(userAccountRecord.user);
     }
-    userAccount.user = user;
+
     if (userAccountRecord.accountIdentifier) {
         userAccount.accountIdentifier = userAccountRecord.accountIdentifier;
     }
@@ -44,3 +45,63 @@ export function userAccountRecordToUserAccountEntity(userAccountRecord: any): Us
     }
     return userAccount;
 };
+
+export function userAccountEntityToUserAccountRecord(userAccount: UserAccount): object {
+    let record: any = {};
+
+    if (userAccount === null) {
+        return record = null;
+    }
+
+    if (userAccount.id) {
+        record._id = new ObjectId(userAccount.id);
+    }
+
+    if (userAccount.user) {
+        record.user = userEntityToUserRecord(userAccount.user);
+    }
+
+    if (userAccount.accountIdentifier) {
+        record.accountIdentifier = userAccount.accountIdentifier;
+    }
+
+    if (userAccount.status) {
+        record.status = userAccount.status;
+    }
+
+    if (userAccount.conformationCode) {
+        record.conformationCode = userAccount.conformationCode;
+    }
+
+    if (userAccount.resetConfirmationCode) {
+        record.resetConfirmationCode = userAccount.resetConfirmationCode;
+    }
+
+    if (userAccount.password) {
+        record.password = userAccount.password;
+    }
+
+    if (userAccount.passwordResetedOn) {
+        record.passwordResetedOn = userAccount.passwordResetedOn;
+    }
+
+    return record;
+}
+
+export function userAccountRecordsToUserAccountEntities(userAccountRecords: any[]): UserAccount[] {
+    let userAccounts: UserAccount[] = [];
+    userAccountRecords.forEach(element => {
+        let userAccount = userAccountRecordToUserAccountEntity(element)
+        userAccounts.push(userAccount)
+    });
+    return userAccounts
+}
+
+export function userAccountEntitiesToUserAccountRecords(userAccounts: UserAccount[]): object[] {
+    let records: any[] = [];
+    userAccounts.forEach(element => {
+        let record = userAccountEntityToUserAccountRecord(element)
+        records.push(record)
+    });
+    return records
+}

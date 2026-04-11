@@ -12,8 +12,8 @@ export class UserAccountManagement {
                 let userAccountPersistor = new UserAccountPersistor();
                 let isExistingUser = await userAccountPersistor.userAccountByAccountIdentifier(userAccount);
                 //TODO: can't handle it here sign up is breaking
-                if (!isExistingUser) {
-                    return reject(new ApiError("User Not Found", StatusCodes.NOT_FOUND));
+                if (isExistingUser) {
+                    return reject(new ApiError("User Already Exists", StatusCodes.NOT_FOUND));
                 };
                 resolve(isExistingUser);
             } catch (error) {

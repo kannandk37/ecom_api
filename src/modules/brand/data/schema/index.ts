@@ -9,4 +9,4 @@ const BrandSchema = new Schema({
     timestamps: true
 });
 
-export const Brand = model('brands', BrandSchema);
+export const BrandModel = model('brands', BrandSchema);

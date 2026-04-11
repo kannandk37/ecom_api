@@ -5,10 +5,12 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
-// import authRoutes from './routes/authRoutes';
-// import productRoutes from './routes/productRoutes';
-// import orderRoutes from './routes/orderRoutes';
 import { errorHandler, errorLogger, invalidPathHandler, notFound } from './middlewares/errorMiddleware';
+import { userAccountRouter } from './modules/user_account/router';
+import { PermissionManagement } from './modules/permission/business';
+import path from 'path';
+import fs from 'fs';
+import { permissionsRawDataToPermissionsEntities } from './modules/permission/router/transformer';
 
 dotenv.config();
 
@@ -41,16 +43,47 @@ const requestLogger = (
 
 app.use(requestLogger);
 
+//seed Permissions
+async function seedPermissions(): Promise<void> {
+
+    const filePath = path.join(__dirname, './data/permissions.json');
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    const rawList: any[] = JSON.parse(raw);
+    const entities = permissionsRawDataToPermissionsEntities(rawList);
+
+    let created = 0;
+    let skipped = 0;
+
+    for (const record of entities) {
+        const exists = await new PermissionManagement().getPermissionByKey(record.key);
+
+        if (exists) {
+            skipped++;
+            continue;
+        }
+
+        await new PermissionManagement().createPermission(record);
+        created++;
+    }
+
+    console.log(`✔ Permissions seeded — created: ${created}, skipped (already exist): ${skipped}`);
+}
+
+
 app.get(
     "/api",
     async (request: Request, response: Response): Promise<Response> => {
         return response.json({ info: "Nature Candy Api running successfully" });
     }
 );
+
+seedPermissions().catch((error) => {
+    console.error("Error seeding permissions:", error);
+});
+
 // Routes
-// app.use('/api/auth', authRoutes);
-// app.use('/api/products', productRoutes);
-// app.use('/api/orders', orderRoutes);
+app.use('/api', userAccountRouter);
+
 
 // Error Handlers
 app.use(notFound);

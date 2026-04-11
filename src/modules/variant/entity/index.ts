@@ -1,3 +1,5 @@
+import { Product } from "../../product/entity";
+
 export enum VariantType {
     FULL = 'full',
     BROKE = 'broke',
@@ -11,7 +13,7 @@ export enum VariantGrade {
 
 export class Variant {
     id?: string;
-    productId?: string;
+    product?: Product;
     type?: VariantType;
     grade?: VariantGrade;
     price?: number;

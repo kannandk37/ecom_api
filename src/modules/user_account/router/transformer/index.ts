@@ -1,13 +1,19 @@
+import { userRawDatumToUserEntity } from "../../../user/router/transformer";
 import { UserAccount } from "../../entity";
 
 export function userAccountInfoToUserAccountEntity(userAccountInfo: any) {
-    let userAccount = new UserAccount(null);
+    let userAccount = new UserAccount();
+
+    if (userAccountInfo === null) {
+        return userAccount = null;
+    }
+
     if (userAccountInfo.id) {
         userAccount.id = userAccountInfo.id;
     }
 
     if (userAccountInfo.user) {
-        userAccount.user = userAccountInfo.user;
+        userAccount.user = userRawDatumToUserEntity(userAccountInfo.user);
     }
 
     if (userAccountInfo.accountIdentifier) {
@@ -35,4 +41,12 @@ export function userAccountInfoToUserAccountEntity(userAccountInfo: any) {
     }
 
     return userAccount;
+}
+
+export function userAccountsInfoToUserAccountsEntities(userAccountsInfo: any[]): UserAccount[] {
+    if (!userAccountsInfo || userAccountsInfo.length === 0) {
+        return [];
+    }
+
+    return userAccountsInfo.map(userAccountInfoToUserAccountEntity);
 }

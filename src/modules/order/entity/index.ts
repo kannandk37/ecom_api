@@ -1,3 +1,8 @@
+import { Address } from "../../address/entity";
+import { Invoice } from "../../invoice/entity";
+import { OrderItem } from "../../order_item/entity";
+import { User } from "../../user/entity";
+
 export enum OrderStatus {
     INORDER = 'inorder',
     ORDERED = 'ordered',
@@ -11,15 +16,14 @@ export enum OrderStatus {
 
 export class Order {
     id?: string;
-    userId?: string;
-    orderItemsIds?: string[];
-    billingAddress?: object; // Snapshot of the address at time of purchase
-    deliveryAddress?: object; // Snapshot of the address at time of purchase
+    user?: User;
+    orderItems?: OrderItem[];
+    billingAddress?: Address;
+    deliveryAddress?: Address;
     totalPrice?: number;
     totalDiscount?: number;
     promocode?: string;
-    invoiceId?: string;
+    invoice?: Invoice;
     status?: OrderStatus;
-    // Added:
-    trackingNumber?: string; // Required for logistics and customer updates
+    snapShot?: object; // Snapshot of the order at time of purchase
 }

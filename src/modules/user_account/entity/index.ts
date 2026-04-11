@@ -9,29 +9,11 @@ export enum AccountStatus {
 }
 export class UserAccount {
     id?: string
-    user: User
+    user?: User
     accountIdentifier?: string
     status?: AccountStatus
-    conformationCode?: string | null
-    resetConfirmationCode?: string | null
+    conformationCode?: string
+    resetConfirmationCode?: string
     password?: string
     passwordResetedOn?: Date
-
-    constructor(
-        user: User,
-        accountIdentifier?: string,
-        status?: AccountStatus,
-        conformationCode?: string,
-        resetConfirmationCode?: string,
-        password?: string,
-        passwordResetedOn?: Date
-    ) {
-        this.user = user
-        this.accountIdentifier = accountIdentifier
-        this.status = status
-        this.conformationCode = conformationCode
-        this.resetConfirmationCode = resetConfirmationCode
-        this.password = password
-        this.passwordResetedOn = passwordResetedOn
-    }
 }
