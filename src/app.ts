@@ -15,6 +15,18 @@ import { userRouter } from './modules/user/router';
 import { rolesRawDataToRolesEntities } from './modules/role/router/transformer';
 import { RoleManagement } from './modules/role/business';
 import { roleRouter } from './modules/role/router';
+import { RoleName } from './modules/role/entity';
+import { Profile } from './modules/profile/entity';
+import { AccountStatus, UserAccount } from './modules/user_account/entity';
+import { UserAccountManagement } from './modules/user_account/business';
+import mongoose from 'mongoose';
+import { UserManagement } from './modules/user/business';
+import { User } from './modules/user/entity';
+import { ProfileManagement } from './modules/profile/business';
+import { categoryRouter } from './modules/category/router';
+import { brandRouter } from './modules/brand/router';
+import { productRouter } from './modules/product/router';
+import { variantRouter } from './modules/variant/router';
 
 dotenv.config();
 
@@ -89,6 +101,63 @@ async function seedRoles(): Promise<void> {
     console.log(`✔ Role seeded`);
 }
 
+async function OnBoardSuperAdmin(): Promise<void> {
+    try {
+
+        let superAminData: any = {};
+
+        let userAccount = new UserAccount();
+        userAccount.email = process.env.ADMIN_EMAIL;
+        userAccount.status = AccountStatus.ACTIVE;
+        userAccount.password = process.env.ADMIN_PASSWORD;
+        userAccount.passwordResetedOn = new Date();
+
+        superAminData.userAccount = userAccount;
+
+        let existingSuperAdminAccount = await new UserAccountManagement().userAccountByEmail(superAminData.userAccount);
+        if (!existingSuperAdminAccount) {
+
+            let role = await new RoleManagement().getRoleByName(RoleName.SUPERADMIN);
+
+            let profile = new Profile();
+            profile.role = role;
+            profile.name = process.env.ADMIN_NAME;
+            profile.email = process.env.ADMIN_EMAIL;
+            profile.mobile = process.env.ADMIN_MOBILE;
+            profile.isEmailVerified = true;
+
+            superAminData.profile = profile;
+
+            let user = new User();
+            user.roles = [role];
+            superAminData.user = user;
+
+            const session = await mongoose.startSession();
+
+            try {
+                await session.withTransaction(async () => {
+                    const newUser = await new UserManagement().createUser(superAminData.user, session);
+                    profile.user = newUser;
+                    superAminData.profile = profile;
+                    await new ProfileManagement().createProfile(superAminData.profile, session);
+                    userAccount.user = newUser;
+                    superAminData.userAccount = userAccount;
+                    await new UserAccountManagement().addEmailAccount(superAminData.userAccount, session);
+                    superAminData.user = newUser;
+                });
+
+                console.log("Transaction committed successfully.");
+                console.log("super admin created:", JSON.stringify(superAminData, null, 2));
+            } catch (error) {
+                console.error("Transaction aborted due to error:", error);
+            } finally {
+                await session.endSession();
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 app.get(
     "/api",
@@ -99,19 +168,14 @@ app.get(
 
 // Seeders
 async function seeders() {
+    // seed permissions
+    await seedPermissions();
 
-    try {
-        await seedPermissions();
-    } catch (error) {
-        console.error("Error seeding permissions:", error);
-    }
+    // seed roles
+    await seedRoles();
 
-    try {
-        await seedRoles();
-    } catch (error) {
-        console.error("Error seeding roles", error);
-    }
-
+    // onboard super admin user
+    await OnBoardSuperAdmin();
 }
 
 
@@ -121,6 +185,10 @@ seeders();
 app.use('/api', userAccountRouter);
 app.use('/api/users', userRouter);
 app.use('/api/roles', roleRouter);
+app.use('/api/categories', categoryRouter);
+app.use('/api/brands', brandRouter);
+app.use('/api/products', productRouter);
+app.use('/api/variants', variantRouter);
 
 
 // Error Handlers
