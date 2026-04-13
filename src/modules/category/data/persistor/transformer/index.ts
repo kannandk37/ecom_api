@@ -61,14 +61,14 @@ export function categoryEntityToCategoryRecord(category: Category): object {
     return record;
 }
 
-export function categoryRecordsToCategoryEntities(categoryRecords: any[]): Category[] {
+export function categoriesRecordsToCategoriesEntities(categoryRecords: any[]): Category[] {
     if (!categoryRecords || categoryRecords.length === 0) {
         return [];
     }
     return categoryRecords.map((record) => categoryRecordToCategoryEntity(record));
 }
 
-export function categoryEntitiesToCategoryRecords(categories: Category[]): object[] {
+export function categoriesEntitiesToCategoriesRecords(categories: Category[]): object[] {
     if (!categories || categories.length === 0) {
         return [];
     }

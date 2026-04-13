@@ -62,14 +62,14 @@ export function brandEntityToBrandRecord(brand: Brand): object {
     return record;
 }
 
-export function brandRecordsToBrandEntities(brandRecords: any[]): Brand[] {
+export function brandsRecordsToBrandsEntities(brandRecords: any[]): Brand[] {
     if (!brandRecords || brandRecords.length === 0) {
         return [];
     }
     return brandRecords.map((record) => brandRecordToBrandEntity(record));
 }
 
-export function brandEntitiesToBrandRecords(brands: Brand[]): object[] {
+export function brandsEntitiesToBrandsRecords(brands: Brand[]): object[] {
     if (!brands || brands.length === 0) {
         return [];
     }

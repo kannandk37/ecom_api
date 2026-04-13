@@ -86,14 +86,14 @@ export function variantEntityToVariantRecord(variant: Variant): object {
     return record;
 }
 
-export function variantRecordsToVariantEntities(variantRecords: any[]): Variant[] {
+export function variantsRecordsToVariantsEntities(variantRecords: any[]): Variant[] {
     if (!variantRecords || variantRecords.length === 0) {
         return [];
     }
     return variantRecords.map((record) => variantRecordToVariantEntity(record));
 }
 
-export function variantEntitiesToVariantRecords(variants: Variant[]): object[] {
+export function variantsEntitiesToVariantsRecords(variants: Variant[]): object[] {
     if (!variants || variants.length === 0) {
         return [];
     }

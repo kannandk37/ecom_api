@@ -96,6 +96,7 @@ userAccountRouter.post(
     '/login',
     async (request: Request, response: Response) => {
         try {
+            // TODO: if super admin or admin first time logs in then he need to be moved to password reset screen to change the dummy password
             let userAccountManagement = new UserAccountManagement();
             let userAccountInfo = new UserAccount();
             userAccountInfo.email = request.body.email;

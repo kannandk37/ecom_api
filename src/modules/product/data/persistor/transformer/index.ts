@@ -1,6 +1,6 @@
-import { brandEntityToBrandRecord, brandRecordToBrandEntity } from "../../../../brand/data/persistor/transformer";
-import { categoryEntityToCategoryRecord, categoryRecordToCategoryEntity } from "../../../../category/data/persistor/transformer";
-import { variantEntitiesToVariantRecords, variantRecordsToVariantEntities } from "../../../../variant/data/persistor/transformer";
+import { brandRecordToBrandEntity } from "../../../../brand/data/persistor/transformer";
+import { categoryRecordToCategoryEntity } from "../../../../category/data/persistor/transformer";
+import { variantsRecordsToVariantsEntities } from "../../../../variant/data/persistor/transformer";
 import { Product, Unit } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -40,7 +40,7 @@ export function productRecordToProductEntity(productRecord: any): Product {
     }
 
     if (productRecord.variants && productRecord.variants.length > 0) {
-        product.variants = variantRecordsToVariantEntities(productRecord.variants);
+        product.variants = variantsRecordsToVariantsEntities(productRecord.variants);
     }
 
     if (productRecord.price !== undefined) {
@@ -152,14 +152,14 @@ export function productEntityToProductRecord(product: Product): object {
     return record;
 }
 
-export function productRecordsToProductEntities(productRecords: any[]): Product[] {
+export function productsRecordsToProductsEntities(productRecords: any[]): Product[] {
     if (!productRecords || productRecords.length === 0) {
         return [];
     }
     return productRecords.map((record) => productRecordToProductEntity(record));
 }
 
-export function productEntitiesToProductRecords(products: Product[]): object[] {
+export function productsEntitiesToProductsRecords(products: Product[]): object[] {
     if (!products || products.length === 0) {
         return [];
     }
