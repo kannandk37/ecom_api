@@ -33,7 +33,7 @@ brandRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
     try {
         let brandId = request.params.id as string;
         let brand = await new BrandManagement().brandById(brandId);
-        response.send(new SuccessResponse(brand, "Brands List", StatusCodes.OK))
+        response.send(new SuccessResponse(brand, "Brand of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }

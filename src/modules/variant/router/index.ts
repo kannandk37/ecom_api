@@ -33,7 +33,7 @@ variantRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNa
     try {
         let variantId = request.params.id as string;
         let variant = await new VariantManagement().variantById(variantId);
-        response.send(new SuccessResponse(variant, "Variants List", StatusCodes.OK))
+        response.send(new SuccessResponse(variant, "Variant of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }

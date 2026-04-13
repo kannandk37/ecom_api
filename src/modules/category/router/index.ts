@@ -33,7 +33,7 @@ categoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleN
     try {
         let categoryId = request.params.id as string;
         let category = await new CategoryManagement().categoryById(categoryId);
-        response.send(new SuccessResponse(category, "Categories List", StatusCodes.OK))
+        response.send(new SuccessResponse(category, "Category of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }

@@ -33,7 +33,7 @@ productRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNa
     try {
         let productId = request.params.id as string;
         let product = await new ProductManagement().productById(productId);
-        response.send(new SuccessResponse(product, "Products List", StatusCodes.OK))
+        response.send(new SuccessResponse(product, "Product of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }

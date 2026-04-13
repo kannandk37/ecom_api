@@ -102,14 +102,14 @@ export function addressEntityToAddressRecord(address: Address): object {
     return record;
 }
 
-export function addressRecordsToAddressEntities(addressRecords: any[]): Address[] {
+export function addressesRecordsToAddressesEntities(addressRecords: any[]): Address[] {
     if (!addressRecords || addressRecords.length === 0) {
         return [];
     }
     return addressRecords.map((record) => addressRecordToAddressEntity(record));
 }
 
-export function addressEntitiesToAddressRecords(addresses: Address[]): object[] {
+export function addressesEntitiesToAddressesRecords(addresses: Address[]): object[] {
     if (!addresses || addresses.length === 0) {
         return [];
     }

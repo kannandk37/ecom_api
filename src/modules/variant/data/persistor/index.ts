@@ -20,7 +20,7 @@ export class VariantPersistor {
     async variants(): Promise<Variant[]> {
         return new Promise<Variant[]>(async (resolve, reject) => {
             try {
-                let variantsRecords = await VariantModel.find().populate([productsPopulate()]);
+                let variantsRecords = await VariantModel.find().populate([productPopulate()]);
                 resolve(variantsRecordsToVariantsEntities(variantsRecords));
             } catch (error) {
                 reject(error);
@@ -31,7 +31,7 @@ export class VariantPersistor {
     async variantById(id: string): Promise<Variant> {
         return new Promise<Variant>(async (resolve, reject) => {
             try {
-                let variantRecord = await VariantModel.findOne({ _id: new ObjectId(id) }).populate([productsPopulate()]);
+                let variantRecord = await VariantModel.findOne({ _id: new ObjectId(id) }).populate([productPopulate()]);
                 resolve(variantRecordToVariantEntity(variantRecord));
             } catch (error) {
                 reject(error);
@@ -40,9 +40,9 @@ export class VariantPersistor {
     }
 }
 
-export function productsPopulate() {
+export function productPopulate() {
     return {
-        path: 'products',
+        path: 'product',
         model: ProductModel
     }
 }
