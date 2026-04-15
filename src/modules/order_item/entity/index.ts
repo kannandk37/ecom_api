@@ -7,6 +7,7 @@ export class OrderItem {
     id?: string;
     product?: Product;
     price?: number;
+    tax: number;
     discount?: number;
     deliveredOn?: Date;
     variant?: Variant; // Specifically identifies which size/grade was bought

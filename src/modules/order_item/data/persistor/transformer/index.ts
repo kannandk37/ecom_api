@@ -104,14 +104,14 @@ export function orderItemEntityToOrderItemRecord(orderItem: OrderItem): object {
     return record;
 }
 
-export function orderItemRecordsToOrderItemEntities(orderItemRecords: any[]): OrderItem[] {
+export function orderItemsRecordsToOrderItemsEntities(orderItemRecords: any[]): OrderItem[] {
     if (!orderItemRecords || orderItemRecords.length === 0) {
         return [];
     }
     return orderItemRecords.map((record) => orderItemRecordToOrderItemEntity(record));
 }
 
-export function orderItemEntitiesToOrderItemRecords(orderItems: OrderItem[]): object[] {
+export function orderItemsEntitiesToOrderItemsRecords(orderItems: OrderItem[]): object[] {
     if (!orderItems || orderItems.length === 0) {
         return [];
     }

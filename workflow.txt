@@ -12,3 +12,145 @@ InvoiceItem for A is marked paid.
 Invoice Update: The system checks if B and C are paid. Since they aren't, the main Invoice and Order remain partially paid.
 
 Completion: Once Item C arrives and is paid for, the system sees all linked OrderItems are paid and marks the entire Order as Completed.
+
+
+export enum WarehouseType    { FULFILLMENT = 'fulfillment', RETURNS = 'returns',
+                               DARK_STORE = 'dark_store', THREE_PL = '3pl', DROPSHIP = 'dropship' }
+
+export enum WarehouseStatus  { ACTIVE = 'active', INACTIVE = 'inactive', MAINTENANCE = 'maintenance' }
+
+export enum CapacityUnit     { UNITS = 'units', CUBIC_METERS = 'cubic_meters', PALLETS = 'pallets' }
+
+export enum ZoneType         { AMBIENT = 'ambient', REFRIGERATED = 'refrigerated',
+                               FROZEN = 'frozen', HAZMAT = 'hazmat',
+                               RETURNS = 'returns', DISPATCH = 'dispatch' }
+
+export enum ReorderStatus    { NONE = 'none', TRIGGERED = 'triggered',
+                               PO_RAISED = 'po_raised', IN_TRANSIT = 'in_transit', RECEIVED = 'received' }
+
+export enum ReservationType  { SOFT = 'soft', HARD = 'hard', MANUAL = 'manual' }
+
+export enum ReservationStatus{ ACTIVE = 'active', RELEASED = 'released',
+                               CONVERTED = 'converted', EXPIRED = 'expired' }
+
+export enum ReferenceType    { CART_ITEM = 'cart_item', ORDER_ITEM = 'order_item',
+                               PURCHASE_ORDER = 'purchase_order', TRANSFER_ORDER = 'transfer_order',
+                               RETURN = 'return', MANUAL_ADJUST = 'manual_adjustment' }
+
+export enum MovementType     { INBOUND_RECEIVE = 'inbound_receive', PICK = 'pick',
+                               PUTAWAY = 'putaway', RETURN_RECEIVE = 'return_receive',
+                               ADJUSTMENT = 'adjustment', TRANSFER_OUT = 'transfer_out',
+                               TRANSFER_IN = 'transfer_in', DAMAGE_WRITE_OFF = 'damage_write_off',
+                               CYCLE_COUNT_ADJUST = 'cycle_count_adjust' }
+
+                               export class Inventory {
+  id?: string;
+  productId?: string;        // unique(productId, warehouseId)
+  warehouseId?: string;
+  warehouse?: Warehouse;
+  qtyOnHand?: number;        // physical stock present
+  qtyReserved?: number;      // soft-held by carts (TTL)
+  qtyCommitted?: number;     // hard-held by paid orders
+  qtyAvailable?: number;     // computed: onHand - reserved - committed
+  reorderPoint?: number;
+  reorderQty?: number;
+  maxStockLevel?: number;
+  reorderStatus?: ReorderStatus;
+  lastMovementAt?: Date;
+  reservations?: InventoryReservation[];
+  binStocks?: BinStock[];
+  updatedAt?: Date;
+}
+
+export class InventoryReservation {
+  id?: string;
+  inventoryId?: string;
+  inventory?: Inventory;
+  productId?: string;
+  warehouseId?: string;
+  qtyReserved?: number;
+  reservationType?: ReservationType;  // soft | hard | manual
+  referenceType?: ReferenceType;
+  referenceId?: string;
+  status?: ReservationStatus;
+  expiresAt?: Date;                   // null for hard reservations
+  createdAt?: Date;
+}
+
+export class BinStock {
+  id?: string;
+  binId?: string;
+  bin?: WarehouseBin;
+  productId?: string;
+  inventoryId?: string;
+  inventory?: Inventory;
+  qtyOnHand?: number;
+  batchNumber?: string;               // batch-tracked SKUs
+  expiryDate?: Date;                  // FEFO: sort ascending at pick
+  lastCountedAt?: Date;
+}
+
+export class StockLedger {
+  id?: string;
+  inventoryId?: string;
+  inventory?: Inventory;
+  warehouseId?: string;
+  binId?: string;
+  bin?: WarehouseBin;
+  productId?: string;
+  movementType?: MovementType;
+  quantityDelta?: number;             // signed: +add / -remove
+  qtyBefore?: number;
+  qtyAfter?: number;
+  referenceType?: ReferenceType;
+  referenceId?: string;
+  notes?: string;
+  performedBy?: string;
+  createdAt?: Date;                   // immutable — append-only table
+}
+
+export class Warehouse {
+  id?: string;
+  code?: string;             // unique — e.g. WH-CHN-01
+  name?: string;
+  type?: WarehouseType;
+  status?: WarehouseStatus;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  pincode?: string;
+  latitude?: number;
+  longitude?: number;
+  totalCapacity?: number;
+  capacityUnit?: CapacityUnit;
+  zones?: WarehouseZone[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export class WarehouseZone {
+  id?: string;
+  warehouseId?: string;
+  warehouse?: Warehouse;
+  zoneCode?: string;         // Z-COLD, Z-AMBIENT
+  zoneName?: string;
+  zoneType?: ZoneType;
+  aisleCount?: number;
+  bins?: WarehouseBin[];
+  createdAt?: Date;
+}
+
+export class WarehouseBin {
+  id?: string;
+  zoneId?: string;
+  zone?: WarehouseZone;
+  binCode?: string;          // A01-R02-L3-P4
+  aisle?: string;
+  rack?: string;
+  level?: string;
+  position?: string;
+  maxUnits?: number;
+  isActive?: boolean;
+}

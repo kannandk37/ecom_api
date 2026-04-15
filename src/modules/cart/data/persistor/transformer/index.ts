@@ -1,4 +1,4 @@
-import { orderRecordToOrderEntity } from "../../../../order/data/persistor/transformer";
+import { cartItemsRecordsToCartItemsEntities } from "../../../../cart_item/data/persistor/transformer";
 import { userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
 import { Cart } from "../../../entity";
 import { ObjectId } from "mongodb";
@@ -18,8 +18,16 @@ export function cartRecordToCartEntity(cartRecord: any): Cart {
         cart.user = userRecordToUserEntity(cartRecord.user);
     }
 
-    if (cartRecord.order) {
-        cart.order = orderRecordToOrderEntity(cartRecord.order);
+    if (cartRecord?.cartItems && cartRecord.cartItems?.length > 0) {
+        cart.cartItems = cartItemsRecordsToCartItemsEntities(cartRecord.cartItems);
+    }
+
+    if (cartRecord.appliedPromocode) {
+        cart.appliedPromocode = cartRecord.appliedPromocode;
+    }
+
+    if (cartRecord.isActive != undefined || cartRecord.isActive != null) {
+        cart.isActive = cartRecord.isActive;
     }
 
     return cart;
@@ -40,8 +48,16 @@ export function cartEntityToCartRecord(cart: Cart): object {
         record.user = new ObjectId(cart.user.id);
     }
 
-    if (cart.order?.id) {
-        record.order = new ObjectId(cart.order.id);
+    if (cart.cartItems && cart.cartItems.length > 0) {
+        record.cartItems = cart.cartItems.map((item) => new ObjectId(item.id));
+    }
+
+    if (cart.appliedPromocode) {
+        record.appliedPromocode = cart.appliedPromocode;
+    }
+
+    if (cart.isActive != undefined || cart.isActive != null) {
+        record.isActive = cart.isActive;
     }
 
     return record;

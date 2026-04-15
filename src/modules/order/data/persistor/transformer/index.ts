@@ -1,9 +1,9 @@
 import { userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
 import { Order, OrderStatus } from "../../../entity";
 import { ObjectId } from "mongodb";
-import { orderItemRecordsToOrderItemEntities, orderItemEntitiesToOrderItemRecords } from "../../../../order_item/data/persistor/transformer";
-import { invoiceRecordToInvoiceEntity, invoiceEntityToInvoiceRecord } from "../../../../invoice/data/persistor/transformer";
-import { addressEntityToAddressRecord, addressRecordToAddressEntity } from "../../../../address/data/persistor/transformer";
+import { orderItemsRecordsToOrderItemsEntities } from "../../../../order_item/data/persistor/transformer";
+import { invoiceRecordToInvoiceEntity } from "../../../../invoice/data/persistor/transformer";
+import { addressRecordToAddressEntity } from "../../../../address/data/persistor/transformer";
 
 export function orderRecordToOrderEntity(orderRecord: any): Order {
     let order = new Order();
@@ -21,7 +21,7 @@ export function orderRecordToOrderEntity(orderRecord: any): Order {
     }
 
     if (orderRecord.orderItems && orderRecord.orderItems.length > 0) {
-        order.orderItems = orderItemRecordsToOrderItemEntities(orderRecord.orderItems);
+        order.orderItems = orderItemsRecordsToOrderItemsEntities(orderRecord.orderItems);
     }
 
     if (orderRecord.billingAddress) {
@@ -105,14 +105,14 @@ export function orderEntityToOrderRecord(order: Order): object {
     return record;
 }
 
-export function orderRecordsToOrderEntities(orderRecords: any[]): Order[] {
+export function ordersRecordsToOrdersEntities(orderRecords: any[]): Order[] {
     if (!orderRecords || orderRecords.length === 0) {
         return [];
     }
     return orderRecords.map((record) => orderRecordToOrderEntity(record));
 }
 
-export function orderEntitiesToOrderRecords(orders: Order[]): object[] {
+export function ordersEntitiesToOrdersRecords(orders: Order[]): object[] {
     if (!orders || orders.length === 0) {
         return [];
     }

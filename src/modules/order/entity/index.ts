@@ -17,10 +17,12 @@ export enum OrderStatus {
 export class Order {
     id?: string;
     user?: User;
+    orderId: string;
     orderItems?: OrderItem[];
     billingAddress?: Address;
     deliveryAddress?: Address;
     totalPrice?: number;
+    totalTaxAmount: number;
     totalDiscount?: number;
     promocode?: string;
     invoice?: Invoice;

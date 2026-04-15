@@ -28,6 +28,7 @@ import { brandRouter } from './modules/brand/router';
 import { productRouter } from './modules/product/router';
 import { variantRouter } from './modules/variant/router';
 import { addressRouter } from './modules/address/router';
+import { orderRouter } from './modules/order/router';
 
 dotenv.config();
 
@@ -191,6 +192,7 @@ app.use('/api/brands', brandRouter);
 app.use('/api/products', productRouter);
 app.use('/api/variants', variantRouter);
 app.use('/api/addresses', addressRouter);
+app.use('/api/orders', orderRouter);
 
 
 // Error Handlers

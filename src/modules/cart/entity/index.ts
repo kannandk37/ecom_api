@@ -1,8 +1,10 @@
-import { Order } from "../../order/entity";
+import { CartItem } from "../../cart_item/entity";
 import { User } from "../../user/entity";
 
 export class Cart {
     id?: string;
     user?: User;
-    order?: Order;
+    cartItems?: CartItem[];
+    appliedPromocode?: string;
+    isActive?: boolean;
 }

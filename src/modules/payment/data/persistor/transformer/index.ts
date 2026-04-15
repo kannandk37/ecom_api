@@ -1,4 +1,4 @@
-import { orderItemEntitiesToOrderItemRecords, orderItemRecordsToOrderItemEntities } from "../../../../order_item/data/persistor/transformer";
+import { orderItemsRecordsToOrderItemsEntities } from "../../../../order_item/data/persistor/transformer";
 import { Payment, PaymentMethod, PaymentStatus } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -34,7 +34,7 @@ export function paymentRecordToPaymentEntity(paymentRecord: any): Payment {
     }
 
     if (paymentRecord.orderItems && paymentRecord.orderItems.length > 0) {
-        payment.orderItems = orderItemRecordsToOrderItemEntities(paymentRecord.orderItems);
+        payment.orderItems = orderItemsRecordsToOrderItemsEntities(paymentRecord.orderItems);
     }
 
     return payment;

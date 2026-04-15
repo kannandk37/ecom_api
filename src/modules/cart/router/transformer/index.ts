@@ -1,4 +1,4 @@
-import { orderRawDatumToOrderEntity } from "../../../order/router/transformer";
+import { cartItemsRawDataToCartItemsEntities } from "../../../cart_item/router/transformer";
 import { userRawDatumToUserEntity } from "../../../user/router/transformer";
 import { Cart } from "../../entity";
 
@@ -17,8 +17,16 @@ export function cartRawDatumToCartEntity(raw: any): Cart {
         cart.user = userRawDatumToUserEntity(raw.user);
     }
 
-    if (raw.order) {
-        cart.order = orderRawDatumToOrderEntity(raw.order);
+    if (raw?.cartItems && raw?.cartItems?.length > 0) {
+        cart.cartItems = cartItemsRawDataToCartItemsEntities(raw.cartItems);
+    }
+
+    if (raw?.appliedPromocode) {
+        cart.appliedPromocode = raw.appliedPromocode
+    }
+
+    if (raw.isActive != undefined) {
+        cart.isActive = raw.isActive
     }
 
     return cart;
