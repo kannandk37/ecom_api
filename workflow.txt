@@ -154,3 +154,14 @@ export class WarehouseBin {
   maxUnits?: number;
   isActive?: boolean;
 }
+
+PORT=5000
+# MONGO_URI=mongodb://admin:admin123@127.0.0.1:27019/?authSource=admin
+MONGO_URI=mongodb://admin:admin123@127.0.0.1:27019/naturecandy?authSource=admin&replicaSet=rs0
+JWT_SECRET_KEY=your_super_secret_key
+JWT_EXPIRES_IN=8h
+NODE_ENV=development
+ADMIN_NAME=natureman
+ADMIN_EMAIL=natureman@gmail.com
+ADMIN_PASSWORD=natureman123
+ADMIN_MOBILE=1234567890
