@@ -183,6 +183,31 @@ async function seeders() {
 
 seeders();
 
+// async function handleUserSignUp() {
+//     const { name, email } = {name: 'Explained', email: "explainedintamil37@gmail.com"};
+    
+//     // ... logic to save user to MongoDB ...
+
+//     // Generate a unique code or use a standard one
+//     const welcomePromo = 'NATURE15'; 
+    
+//     // Provide the URL to the image you want at the top
+//     // (This should be hosted somewhere publicly accessible, like an S3 bucket or your public assets folder)
+//     const headerImage = path.resolve(process.cwd(), './data/banner.png');
+
+//     // Send the email asynchronously 
+//     await sendWelcomeEmail({
+//         customerEmail: email,
+//         customerName: name,
+//         promoCode: welcomePromo,
+//         heroImageUrl: headerImage
+//     });
+
+//     console.log({ message: 'User created successfully' });
+// }
+
+
+
 // Routes
 app.use('/api', userAccountRouter);
 app.use('/api/users', userRouter);
