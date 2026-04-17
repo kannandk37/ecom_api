@@ -13,6 +13,7 @@ import { Profile } from "../../profile/entity";
 import mongoose from "mongoose";
 import { RoleManagement } from "../../role/business";
 import { RoleName } from "../../role/entity";
+import { sendWelcomeEmail } from '../utlis/emailService';
 
 export const userAccountRouter = Router();
 
