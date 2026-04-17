@@ -41,102 +41,40 @@ export async function sendWelcomeEmail({
     
     const htmlContent = `
     <!DOCTYPE html>
-    <html>
+    <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Welcome to Nature's Candy</title>
         <style>
-            body {
-                margin: 0;
-                padding: 0;
-                background-color: #FDF8F5;
-                font-family: 'Georgia', serif;
-                color: #333333;
-            }
-            .container {
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #FFFFFF;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-            .hero-image {
-                width: 100%;
-                height: auto;
-                display: block;
-            }
-            .content {
-                padding: 40px 30px;
-                text-align: center;
-                background-color: #FDF8F5;
-            }
-            .brand-subtitle {
-                font-family: 'Arial', sans-serif;
-                font-size: 12px;
-                font-weight: bold;
-                letter-spacing: 2px;
-                color: #8B6D41;
-                text-transform: uppercase;
-                margin-bottom: 10px;
-            }
-            h1 {
-                font-size: 28px;
-                margin: 0 0 20px 0;
-                color: #2C2C2C;
-            }
-            p {
-                font-family: 'Arial', sans-serif;
-                font-size: 14px;
-                line-height: 1.6;
-                color: #555555;
-                margin-bottom: 25px;
-            }
-            .promo-box {
-                background-color: #FFFFFF;
-                border: 1px dashed #8B6D41;
-                padding: 15px;
-                margin: 20px auto;
-                max-width: 250px;
-                border-radius: 4px;
-            }
-            .promo-code {
-                font-size: 20px;
-                font-weight: bold;
-                color: #8B6D41;
-                letter-spacing: 1px;
-            }
-            .cta-button {
-                display: inline-block;
-                background-color: #927552;
-                color: #ffffff !important;
-                text-decoration: none;
-                font-family: 'Arial', sans-serif;
-                font-weight: bold;
-                font-size: 14px;
-                padding: 14px 30px;
-                border-radius: 4px;
-                margin-top: 10px;
-            }
-            .footer {
-                text-align: center;
-                padding: 30px;
-                background-color: #FDF8F5;
-                border-top: 1px solid #EBE4DD;
-                font-family: 'Arial', sans-serif;
-                font-size: 11px;
-                color: #888888;
-            }
-            .footer a {
-                color: #8B6D41;
-                text-decoration: none;
-            }
+            body { margin: 0; padding: 0; background-color: #FDF8F5; font-family: 'Georgia', serif; color: #333333; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border-radius: 8px; overflow: hidden; }
+            .content { padding: 40px 30px; text-align: center; background-color: #FDF8F5; }
+            .brand-subtitle { font-family: 'Arial', sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 2px; color: #8B6D41; text-transform: uppercase; margin-bottom: 10px; }
+            h1 { font-size: 28px; margin: 0 0 20px 0; color: #2C2C2C; }
+            p { font-family: 'Arial', sans-serif; font-size: 14px; line-height: 1.6; color: #555555; margin-bottom: 25px; }
+            .promo-box { background-color: #FFFFFF; border: 1px dashed #8B6D41; padding: 15px; margin: 20px auto; max-width: 250px; border-radius: 4px; }
+            .promo-code { font-size: 20px; font-weight: bold; color: #8B6D41; letter-spacing: 1px; }
+            .cta-button { display: inline-block; background-color: #927552; color: #ffffff !important; text-decoration: none; font-family: 'Arial', sans-serif; font-weight: bold; font-size: 14px; padding: 14px 30px; border-radius: 4px; margin-top: 10px; }
+            .footer { text-align: center; padding: 30px; background-color: #FDF8F5; border-top: 1px solid #EBE4DD; font-family: 'Arial', sans-serif; font-size: 11px; color: #888888; }
+            .footer a { color: #8B6D41; text-decoration: none; }
         </style>
     </head>
     <body>
         <div class="container">
-            <img src="cid:nature-banner" alt="Nature's Candy Assortment" class="hero-image" />
             
+            <div style="background-color: #333333; width: 100%; max-width: 600px;">
+                <div style="background-image: url('cid:nature-banner'); background-color: #333333; background-position: center; background-size: cover; background-repeat: no-repeat; text-align: center; width: 100%; max-width: 600px;">
+                    
+                    <div style="background-color: rgba(0, 0, 0, 0.4); padding: 80px 20px; text-align: center;">
+                        <h2 style="color: #FFFFFF !important; font-family: 'Georgia', serif; font-size: 36px; line-height: 1.2; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-weight: normal;">
+                            Start Your Nutritious Journey
+                        </h2>
+                    </div>
+                    
+                </div>
+                
+                </div>
             <div class="content">
                 <div class="brand-subtitle">Nature's Candy</div>
                 <h1>Welcome to the Nature's Candy, ${customerName}</h1>
@@ -161,6 +99,7 @@ export async function sendWelcomeEmail({
         </div>
     </body>
     </html>
+    `;
     `;
 
     try {
