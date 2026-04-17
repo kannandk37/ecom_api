@@ -82,6 +82,17 @@ userAccountRouter.post(
                 // TODO userById show only return record from user table 
                 // construct createUser with user, profile, tenant details (use getTenantById) 
                 const createdUser = await userManagement.userById(user.id);
+
+                // welcome email
+                const welcomePromo = 'NATURE15'; 
+                const headerImage = path.resolve(process.cwd(), './data/banner.png');
+                sendWelcomeEmail({
+                    customerEmail: profile.email,
+                    customerName: profile.name,
+                    promoCode: welcomePromo,
+                    heroImageUrl: headerImage
+                }).catch(() => console.log('unable to send welcome email);
+                
                 response.send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
             } else {
                 response.send(new ApiError("User already exists", StatusCodes.BAD_REQUEST));
