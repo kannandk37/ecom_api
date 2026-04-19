@@ -30,15 +30,15 @@ const transporter = nodemailer.createTransport({
 /**
  * Sends a stylized welcome email to new customers.
  */
-export async function sendWelcomeEmail({ 
-    customerEmail, 
-    customerName, 
-    promoCode 
-}: WelcomeEmailParams): Promise<EmailResponse> {
-    
+export async function sendWelcomeEmail({
+    customerEmail,
+    customerName,
+    promoCode
+}: WelcomeEmailParams) {
+
     // The path to your banner
-    const heroImageUrl = 'C:/work/learning/opawasm/banner.png'; 
-    
+    const heroImageUrl = 'D:/naturecandy/back-end/src/data/Banner.png';
+
     const htmlContent = `
     <!DOCTYPE html>
     <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -100,26 +100,25 @@ export async function sendWelcomeEmail({
     </body>
     </html>
     `;
-    `;
 
     try {
         const info = await transporter.sendMail({
-            from: '"Nature\'s Candy" <kannandk37@gmail.com>', 
+            from: '"Nature\'s Candy" <kannandk37@gmail.com>',
             to: customerEmail,
             subject: "Welcome to Nature's Candy! Your special gift inside ✨",
             html: htmlContent,
             attachments: [
                 {
                     filename: 'banner.png',
-                    path: heroImageUrl, 
-                    cid: 'nature-banner' 
+                    path: heroImageUrl,
+                    cid: 'nature-banner'
                 }
             ]
         });
 
         console.log("Message sent: %s", info.messageId);
         return { success: true, messageId: info.messageId };
-        
+
     } catch (error: unknown) {
         console.error("Error sending welcome email:", error);
         return { success: false, error };
