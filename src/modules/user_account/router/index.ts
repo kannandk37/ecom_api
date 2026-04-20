@@ -13,7 +13,8 @@ import { Profile } from "../../profile/entity";
 import mongoose from "mongoose";
 import { RoleManagement } from "../../role/business";
 import { RoleName } from "../../role/entity";
-import { sendWelcomeEmail } from '../utlis/emailService';
+import { sendWelcomeEmail } from '../../../utils/emailService';
+import path from "path";
 
 export const userAccountRouter = Router();
 
@@ -85,15 +86,15 @@ userAccountRouter.post(
                 const createdUser = await userManagement.userById(user.id);
 
                 // welcome email
-                const welcomePromo = 'NATURE15'; 
+                const welcomePromo = 'NATURE15';
                 const headerImage = path.resolve(process.cwd(), './data/banner.png');
                 sendWelcomeEmail({
-                    customerEmail: profile.email,
-                    customerName: profile.name,
+                    userEmail: profile.email,
+                    userName: profile.name,
                     promoCode: welcomePromo,
-                    heroImageUrl: headerImage
-                }).catch(() => console.log('unable to send welcome email);
-                
+                    // heroImageUrl: headerImage
+                }).catch(() => console.log('unable to send welcome email'));
+
                 response.send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
             } else {
                 response.send(new ApiError("User already exists", StatusCodes.BAD_REQUEST));

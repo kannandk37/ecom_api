@@ -34,6 +34,7 @@ import { productRouter } from './modules/product/router';
 import { variantRouter } from './modules/variant/router';
 import { addressRouter } from './modules/address/router';
 import { orderRouter } from './modules/order/router';
+import { resetPasswordEmail, sendWelcomeEmail } from './utils/emailService';
 
 dotenv.config();
 
@@ -188,28 +189,45 @@ async function seeders() {
 
 seeders();
 
-// async function handleUserSignUp() {
-//     const { name, email } = {name: 'Explained', email: "explainedintamil37@gmail.com"};
-    
-//     // ... logic to save user to MongoDB ...
+async function handleUserSignUp() {
+    // const { name, email } = { name: 'Explained', email: "explainedintamil37@gmail.com" };
+    const { name, email } = { name: 'Swetha', email: "swethag872003@gmail.com" };
 
-//     // Generate a unique code or use a standard one
-//     const welcomePromo = 'NATURE15'; 
-    
-//     // Provide the URL to the image you want at the top
-//     // (This should be hosted somewhere publicly accessible, like an S3 bucket or your public assets folder)
-//     const headerImage = path.resolve(process.cwd(), './data/banner.png');
 
-//     // Send the email asynchronously 
-//     await sendWelcomeEmail({
-//         customerEmail: email,
-//         customerName: name,
-//         promoCode: welcomePromo,
-//         heroImageUrl: headerImage
-//     });
+    // ... logic to save user to MongoDB ...
 
-//     console.log({ message: 'User created successfully' });
-// }
+    // Generate a unique code or use a standard one
+    const welcomePromo = 'NATURE15';
+
+    // Provide the URL to the image you want at the top
+    // (This should be hosted somewhere publicly accessible, like an S3 bucket or your public assets folder)
+    const headerImage = path.resolve(process.cwd(), './data/banner.png');
+
+    // Send the email asynchronously 
+    await sendWelcomeEmail({
+        userEmail: email,
+        userName: name,
+        promoCode: welcomePromo,
+        // heroImageUrl: headerImage
+    });
+
+    console.log({ message: 'User created successfully' });
+}
+
+// handleUserSignUp()
+
+async function resetPasswordEmailTest() {
+    const { name, email } = { name: 'Swetha', email: "swethag872003@gmail.com" };
+
+    await resetPasswordEmail({
+        userEmail: email,
+        userName: name,
+    })
+    console.log({ message: 'Reset Password Email Sent successfully' });
+
+}
+
+// resetPasswordEmailTest();
 
 
 
