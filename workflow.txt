@@ -155,6 +155,209 @@ export class WarehouseBin {
   isActive?: boolean;
 }
 
+import mongoose from 'mongoose';
+import { InventoryModel, ReservationModel, LedgerModel } from './models'; // Your mongoose models
+
+export class InventoryService {
+  
+  /**
+   * Helper: Calculates the available quantity.
+   */
+  private static calculateAvailable(onHand = 0, reserved = 0, committed = 0): number {
+    return onHand - reserved - committed;
+  }
+
+  /**
+   * FLOW 1: Adjust Stock Screen
+   * Adds or subtracts physical stock numbers and updates the ledger.
+   */
+  static async adjustStock(
+    productId: string, 
+    warehouseId: string, 
+    quantityDelta: number, 
+    performedBy: string, 
+    notes?: string
+  ): Promise<Inventory> {
+    if (quantityDelta === 0) throw new Error("Adjustment quantity cannot be zero.");
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      let inventory = await InventoryModel.findOne({ productId, warehouseId }).session(session);
+
+      if (!inventory) {
+        if (quantityDelta < 0) throw new Error("Cannot reduce stock for an item with no inventory record.");
+        
+        // Create new inventory
+        inventory = new InventoryModel({
+          productId,
+          warehouseId,
+          qtyOnHand: quantityDelta,
+          qtyReserved: 0,
+          qtyCommitted: 0,
+          qtyAvailable: quantityDelta,
+          lastMovementAt: new Date(),
+          updatedAt: new Date()
+        });
+      } else {
+        const currentOnHand = inventory.qtyOnHand || 0;
+        const newOnHand = currentOnHand + quantityDelta;
+
+        if (newOnHand < 0) throw new Error(`Adjustment would result in negative physical stock. Current: ${currentOnHand}`);
+
+        inventory.qtyOnHand = newOnHand;
+        inventory.qtyAvailable = this.calculateAvailable(newOnHand, inventory.qtyReserved, inventory.qtyCommitted);
+        inventory.lastMovementAt = new Date();
+        inventory.updatedAt = new Date();
+      }
+
+      await inventory.save({ session });
+
+      // Create immutable ledger entry
+      await LedgerModel.create([{
+        inventoryId: inventory._id,
+        productId,
+        warehouseId,
+        movementType: quantityDelta > 0 ? MovementType.ADJUSTMENT : MovementType.CYCLE_COUNT_ADJUST,
+        quantityDelta,
+        qtyBefore: (inventory.qtyOnHand || 0) - quantityDelta,
+        qtyAfter: inventory.qtyOnHand,
+        referenceType: ReferenceType.MANUAL_ADJUST,
+        notes,
+        performedBy,
+        createdAt: new Date()
+      }], { session });
+
+      await session.commitTransaction();
+      return inventory.toObject();
+
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * FLOW 2: Order is Made
+   * Reserves the asked quantity. Physical stock remains, but available stock decreases.
+   */
+  static async reserveStock(
+    productId: string, 
+    warehouseId: string, 
+    orderId: string, 
+    askedQuantity: number
+  ): Promise<InventoryReservation> {
+    if (askedQuantity <= 0) throw new Error("Reservation quantity must be greater than zero.");
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const inventory = await InventoryModel.findOne({ productId, warehouseId }).session(session);
+      
+      if (!inventory) throw new Error("Inventory record not found.");
+      if ((inventory.qtyAvailable || 0) < askedQuantity) throw new Error(`Insufficient stock. Only ${inventory.qtyAvailable} available.`);
+
+      // Update Inventory
+      inventory.qtyReserved = (inventory.qtyReserved || 0) + askedQuantity;
+      inventory.qtyAvailable = this.calculateAvailable(inventory.qtyOnHand, inventory.qtyReserved, inventory.qtyCommitted);
+      inventory.updatedAt = new Date();
+      
+      await inventory.save({ session });
+
+      // Create Reservation
+      const [reservation] = await ReservationModel.create([{
+        inventoryId: inventory._id,
+        productId,
+        warehouseId,
+        qtyReserved: askedQuantity,
+        reservationType: ReservationType.HARD, // Using HARD as it is tied to an actual order
+        referenceType: ReferenceType.ORDER_ITEM,
+        referenceId: orderId,
+        status: ReservationStatus.ACTIVE,
+        createdAt: new Date()
+      }], { session });
+
+      await session.commitTransaction();
+      return reservation.toObject();
+
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * FLOW 3: Delivery Status Changes to 'Started'
+   * The item is sent to the customer. We reduce reserved stock AND physical stock.
+   */
+  static async dispatchOrder(
+    reservationId: string, 
+    performedBy: string
+  ): Promise<void> {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const reservation = await ReservationModel.findById(reservationId).session(session);
+      if (!reservation) throw new Error("Reservation not found.");
+      if (reservation.status !== ReservationStatus.ACTIVE) throw new Error(`Reservation is already ${reservation.status}.`);
+
+      const inventory = await InventoryModel.findById(reservation.inventoryId).session(session);
+      if (!inventory) throw new Error("Linked inventory record not found.");
+
+      const dispatchQty = reservation.qtyReserved || 0;
+      const currentOnHand = inventory.qtyOnHand || 0;
+
+      if (currentOnHand < dispatchQty) throw new Error("Data anomaly: Physical stock is less than reserved amount.");
+
+      // Reduce Physical Stock AND Reserved Stock
+      inventory.qtyOnHand = currentOnHand - dispatchQty;
+      inventory.qtyReserved = (inventory.qtyReserved || 0) - dispatchQty;
+      
+      // Re-calculate available (should technically result in the same number as before dispatch)
+      inventory.qtyAvailable = this.calculateAvailable(inventory.qtyOnHand, inventory.qtyReserved, inventory.qtyCommitted);
+      inventory.lastMovementAt = new Date();
+      inventory.updatedAt = new Date();
+
+      await inventory.save({ session });
+
+      // Mark reservation as converted
+      reservation.status = ReservationStatus.CONVERTED;
+      await reservation.save({ session });
+
+      // Append to Ledger (Physical movement out)
+      await LedgerModel.create([{
+        inventoryId: inventory._id,
+        productId: inventory.productId,
+        warehouseId: inventory.warehouseId,
+        movementType: MovementType.TRANSFER_OUT,
+        quantityDelta: -dispatchQty,
+        qtyBefore: currentOnHand,
+        qtyAfter: inventory.qtyOnHand,
+        referenceType: ReferenceType.ORDER_ITEM,
+        referenceId: reservation.referenceId,
+        performedBy,
+        createdAt: new Date()
+      }], { session });
+
+      await session.commitTransaction();
+
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+}
+
+
 PORT=5000
 # MONGO_URI=mongodb://admin:admin123@127.0.0.1:27019/?authSource=admin
 MONGO_URI=mongodb://admin:admin123@127.0.0.1:27019/naturecandy?authSource=admin&replicaSet=rs0
