@@ -38,3 +38,14 @@ categoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleN
         errorhandler(error, response);
     }
 });
+
+categoryRouter.put('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let categoryId = request.params.id as string;
+        let categoryData = categoryRawDatumToCategoryEntity(request.body.category);
+        let category = await new CategoryManagement().updateCategoryById(categoryId, categoryData);
+        response.send(new SuccessResponse(category, "Updated Category of Id", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});

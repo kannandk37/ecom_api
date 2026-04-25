@@ -43,4 +43,32 @@ export class CategoryPersistor {
             }
         })
     }
+
+    async categoryByName(name: string): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryRecord = await CategoryModel.findOne({ name: name }).populate({ // TODO:: name should be case insensitive
+                    path: 'subCategory',
+                    model: CategoryModel
+                });
+                resolve(categoryRecordToCategoryEntity(categoryRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async updateCategoryById(id: string, category: Category): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryData = categoryEntityToCategoryRecord(category);
+                let categoryRecord = await CategoryModel.updateOne({
+                    _id: new ObjectId(id)
+                }, categoryData);;
+                resolve(await categoryRecordToCategoryEntity(categoryRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
 }
