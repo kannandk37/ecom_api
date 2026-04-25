@@ -10,7 +10,7 @@ export class BrandPersistor {
             try {
                 let brandData = brandEntityToBrandRecord(brand);
                 let brandRecord = await BrandModel.create(brandData);
-                resolve(brandRecordToBrandEntity(brandRecord));
+                resolve(await brandRecordToBrandEntity(brandRecord));
             } catch (error) {
                 reject(error);
             }
@@ -24,7 +24,7 @@ export class BrandPersistor {
                     path: 'category',
                     model: CategoryModel
                 });
-                resolve(brandsRecordsToBrandsEntities(brandsRecords));
+                resolve(await brandsRecordsToBrandsEntities(brandsRecords));
             } catch (error) {
                 reject(error);
             }
@@ -38,7 +38,7 @@ export class BrandPersistor {
                     path: 'category',
                     model: CategoryModel
                 });
-                resolve(brandRecordToBrandEntity(brandRecord));
+                resolve(await brandRecordToBrandEntity(brandRecord));
             } catch (error) {
                 reject(error);
             }

@@ -9,7 +9,7 @@ export class CategoryPersistor {
             try {
                 let categoryData = categoryEntityToCategoryRecord(category);
                 let categoryRecord = await CategoryModel.create(categoryData);
-                resolve(categoryRecordToCategoryEntity(categoryRecord));
+                resolve(await categoryRecordToCategoryEntity(categoryRecord));
             } catch (error) {
                 reject(error);
             }

@@ -10,7 +10,7 @@ export class AddressPersistor {
             try {
                 let addressData = addressEntityToAddressRecord(address);
                 let addressRecord = await AddressModel.create(addressData);
-                resolve(addressRecordToAddressEntity(addressRecord));
+                resolve(await addressRecordToAddressEntity(addressRecord));
             } catch (error) {
                 reject(error);
             }
@@ -21,7 +21,7 @@ export class AddressPersistor {
         return new Promise<Address[]>(async (resolve, reject) => {
             try {
                 let addressesRecords = await AddressModel.find().populate([userPopulate()]);
-                resolve(addressesRecordsToAddressesEntities(addressesRecords));
+                resolve(await addressesRecordsToAddressesEntities(addressesRecords));
             } catch (error) {
                 reject(error);
             }
@@ -32,7 +32,7 @@ export class AddressPersistor {
         return new Promise<Address>(async (resolve, reject) => {
             try {
                 let addressRecord = await AddressModel.findOne({ _id: new ObjectId(id) }).populate([userPopulate()]);
-                resolve(addressRecordToAddressEntity(addressRecord));
+                resolve(await addressRecordToAddressEntity(addressRecord));
             } catch (error) {
                 reject(error);
             }

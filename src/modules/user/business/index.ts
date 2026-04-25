@@ -23,6 +23,7 @@ export class UserManagement {
                 let profile = await profilePersistor.profileByUserId(id);
                 let result = {
                     id: user.id,
+                    user: user,
                     profile: profile,
                     roles: user.roles
                 };

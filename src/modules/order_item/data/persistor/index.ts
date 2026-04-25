@@ -12,7 +12,7 @@ export class OrderItemPersistor {
             try {
                 let orderItemData = orderItemEntityToOrderItemRecord(orderItem);
                 let orderItemRecord = await OrderItemModel.create(orderItemData);
-                resolve(orderItemRecordToOrderItemEntity(orderItemRecord));
+                resolve(await orderItemRecordToOrderItemEntity(orderItemRecord));
             } catch (error) {
                 reject(error);
             }
@@ -23,7 +23,7 @@ export class OrderItemPersistor {
         return new Promise<OrderItem[]>(async (resolve, reject) => {
             try {
                 let orderItemsRecords = await OrderItemModel.find().populate([productPopulate(), variantPopulate()]);
-                resolve(orderItemsRecordsToOrderItemsEntities(orderItemsRecords));
+                resolve(await orderItemsRecordsToOrderItemsEntities(orderItemsRecords));
             } catch (error) {
                 reject(error);
             }
@@ -34,7 +34,7 @@ export class OrderItemPersistor {
         return new Promise<OrderItem>(async (resolve, reject) => {
             try {
                 let orderitemRecord = await OrderItemModel.findOne({ _id: new ObjectId(id) }).populate([productPopulate(), variantPopulate()]);
-                resolve(orderItemRecordToOrderItemEntity(orderitemRecord));
+                resolve(await orderItemRecordToOrderItemEntity(orderitemRecord));
             } catch (error) {
                 reject(error);
             }

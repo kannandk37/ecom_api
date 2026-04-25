@@ -12,7 +12,7 @@ export class ProductPersistor {
             try {
                 let productData = productEntityToProductRecord(product);
                 let productRecord = await ProductModel.create(productData);
-                resolve(productRecordToProductEntity(productRecord));
+                resolve(await productRecordToProductEntity(productRecord));
             } catch (error) {
                 reject(error);
             }
@@ -23,7 +23,7 @@ export class ProductPersistor {
         return new Promise<Product[]>(async (resolve, reject) => {
             try {
                 let productsRecords = await ProductModel.find().populate([categoryPopulate(), brandPopulate(), variantsPopulate()]);
-                resolve(productsRecordsToProductsEntities(productsRecords));
+                resolve(await productsRecordsToProductsEntities(productsRecords));
             } catch (error) {
                 reject(error);
             }
@@ -34,7 +34,7 @@ export class ProductPersistor {
         return new Promise<Product>(async (resolve, reject) => {
             try {
                 let productRecord = await ProductModel.findOne({ _id: new ObjectId(id) }).populate([categoryPopulate(), brandPopulate(), variantsPopulate()]);
-                resolve(productRecordToProductEntity(productRecord));
+                resolve(await productRecordToProductEntity(productRecord));
             } catch (error) {
                 reject(error);
             }

@@ -70,7 +70,7 @@ app.use(requestLogger);
 //seed Permissions
 async function seedPermissions(): Promise<void> {
 
-    const filePath = path.join(__dirname, './data/permissions.json');
+    const filePath = path.join(__dirname, '../data/permissions.json');
     const raw = fs.readFileSync(filePath, 'utf-8');
     const rawList: any[] = JSON.parse(raw);
     const entities = permissionsRawDataToPermissionsEntities(rawList);
@@ -95,7 +95,7 @@ async function seedPermissions(): Promise<void> {
 
 async function seedRoles(): Promise<void> {
 
-    const filePath = path.join(__dirname, './data/roles.json');
+    const filePath = path.join(__dirname, '../data/roles.json');
     const raw = fs.readFileSync(filePath, 'utf-8');
     const rawList: any[] = JSON.parse(raw);
     const entities = rolesRawDataToRolesEntities(rawList);
@@ -201,7 +201,7 @@ async function handleUserSignUp() {
 
     // Provide the URL to the image you want at the top
     // (This should be hosted somewhere publicly accessible, like an S3 bucket or your public assets folder)
-    const headerImage = path.resolve(process.cwd(), './data/banner.png');
+    const headerImage = path.resolve(process.cwd(), '../data/banner.png');
 
     // Send the email asynchronously 
     await sendWelcomeEmail({

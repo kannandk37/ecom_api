@@ -12,7 +12,7 @@ export const brandRouter = Router();
 
 brandRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
-        let brandInfo = brandRawDatumToBrandEntity(request.body);
+        let brandInfo = brandRawDatumToBrandEntity(request.body.brand);
         let persistedBrand = await new BrandManagement().createBrand(brandInfo);
         response.send(new SuccessResponse(await new BrandManagement().brandById(persistedBrand.id), 'Brand created successfully', StatusCodes.CREATED))
     } catch (error: any) {

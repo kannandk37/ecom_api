@@ -11,7 +11,7 @@ export class ProfilePersistor {
                 profile.lastLogin = new Date();
                 let profileRecordData = profileEntityToProfileRecord(profile);
                 let [persistedProfileRecord] = await ProfileModel.create([profileRecordData], { session: transaction });
-                resolve(profileRecordToProfileEntity(persistedProfileRecord));
+                resolve(await profileRecordToProfileEntity(persistedProfileRecord));
             } catch (error) {
                 reject(error);
             }
@@ -24,7 +24,7 @@ export class ProfilePersistor {
                 let profileRecord: any = await ProfileModel.findOne({
                     email: email
                 });
-                resolve(profileRecordToProfileEntity(profileRecord));
+                resolve(await profileRecordToProfileEntity(profileRecord));
             } catch (error) {
                 reject(error);
             }
@@ -40,7 +40,7 @@ export class ProfilePersistor {
                     path: 'role',
                     model: RoleModel
                 });
-                resolve(profileRecordToProfileEntity(profileRecord));
+                resolve(await profileRecordToProfileEntity(profileRecord));
             } catch (error) {
                 reject(error);
             }

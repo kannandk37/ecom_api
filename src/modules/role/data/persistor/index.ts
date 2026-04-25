@@ -22,7 +22,7 @@ export class RolePersistor {
                         runValidators: true
                     }
                 );
-                resolve(roleRecordToRoleEntity(roleRecord))
+                resolve(await roleRecordToRoleEntity(roleRecord))
             } catch (error) {
                 reject(error)
             }
@@ -33,7 +33,7 @@ export class RolePersistor {
         return new Promise<Role[]>(async (resolve, reject) => {
             try {
                 let rolesRecords = await RoleModel.find();
-                resolve(rolesRecordsToRolesEntities(rolesRecords));
+                resolve(await rolesRecordsToRolesEntities(rolesRecords));
             } catch (error) {
                 reject(error);
             }
@@ -46,7 +46,7 @@ export class RolePersistor {
                 let roleRecord = await RoleModel.findOne({
                     name: name
                 });
-                resolve(roleRecordToRoleEntity(roleRecord));
+                resolve(await roleRecordToRoleEntity(roleRecord));
             } catch (error) {
                 reject(error);
             }

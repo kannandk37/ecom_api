@@ -11,7 +11,7 @@ export const orderRouter = Router();
 
 orderRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
-        let orderInfo = orderRawDatumToOrderEntity(request.body);
+        let orderInfo = orderRawDatumToOrderEntity(request.body.order);
         let persistedOrder = await new OrderManagement().createOrder(orderInfo);
         response.send(new SuccessResponse(await new OrderManagement().orderById(persistedOrder.id), 'Order created successfully', StatusCodes.CREATED))
     } catch (error: any) {

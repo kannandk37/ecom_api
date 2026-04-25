@@ -8,7 +8,7 @@ export class PermissionPersistor {
             try {
                 let permissionRecord = permissionEntityToPermissionRecord(permission);
                 let createdPermissionRecord = await PermissionModel.create(permissionRecord);
-                resolve(permissionRecordToPermissionEntity(createdPermissionRecord));
+                resolve(await permissionRecordToPermissionEntity(createdPermissionRecord));
             } catch (error) {
                 reject(error);
             }
@@ -19,7 +19,7 @@ export class PermissionPersistor {
         return new Promise<Permission>(async (resolve, reject) => {
             try {
                 let permissionRecord = await PermissionModel.findOne({ key });
-                resolve(permissionRecord ? permissionRecordToPermissionEntity(permissionRecord) : null);
+                resolve(await permissionRecord ? permissionRecordToPermissionEntity(permissionRecord) : null);
             } catch (error) {
                 reject(error);
             }
@@ -30,7 +30,7 @@ export class PermissionPersistor {
         return new Promise<Permission[]>(async (resolve, reject) => {
             try {
                 let permissionsRecords = await PermissionModel.find({ key: { $in: keys } });
-                resolve(permissionsRecordsToPermissionsEntities(permissionsRecords));
+                resolve(await permissionsRecordsToPermissionsEntities(permissionsRecords));
             } catch (error) {
                 reject(error);
             }

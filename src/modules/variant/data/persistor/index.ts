@@ -10,7 +10,7 @@ export class VariantPersistor {
             try {
                 let variantData = variantEntityToVariantRecord(variant);
                 let variantRecord = await VariantModel.create(variantData);
-                resolve(variantRecordToVariantEntity(variantRecord));
+                resolve(await variantRecordToVariantEntity(variantRecord));
             } catch (error) {
                 reject(error);
             }
@@ -21,7 +21,7 @@ export class VariantPersistor {
         return new Promise<Variant[]>(async (resolve, reject) => {
             try {
                 let variantsRecords = await VariantModel.find().populate([productPopulate()]);
-                resolve(variantsRecordsToVariantsEntities(variantsRecords));
+                resolve(await variantsRecordsToVariantsEntities(variantsRecords));
             } catch (error) {
                 reject(error);
             }
@@ -32,7 +32,7 @@ export class VariantPersistor {
         return new Promise<Variant>(async (resolve, reject) => {
             try {
                 let variantRecord = await VariantModel.findOne({ _id: new ObjectId(id) }).populate([productPopulate()]);
-                resolve(variantRecordToVariantEntity(variantRecord));
+                resolve(await variantRecordToVariantEntity(variantRecord));
             } catch (error) {
                 reject(error);
             }

@@ -12,7 +12,7 @@ export const addressRouter = Router();
 
 addressRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN, RoleName.CUSTOMER]), async (request: Request, response: Response) => {
     try {
-        let addressInfo = addressRawDatumToAddressEntity(request.body);
+        let addressInfo = addressRawDatumToAddressEntity(request.body.address);
         let persistedAddress = await new AddressManagement().createAddress(addressInfo);
         response.send(new SuccessResponse(await new AddressManagement().addressById(persistedAddress.id), 'Address created successfully', StatusCodes.CREATED))
     } catch (error: any) {

@@ -14,7 +14,7 @@ export class UserAccountPersistor {
                     {
                         email: userAccount.email
                     });
-                resolve(userAccountRecordToUserAccountEntity(existingUserAccount));
+                resolve(await userAccountRecordToUserAccountEntity(existingUserAccount));
             } catch (error) {
                 reject(error);
             };
@@ -35,7 +35,7 @@ export class UserAccountPersistor {
                 } else {
                     let userAccountRecordData = userAccountEntityToUserAccountRecord(userAccount);
                     const [userAccountRecord] = await UserAccountModel.create([userAccountRecordData], { session: transaction });
-                    resolve(userAccountRecordToUserAccountEntity(userAccountRecord))
+                    resolve(await userAccountRecordToUserAccountEntity(userAccountRecord))
                 }
             } catch (error) {
                 reject(error);

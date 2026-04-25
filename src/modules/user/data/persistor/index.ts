@@ -10,7 +10,7 @@ export class UserPersistor {
             try {
                 let userRecordData = userEntityToUserRecord(user);
                 let [userRecord] = await UserModel.create([userRecordData], { session: transaction });
-                resolve(userRecordToUserEntity(userRecord))
+                resolve(await userRecordToUserEntity(userRecord))
             } catch (error) {
                 reject(error)
             }
@@ -23,7 +23,7 @@ export class UserPersistor {
                 let userRecord = await UserModel.findOne(
                     { _id: new ObjectId(id) }
                 );
-                resolve(userRecordToUserEntity(userRecord))
+                resolve(await userRecordToUserEntity(userRecord))
             } catch (error) {
                 console.log(error)
                 reject(error)
@@ -35,7 +35,7 @@ export class UserPersistor {
         return new Promise<User[]>(async (resolve, reject) => {
             try {
                 let userRecords = await UserModel.find();
-                resolve(usersRecordsToUsersEntities(userRecords));
+                resolve(await usersRecordsToUsersEntities(userRecords));
             } catch (error) {
                 console.log(error)
                 reject(error)

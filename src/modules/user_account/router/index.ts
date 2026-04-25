@@ -87,7 +87,7 @@ userAccountRouter.post(
 
                 // welcome email
                 const welcomePromo = 'NATURE15';
-                const headerImage = path.resolve(process.cwd(), './data/banner.png');
+                const headerImage = path.resolve(process.cwd(), '../data/banner.png');
                 sendWelcomeEmail({
                     userEmail: profile.email,
                     userName: profile.name,

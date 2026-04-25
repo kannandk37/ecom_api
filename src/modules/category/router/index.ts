@@ -12,7 +12,7 @@ export const categoryRouter = Router();
 
 categoryRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
-        let categoryInfo = categoryRawDatumToCategoryEntity(request.body);
+        let categoryInfo = categoryRawDatumToCategoryEntity(request.body.category);
         let persistedCategory = await new CategoryManagement().createCategory(categoryInfo);
         response.send(new SuccessResponse(await new CategoryManagement().categoryById(persistedCategory.id), 'Category created successfully', StatusCodes.CREATED))
     } catch (error: any) {

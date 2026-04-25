@@ -13,7 +13,7 @@ export class OrderPersistor {
             try {
                 let orderData = orderEntityToOrderRecord(order);
                 let orderRecord = await OrderModel.create(orderData);
-                resolve(orderRecordToOrderEntity(orderRecord));
+                resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);
             }
@@ -24,7 +24,7 @@ export class OrderPersistor {
         return new Promise<Order[]>(async (resolve, reject) => {
             try {
                 let ordersRecords = await OrderModel.find().populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
-                resolve(ordersRecordsToOrdersEntities(ordersRecords));
+                resolve(await ordersRecordsToOrdersEntities(ordersRecords));
             } catch (error) {
                 reject(error);
             }
@@ -35,7 +35,7 @@ export class OrderPersistor {
         return new Promise<Order>(async (resolve, reject) => {
             try {
                 let orderRecord = await OrderModel.findOne({ _id: new ObjectId(id) }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
-                resolve(orderRecordToOrderEntity(orderRecord));
+                resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);
             }
@@ -46,7 +46,7 @@ export class OrderPersistor {
         return new Promise<Order[]>(async (resolve, reject) => {
             try {
                 let ordersRecords = await OrderModel.find({ user: new ObjectId(userId) }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
-                resolve(ordersRecordsToOrdersEntities(ordersRecords));
+                resolve(await ordersRecordsToOrdersEntities(ordersRecords));
             } catch (error) {
                 reject(error);
             }
@@ -57,7 +57,7 @@ export class OrderPersistor {
         return new Promise<Order>(async (resolve, reject) => {
             try {
                 let orderRecord = await OrderModel.find({ _id: new ObjectId(id), user: new ObjectId(userId) }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
-                resolve(orderRecordToOrderEntity(orderRecord));
+                resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);
             }

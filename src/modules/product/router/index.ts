@@ -12,7 +12,7 @@ export const productRouter = Router();
 
 productRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
-        let productInfo = productRawDatumToProductEntity(request.body);
+        let productInfo = productRawDatumToProductEntity(request.body.product);
         let persistedProduct = await new ProductManagement().createProduct(productInfo);
         response.send(new SuccessResponse(await new ProductManagement().productById(persistedProduct.id), 'Product created successfully', StatusCodes.CREATED))
     } catch (error: any) {

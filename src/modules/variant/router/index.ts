@@ -12,7 +12,7 @@ export const variantRouter = Router();
 
 variantRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
-        let variantInfo = variantRawDatumToVariantEntity(request.body);
+        let variantInfo = variantRawDatumToVariantEntity(request.body.variant);
         let persistedVariant = await new VariantManagement().createVariant(variantInfo);
         response.send(new SuccessResponse(await new VariantManagement().variantById(persistedVariant.id), 'Variant created successfully', StatusCodes.CREATED))
     } catch (error: any) {
