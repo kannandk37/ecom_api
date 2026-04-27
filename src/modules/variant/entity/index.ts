@@ -13,6 +13,7 @@ export enum VariantGrade {
 
 export class Variant {
     id?: string;
+    name?: string;
     product?: Product;
     type?: VariantType;
     grade?: VariantGrade;

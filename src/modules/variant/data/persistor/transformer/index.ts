@@ -13,6 +13,10 @@ export function variantRecordToVariantEntity(variantRecord: any): Variant {
         variant.id = variantRecord._id?.toString();
     }
 
+    if (variantRecord.name) {
+        variant.name = variantRecord.name;
+    }
+
     if (variantRecord.product) {
         variant.product = productRecordToProductEntity(variantRecord.product);
     }
@@ -53,6 +57,10 @@ export function variantEntityToVariantRecord(variant: Variant): object {
 
     if (variant.id) {
         record._id = new ObjectId(variant.id);
+    }
+
+    if (variant.name) {
+        record.name = variant.name;
     }
 
     if (variant.product?.id) {

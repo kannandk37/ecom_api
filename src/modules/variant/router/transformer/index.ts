@@ -12,6 +12,10 @@ export function variantRawDatumToVariantEntity(raw: any): Variant {
         variant.id = raw.id;
     }
 
+    if (raw.name) {
+        variant.name = raw.name;
+    }
+
     if (raw.product) {
         variant.product = productRawDatumToProductEntity(raw.product);
     }
