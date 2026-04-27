@@ -95,9 +95,9 @@ userAccountRouter.post(
                     // heroImageUrl: headerImage
                 }).catch(() => console.log('unable to send welcome email'));
 
-                response.send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
+                response.status(StatusCodes.CREATED).send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
             } else {
-                response.send(new ApiError("User already exists", StatusCodes.BAD_REQUEST));
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User already exists", StatusCodes.BAD_REQUEST));
             };
         } catch (error: any) {
             errorhandler(error, response);
@@ -116,7 +116,7 @@ userAccountRouter.post(
             userAccountInfo.password = request.body.password;
             let userAccount = userAccountInfoToUserAccountEntity(userAccountInfo)
             let token = await userAccountManagement.loginExistingUser(userAccount);
-            response.send(new SuccessResponse({ token: token }, "Login in successful", StatusCodes.CREATED));
+            response.status(StatusCodes.CREATED).send(new SuccessResponse({ token: token }, "Login in successful", StatusCodes.CREATED));
         } catch (error: any) {
             errorhandler(error, response);
         };

@@ -14,7 +14,7 @@ productRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
     try {
         let productInfo = productRawDatumToProductEntity(request.body.product);
         let persistedProduct = await new ProductManagement().createProduct(productInfo);
-        response.send(new SuccessResponse(await new ProductManagement().productById(persistedProduct.id), 'Product created successfully', StatusCodes.CREATED))
+        response.status(StatusCodes.CREATED).send(new SuccessResponse(await new ProductManagement().productById(persistedProduct.id), 'Product created successfully', StatusCodes.CREATED))
     } catch (error: any) {
         errorhandler(error, response);
     }
@@ -23,7 +23,7 @@ productRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
 productRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let products = await new ProductManagement().products();
-        response.send(new SuccessResponse(products, "Products List", StatusCodes.OK))
+        response.status(StatusCodes.OK).send(new SuccessResponse(products, "Products List", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }
@@ -33,7 +33,7 @@ productRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNa
     try {
         let productId = request.params.id as string;
         let product = await new ProductManagement().productById(productId);
-        response.send(new SuccessResponse(product, "Product of Id", StatusCodes.OK))
+        response.status(StatusCodes.OK).send(new SuccessResponse(product, "Product of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }

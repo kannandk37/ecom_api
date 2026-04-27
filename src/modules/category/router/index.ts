@@ -14,7 +14,7 @@ categoryRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNam
     try {
         let categoryInfo = categoryRawDatumToCategoryEntity(request.body.category);
         let persistedCategory = await new CategoryManagement().createCategory(categoryInfo);
-        response.send(new SuccessResponse(await new CategoryManagement().categoryById(persistedCategory.id), 'Category created successfully', StatusCodes.CREATED))
+        response.status(StatusCodes.CREATED).send(new SuccessResponse(await new CategoryManagement().categoryById(persistedCategory.id), 'Category created successfully', StatusCodes.CREATED))
     } catch (error: any) {
         errorhandler(error, response);
     }
@@ -23,7 +23,7 @@ categoryRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNam
 categoryRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let categories = await new CategoryManagement().categories();
-        response.send(new SuccessResponse(categories, "Categories List", StatusCodes.OK))
+        response.status(StatusCodes.OK).send(new SuccessResponse(categories, "Categories List", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }
@@ -33,7 +33,7 @@ categoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleN
     try {
         let categoryId = request.params.id as string;
         let category = await new CategoryManagement().categoryById(categoryId);
-        response.send(new SuccessResponse(category, "Category of Id", StatusCodes.OK))
+        response.status(StatusCodes.OK).send(new SuccessResponse(category, "Category of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }
@@ -44,7 +44,7 @@ categoryRouter.put('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleN
         let categoryId = request.params.id as string;
         let categoryData = categoryRawDatumToCategoryEntity(request.body.category);
         let category = await new CategoryManagement().updateCategoryById(categoryId, categoryData);
-        response.send(new SuccessResponse(category, "Updated Category of Id", StatusCodes.OK))
+        response.status(StatusCodes.OK).send(new SuccessResponse(category, "Updated Category of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }

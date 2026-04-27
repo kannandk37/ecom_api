@@ -11,7 +11,7 @@ export const userRouter = Router();
 userRouter.get('/', verifyToken, specificRolesOnly([RoleName.SUPERADMIN, RoleName.ADMIN]), async (request: Request, response: Response) => {
     try {
         let userManagement = new UserManagement();
-        response.send(new SuccessResponse(await userManagement.users(), 'Users List', StatusCodes.OK));
+        response.status(StatusCodes.OK).send(new SuccessResponse(await userManagement.users(), 'Users List', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
     }

@@ -14,7 +14,7 @@ variantRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
     try {
         let variantInfo = variantRawDatumToVariantEntity(request.body.variant);
         let persistedVariant = await new VariantManagement().createVariant(variantInfo);
-        response.send(new SuccessResponse(await new VariantManagement().variantById(persistedVariant.id), 'Variant created successfully', StatusCodes.CREATED))
+        response.status(StatusCodes.CREATED).send(new SuccessResponse(await new VariantManagement().variantById(persistedVariant.id), 'Variant created successfully', StatusCodes.CREATED))
     } catch (error: any) {
         errorhandler(error, response);
     }
@@ -23,7 +23,7 @@ variantRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
 variantRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let variants = await new VariantManagement().variants();
-        response.send(new SuccessResponse(variants, "Variants List", StatusCodes.OK))
+        response.status(StatusCodes.OK).send(new SuccessResponse(variants, "Variants List", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }
@@ -33,7 +33,7 @@ variantRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNa
     try {
         let variantId = request.params.id as string;
         let variant = await new VariantManagement().variantById(variantId);
-        response.send(new SuccessResponse(variant, "Variant of Id", StatusCodes.OK))
+        response.status(StatusCodes.OK).send(new SuccessResponse(variant, "Variant of Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }
