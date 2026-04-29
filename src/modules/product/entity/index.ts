@@ -12,7 +12,11 @@ export enum Duration {
     DAY = 'day',
     WEEK = 'week',
     MONTH = 'month',
-    YEAR = 'year'
+    YEAR = 'year',
+    DAYS = 'days',
+    WEEKS = 'weeks',
+    MONTHS = 'months',
+    YEARS = 'years'
 }
 
 export enum Unit {
@@ -24,6 +28,17 @@ export enum Label {
     SHELF_LIFE = 'shelf life',
     STORAGE = 'storage'
 }
+
+export interface ShelfLifeValue {
+    quantity: number;       // e.g. 12
+    unit: Duration;         // e.g. Duration.WEEK
+}
+
+export type SpecValue =
+    | { label: Label.ORIGIN; value: string }           // "India", "USA"
+    | { label: Label.STORAGE; value: Storage }          // Storage.COOL_DRY_PLACE
+    | { label: Label.SHELF_LIFE; value: ShelfLifeValue }   // { quantity: 12, unit: Duration.WEEK }
+
 
 export class Product {
     id?: string;
@@ -39,7 +54,7 @@ export class Product {
     unit?: Unit;
     images?: string[];
     features?: string[];
-    specs?: { label: Label, value: string | Duration | Storage }[];
+    specs?: SpecValue[];
     // Added:
     slug?: string; // URL-friendly name (e.g., "premium-almonds") for SEO
     averageRating?: number; // For sorting and displaying popularity

@@ -1,6 +1,7 @@
 import { brandRawDatumToBrandEntity } from "../../../brand/router/transformer";
 import { categoryRawDatumToCategoryEntity } from "../../../category/router/transformer";
 import { variantsRawDataToVariantsEntities } from "../../../variant/router/transformer";
+import { transformSpecs } from "../../data/persistor/transformer";
 import { Product, Unit } from "../../entity";
 
 export function productRawDatumToProductEntity(raw: any): Product {
@@ -67,7 +68,7 @@ export function productRawDatumToProductEntity(raw: any): Product {
     }
 
     if (raw.specs) {
-        product.specs = raw.specs;
+        product.specs = transformSpecs(raw.specs);
     }
 
     if (raw.slug) {

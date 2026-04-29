@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { Duration, Unit } from "../../entity";
+import { Label, Unit } from "../../entity";
 
 const ProductSchema = new Schema({
     title: { type: String },
@@ -15,7 +15,7 @@ const ProductSchema = new Schema({
     unit: { type: String, enum: Unit },
     images: [{ type: String, required: true }],
     features: [{ type: String, required: true }],
-    specs: [{ type: { label: { type: String, required: true }, value: { type: Schema.Types.Mixed, required: true } }, required: true }],
+    specs: [{ type: { label: { type: String, required: true, enum: Label }, value: { type: Schema.Types.Mixed, required: true } }, required: true }],
     averageRating: { type: Number, default: 0, index: true }, // For "Top Rated" sorting
 }, { timestamps: true });
 

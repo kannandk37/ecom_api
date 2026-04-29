@@ -1,7 +1,7 @@
 import { brandRecordToBrandEntity } from "../../../../brand/data/persistor/transformer";
 import { categoryRecordToCategoryEntity } from "../../../../category/data/persistor/transformer";
 import { variantsRecordsToVariantsEntities } from "../../../../variant/data/persistor/transformer";
-import { Product, Unit } from "../../../entity";
+import { Duration, Label, Product, SpecValue, Unit, Storage } from "../../../entity";
 import { ObjectId } from "mongodb";
 
 export function productRecordToProductEntity(productRecord: any): Product {
@@ -64,7 +64,7 @@ export function productRecordToProductEntity(productRecord: any): Product {
     }
 
     if (productRecord.specs && productRecord.specs.length > 0) {
-        product.specs = productRecord.specs;
+        product.specs = transformSpecs(productRecord.specs);
     }
 
     if (productRecord.slug) {
@@ -138,7 +138,18 @@ export function productEntityToProductRecord(product: Product): object {
     }
 
     if (product.specs && product.specs.length > 0) {
-        record.specs = product.specs;
+        record.specs = product.specs.map((spec) => {
+            if (spec.label === Label.SHELF_LIFE) {
+                return {
+                    label: spec.label,
+                    value: {
+                        quantity: spec.value.quantity,
+                        unit: spec.value.unit
+                    }
+                };
+            }
+            return { label: spec.label, value: spec.value };
+        });
     }
 
     if (product.slug) {
@@ -164,4 +175,73 @@ export function productsEntitiesToProductsRecords(products: Product[]): object[]
         return [];
     }
     return products.map((product) => productEntityToProductRecord(product));
+}
+
+function rawSpecToSpecValue(raw: any): SpecValue | null {
+    if (!raw || !raw.label || raw.value === undefined) return null;
+
+    switch (raw.label) {
+
+        case Label.ORIGIN: {
+            if (typeof raw.value !== 'string' || !raw.value.trim()) return null;
+            const spec: Extract<SpecValue, { label: Label.ORIGIN }> = {
+                label: Label.ORIGIN,
+                value: raw.value.trim()
+            };
+            return spec;
+        }
+
+        case Label.STORAGE: {
+            if (!Object.values(Storage).includes(raw.value)) return null;
+            const spec: Extract<SpecValue, { label: Label.STORAGE }> = {
+                label: Label.STORAGE,
+                value: raw.value as Storage
+            };
+            return spec;
+        }
+
+        case Label.SHELF_LIFE: {
+            if (typeof raw.value === 'object' && raw.value !== null) {
+                const qty = Number(raw.value.quantity);
+                const unit = raw.value.unit as Duration;
+                if (!qty || qty < 1 || !Object.values(Duration).includes(unit)) return null;
+                const spec: Extract<SpecValue, { label: Label.SHELF_LIFE }> = {
+                    label: Label.SHELF_LIFE,
+                    value: { quantity: qty, unit }
+                };
+                return spec;
+            }
+            if (typeof raw.value === 'string') {
+                const [qtyStr, unit] = raw.value.trim().split(' ');
+                const qty = Number(qtyStr);
+                if (!qty || qty < 1 || !Object.values(Duration).includes(unit as Duration)) return null;
+                const spec: Extract<SpecValue, { label: Label.SHELF_LIFE }> = {
+                    label: Label.SHELF_LIFE,
+                    value: { quantity: qty, unit: unit as Duration }
+                };
+                return spec;
+            }
+            return null;
+        }
+
+        default:
+            return null;
+    }
+}
+
+export function transformSpecs(rawSpecs: any[]): SpecValue[] {
+    if (!Array.isArray(rawSpecs) || rawSpecs.length === 0) return [];
+
+    const seen = new Set<string>();
+    const results: SpecValue[] = [];
+
+    for (const raw of rawSpecs) {
+        const spec = rawSpecToSpecValue(raw);
+        if (!spec) continue;
+        if (seen.has(spec.label)) continue;
+        seen.add(spec.label);
+        results.push(spec);
+    }
+
+    return results;
 }
