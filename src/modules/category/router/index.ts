@@ -20,7 +20,7 @@ categoryRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNam
     }
 });
 
-categoryRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+categoryRouter.get('/', async (request: Request, response: Response) => {
     try {
         let categories = await new CategoryManagement().categories();
         response.status(StatusCodes.OK).send(new SuccessResponse(categories, "Categories List", StatusCodes.OK))

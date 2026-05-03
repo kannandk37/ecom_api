@@ -34,7 +34,7 @@ import { productRouter } from './modules/product/router';
 import { variantRouter } from './modules/variant/router';
 import { addressRouter } from './modules/address/router';
 import { orderRouter } from './modules/order/router';
-import { resetPasswordEmail, sendWelcomeEmail } from './utils/emailService';
+import { resetPasswordEmail, sendWelcomeEmail, userOnBoardingPasswordReset } from './utils/emailService';
 
 dotenv.config();
 
@@ -214,7 +214,7 @@ async function handleUserSignUp() {
     console.log({ message: 'User created successfully' });
 }
 
-// handleUserSignUp()
+// handleUserSignUp();
 
 async function resetPasswordEmailTest() {
     const { name, email } = { name: 'Swetha', email: "swethag872003@gmail.com" };
@@ -229,6 +229,20 @@ async function resetPasswordEmailTest() {
 
 // resetPasswordEmailTest();
 
+async function userOnBoardingPasswordResetTest() {
+    const { name, email, password, roleName } = { name: 'Swetha', email: "swethag872003@gmail.com", password: 'TEMP_SWETHA', roleName: "ADMIN" };
+
+    await userOnBoardingPasswordReset({
+        userEmail: email,
+        userName: name,
+        password: password,
+        roleName: roleName
+    })
+    console.log({ message: 'User on Boarding Password Reset Email Sent successfully' });
+
+}
+
+// userOnBoardingPasswordResetTest();
 
 
 // Routes

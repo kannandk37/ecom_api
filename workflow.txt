@@ -13,6 +13,172 @@ Invoice Update: The system checks if B and C are paid. Since they aren't, the ma
 
 Completion: Once Item C arrives and is paid for, the system sees all linked OrderItems are paid and marks the entire Order as Completed.
 
+// ─── ENUMS ────────────────────────────────────────────────────────────────
+
+export enum WarehouseType {
+  OWN    = 'own',
+  RENTED = 'rented'
+}
+
+export enum WarehouseStatus {
+  ACTIVE      = 'active',
+  INACTIVE    = 'inactive',
+  MAINTENANCE = 'maintenance'
+}
+
+export enum CapacityUnit {
+  UNITS        = 'units',
+  CUBIC_METERS = 'cubic_meters',
+  PALLETS      = 'pallets'
+}
+
+export enum ReorderStatus {
+  NONE      = 'none',
+  TRIGGERED = 'triggered',
+  RECEIVED  = 'received'
+}
+
+export enum ReferenceType {
+  CART_ITEM       = 'cart_item',
+  ORDER_ITEM      = 'order_item',
+  PURCHASE_ORDER  = 'purchase_order',
+  TRANSFER_ORDER  = 'transfer_order',
+  RETURN          = 'return',
+  MANUAL_ADJUST   = 'manual_adjustment'
+}
+
+export enum MovementType {
+  INBOUND_RECEIVE    = 'inbound_receive',
+  PICK               = 'pick',
+  PUTAWAY            = 'putaway',
+  RETURN_RECEIVE     = 'return_receive',
+  ADJUSTMENT         = 'adjustment',
+  TRANSFER_OUT       = 'transfer_out',
+  TRANSFER_IN        = 'transfer_in',
+  DAMAGE_WRITE_OFF   = 'damage_write_off',
+  CYCLE_COUNT_ADJUST = 'cycle_count_adjust'
+}
+
+// ─── ENTITIES ─────────────────────────────────────────────────────────────
+
+export class Warehouse {
+  id?          : string;
+  code?        : string;          // unique — e.g. WH-CHN-01
+  name?        : string;
+  type?        : WarehouseType;
+  status?      : WarehouseStatus;
+  address?     : Address;
+  totalCapacity? : number;
+  capacityUnit?: CapacityUnit;
+  createdAt?   : Date;
+  updatedAt?   : Date;
+}
+
+export class WarehouseBin {
+  id?       : string;
+  warehouse?: Warehouse;
+  binCode?  : string;             // e.g. A01-R02-L3-P4
+  aisle?    : string;             // e.g. A01
+  rack?     : string;             // e.g. R02
+  level?    : string;             // e.g. L3
+  position? : string;             // e.g. P4 — added to match binCode format
+  maxUnits? : number;
+  isActive? : boolean;            // default true
+}
+
+export class Inventory {
+  id?               : string;
+  product?          : Product;
+  variant?          : Variant;    // unique(product, variant, warehouse)
+  warehouse?        : Warehouse;
+  qtyOnHand?        : number;     // physical stock present
+  qtyReserved?      : number;     // for future soft-reserve use — keep at 0 for now
+  qtyCommitted?     : number;     // hard-held by paid orders
+  // qtyAvailable   — DO NOT store — compute on read: onHand - reserved - committed
+  reorderPoint?     : number;     // threshold that triggers reorder
+  reorderQty?       : number;     // standard quantity to order from vendor
+  reorderOrderedQty?: number;     // actual qty placed with vendor in Flow 5A — cleared after RECEIVED
+  maxStockLevel?    : number;
+  reorderStatus?    : ReorderStatus;
+  lastMovementAt?   : Date;
+  binStocks?        : BinStock[];
+  updatedAt?        : Date;
+}
+
+export class BinStock {
+  id?           : string;
+  bin?          : WarehouseBin;
+  product?      : Product;
+  variant?      : Variant;        // added — avoids joins when querying bin-level stock
+  inventory?    : Inventory;
+  qtyOnHand?    : number;
+  batchNumber?  : string;         // batch-tracked SKUs
+  expiryDate?   : Date;           // FEFO: sort ascending at pick
+  lastCountedAt?: Date;
+}
+
+export class StockLedger {
+  id?            : string;
+  inventory?     : Inventory;
+  warehouse?     : Warehouse;
+  bin?           : WarehouseBin;
+  binStock?      : BinStock;      // added — exact BinStock picked from, needed for return tracing
+  product?       : Product;
+  variant?       : Variant;       // added — avoids joins for ledger queries by variant
+  movementType?  : MovementType;
+  quantityDelta? : number;        // signed: + add / - remove
+  qtyBefore?     : number;        // Inventory.qtyOnHand before this movement
+  qtyAfter?      : number;        // Inventory.qtyOnHand after this movement
+  referenceType? : ReferenceType;
+  referenceId?   : string;
+  notes?         : string;
+  performedBy?   : string;
+  createdAt?     : Date;          // immutable — append-only, never update this table
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export enum WarehouseType    { FULFILLMENT = 'fulfillment', RETURNS = 'returns',
                                DARK_STORE = 'dark_store', THREE_PL = '3pl', DROPSHIP = 'dropship' }
@@ -43,10 +209,10 @@ export enum MovementType     { INBOUND_RECEIVE = 'inbound_receive', PICK = 'pick
                                TRANSFER_IN = 'transfer_in', DAMAGE_WRITE_OFF = 'damage_write_off',
                                CYCLE_COUNT_ADJUST = 'cycle_count_adjust' }
 
-                               export class Inventory {
+export class Inventory {
   id?: string;
-  productId?: string;        // unique(productId, warehouseId)
-  warehouseId?: string;
+  product?: Product;
+  variant?: Variant;        // unique(product, warehouse, variant)
   warehouse?: Warehouse;
   qtyOnHand?: number;        // physical stock present
   qtyReserved?: number;      // soft-held by carts (TTL)
@@ -60,6 +226,36 @@ export enum MovementType     { INBOUND_RECEIVE = 'inbound_receive', PICK = 'pick
   reservations?: InventoryReservation[];
   binStocks?: BinStock[];
   updatedAt?: Date;
+}
+
+
+
+export class BinStock {
+  id?: string;
+  bin?: WarehouseBin;
+  product?: Product;
+  inventory?: Inventory;
+  qtyOnHand?: number;
+  batchNumber?: string;               // batch-tracked SKUs
+  expiryDate?: Date;                  // FEFO: sort ascending at pick
+  lastCountedAt?: Date;
+}
+
+export class StockLedger {
+  id?: string;
+  inventory?: Inventory;
+  warehouse?: Warehouse;
+  bin?: WarehouseBin;
+  product?: Product;
+  movementType?: MovementType;
+  quantityDelta?: number;             // signed: +add / -remove
+  qtyBefore?: number;
+  qtyAfter?: number;
+  referenceType?: ReferenceType;
+  referenceId?: string;
+  notes?: string;
+  performedBy?: string;
+  createdAt?: Date;                   // immutable — append-only table
 }
 
 export class InventoryReservation {
@@ -77,37 +273,17 @@ export class InventoryReservation {
   createdAt?: Date;
 }
 
-export class BinStock {
-  id?: string;
-  binId?: string;
-  bin?: WarehouseBin;
-  productId?: string;
-  inventoryId?: string;
-  inventory?: Inventory;
-  qtyOnHand?: number;
-  batchNumber?: string;               // batch-tracked SKUs
-  expiryDate?: Date;                  // FEFO: sort ascending at pick
-  lastCountedAt?: Date;
-}
 
-export class StockLedger {
-  id?: string;
-  inventoryId?: string;
-  inventory?: Inventory;
-  warehouseId?: string;
-  binId?: string;
-  bin?: WarehouseBin;
-  productId?: string;
-  movementType?: MovementType;
-  quantityDelta?: number;             // signed: +add / -remove
-  qtyBefore?: number;
-  qtyAfter?: number;
-  referenceType?: ReferenceType;
-  referenceId?: string;
-  notes?: string;
-  performedBy?: string;
-  createdAt?: Date;                   // immutable — append-only table
-}
+export enum WarehouseType    { FULFILLMENT = 'fulfillment', RETURNS = 'returns',
+                               DARK_STORE = 'dark_store', THREE_PL = '3pl', DROPSHIP = 'dropship' }
+
+export enum WarehouseStatus  { ACTIVE = 'active', INACTIVE = 'inactive', MAINTENANCE = 'maintenance' }
+
+export enum CapacityUnit     { UNITS = 'units', CUBIC_METERS = 'cubic_meters', PALLETS = 'pallets' }
+
+export enum ZoneType         { AMBIENT = 'ambient', REFRIGERATED = 'refrigerated',
+                               FROZEN = 'frozen', HAZMAT = 'hazmat',
+                               RETURNS = 'returns', DISPATCH = 'dispatch' }
 
 export class Warehouse {
   id?: string;
@@ -115,31 +291,12 @@ export class Warehouse {
   name?: string;
   type?: WarehouseType;
   status?: WarehouseStatus;
-  addressLine1?: string;
-  addressLine2?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  pincode?: string;
-  latitude?: number;
-  longitude?: number;
+  address? : Address;
   totalCapacity?: number;
   capacityUnit?: CapacityUnit;
   zones?: WarehouseZone[];
   createdAt?: Date;
   updatedAt?: Date;
-}
-
-export class WarehouseZone {
-  id?: string;
-  warehouseId?: string;
-  warehouse?: Warehouse;
-  zoneCode?: string;         // Z-COLD, Z-AMBIENT
-  zoneName?: string;
-  zoneType?: ZoneType;
-  aisleCount?: number;
-  bins?: WarehouseBin[];
-  createdAt?: Date;
 }
 
 export class WarehouseBin {
@@ -153,6 +310,18 @@ export class WarehouseBin {
   position?: string;
   maxUnits?: number;
   isActive?: boolean;
+}
+
+export class WarehouseZone {
+  id?: string;
+  warehouseId?: string;
+  warehouse?: Warehouse;
+  zoneCode?: string;         // Z-COLD, Z-AMBIENT
+  zoneName?: string;
+  zoneType?: ZoneType;
+  aisleCount?: number;
+  bins?: WarehouseBin[];
+  createdAt?: Date;
 }
 
 import mongoose from 'mongoose';
@@ -368,3 +537,278 @@ ADMIN_NAME=natureman
 ADMIN_EMAIL=natureman@gmail.com
 ADMIN_PASSWORD=natureman123
 ADMIN_MOBILE=1234567890
+
+
+
+{
+  id:            "wh-001",
+  code:          "WH-CHN-01",
+  name:          "Chennai Central Warehouse",
+  type:          WarehouseType.OWN,
+  status:        WarehouseStatus.ACTIVE,
+  address:       {
+    line1:   "42 Industrial Estate",
+    city:    "Chennai",
+    state:   "Tamil Nadu",
+    pincode: "600096"
+  },
+  totalCapacity: 5000,
+  capacityUnit:  CapacityUnit.UNITS,
+  createdAt:     "2025-01-10T08:00:00Z",
+  updatedAt:     "2025-01-10T08:00:00Z"
+}
+// Bin 1
+{
+  id:        "bin-001",
+  warehouse: { id: "wh-001" },
+  binCode:   "A01-R02-L3-P4",
+  aisle:     "A01",
+  rack:      "R02",
+  level:     "L3",
+  position:  "P4",
+  maxUnits:  200,
+  isActive:  true
+}
+
+// Bin 2 — different aisle
+{
+  id:        "bin-002",
+  warehouse: { id: "wh-001" },
+  binCode:   "A02-R01-L1-P1",
+  aisle:     "A02",
+  rack:      "R01",
+  level:     "L1",
+  position:  "P1",
+  maxUnits:  150,
+  isActive:  true
+}
+
+// Bin 3 — inactive (damaged shelf)
+{
+  id:        "bin-003",
+  warehouse: { id: "wh-001" },
+  binCode:   "A01-R03-L2-P2",
+  aisle:     "A01",
+  rack:      "R03",
+  level:     "L2",
+  position:  "P2",
+  maxUnits:  200,
+  isActive:  false                // deactivated in Flow 1.3
+}
+
+{
+  id:                "inv-001",
+  product:           { id: "prod-001", name: "Nike Air Max" },
+  variant:           { id: "var-001", name: "Red - UK9" },
+  warehouse:         { id: "wh-001" },
+  qtyOnHand:         76,          // 100 initial - 2 dispatched - 20 damaged - 2 more dispatched
+  qtyReserved:       0,           // not used currently
+  qtyCommitted:      3,           // one live order paid but not yet dispatched
+  // qtyAvailable   = 76 - 0 - 3 = 73  ← computed on read, never stored
+  reorderPoint:      20,          // trigger reorder when onHand hits 20
+  reorderQty:        100,         // standard order size from vendor
+  reorderOrderedQty: null,        // null = no active reorder in progress
+  maxStockLevel:     300,
+  reorderStatus:     ReorderStatus.NONE,
+  lastMovementAt:    "2025-03-15T14:30:00Z",
+  updatedAt:         "2025-03-15T14:30:00Z"
+}
+
+// Batch 1 — older batch in bin-001, partially depleted
+{
+  id:           "bs-001",
+  bin:          { id: "bin-001" },
+  product:      { id: "prod-001" },
+  variant:      { id: "var-001" },
+  inventory:    { id: "inv-001" },
+  qtyOnHand:    56,               // was 80, 4 units picked across two orders, 20 written off
+  batchNumber:  "BATCH-2024-01",
+  expiryDate:   "2026-06-30",     // picked first at dispatch (earliest expiry — FEFO)
+  lastCountedAt:"2025-03-15T14:30:00Z"
+}
+
+// Batch 2 — newer restock batch in bin-002, untouched
+{
+  id:           "bs-002",
+  bin:          { id: "bin-002" },
+  product:      { id: "prod-001" },
+  variant:      { id: "var-001" },
+  inventory:    { id: "inv-001" },
+  qtyOnHand:    20,
+  batchNumber:  "BATCH-2025-A",
+  expiryDate:   "2027-12-31",     // picked second (later expiry)
+  lastCountedAt:"2025-03-01T09:00:00Z"
+}
+
+// 1. Initial stock entry — Flow 2
+{
+  id:            "sl-001",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           { id: "bin-001" },
+  binStock:      { id: "bs-001" },
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.ADJUSTMENT,
+  quantityDelta: +100,
+  qtyBefore:     0,
+  qtyAfter:      100,
+  referenceType: ReferenceType.MANUAL_ADJUST,
+  referenceId:   null,
+  notes:         "Initial stock entry",
+  performedBy:   "admin-001",
+  createdAt:     "2025-01-15T09:00:00Z"
+}
+
+// 2. Damage write-off — Flow 4 (20 units of BATCH-2024-01 expired)
+{
+  id:            "sl-002",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           { id: "bin-001" },
+  binStock:      { id: "bs-001" },
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.DAMAGE_WRITE_OFF,
+  quantityDelta: -20,
+  qtyBefore:     100,
+  qtyAfter:      80,
+  referenceType: ReferenceType.MANUAL_ADJUST,
+  referenceId:   null,
+  notes:         "Expired stock — BATCH-2024-01",
+  performedBy:   "admin-001",
+  createdAt:     "2025-02-01T11:00:00Z"
+}
+
+// 3. Restock received — Flow 5B (20 units new batch arrived)
+{
+  id:            "sl-003",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           { id: "bin-002" },
+  binStock:      { id: "bs-002" },
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.INBOUND_RECEIVE,
+  quantityDelta: +20,
+  qtyBefore:     80,
+  qtyAfter:      100,             // back to 100 after restock
+  referenceType: ReferenceType.PURCHASE_ORDER,
+  referenceId:   "PO-2025-0042",
+  notes:         "Restock received — BATCH-2025-A",
+  performedBy:   "admin-001",
+  createdAt:     "2025-03-01T09:00:00Z"
+}
+
+// 4. Payment confirmed for ORD-8801 — Flow 6 (2 units committed)
+{
+  id:            "sl-004",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           null,            // bin not yet assigned at payment stage
+  binStock:      null,            // binStock not yet assigned at payment stage
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.PICK,
+  quantityDelta: -2,
+  qtyBefore:     100,
+  qtyAfter:      100,             // qtyOnHand unchanged — only qtyCommitted increased
+  referenceType: ReferenceType.ORDER_ITEM,
+  referenceId:   "ORD-8801",
+  notes:         "Payment confirmed — stock committed",
+  performedBy:   "system",
+  createdAt:     "2025-03-10T13:00:00Z"
+}
+
+// 5. Dispatch of ORD-8801 — Flow 7 (physical pick from bin-001, BATCH-2024-01)
+{
+  id:            "sl-005",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           { id: "bin-001" },
+  binStock:      { id: "bs-001" },  // exact binstock recorded here — used for return tracing
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.PICK,
+  quantityDelta: -2,
+  qtyBefore:     100,
+  qtyAfter:      98,
+  referenceType: ReferenceType.ORDER_ITEM,
+  referenceId:   "ORD-8801",
+  notes:         "Dispatched to delivery partner",
+  performedBy:   "warehouse-staff-01",
+  createdAt:     "2025-03-11T10:00:00Z"
+}
+
+// 6. Payment confirmed for ORD-9001 — Flow 6 (3 units committed)
+{
+  id:            "sl-006",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           null,
+  binStock:      null,
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.PICK,
+  quantityDelta: -3,
+  qtyBefore:     98,
+  qtyAfter:      98,              // qtyOnHand still unchanged
+  referenceType: ReferenceType.ORDER_ITEM,
+  referenceId:   "ORD-9001",
+  notes:         "Payment confirmed — stock committed",
+  performedBy:   "system",
+  createdAt:     "2025-03-14T09:00:00Z"
+}
+
+// 7. ORD-8801 returned undelivered — Flow 9
+{
+  id:            "sl-007",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           { id: "bin-001" },   // same bin as sl-005
+  binStock:      { id: "bs-001" },    // same binstock as sl-005 — traced from sl-005
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.RETURN_RECEIVE,
+  quantityDelta: +2,
+  qtyBefore:     98,
+  qtyAfter:      100,
+  referenceType: ReferenceType.RETURN,
+  referenceId:   "ORD-8801",
+  notes:         "Returned undelivered by delivery partner",
+  performedBy:   "warehouse-staff-01",
+  createdAt:     "2025-03-15T14:30:00Z"
+}
+
+// 8. Dispatch of ORD-9001 — Flow 7 (3 units picked, FEFO — bin-001 first)
+{
+  id:            "sl-008",
+  inventory:     { id: "inv-001" },
+  warehouse:     { id: "wh-001" },
+  bin:           { id: "bin-001" },
+  binStock:      { id: "bs-001" },
+  product:       { id: "prod-001" },
+  variant:       { id: "var-001" },
+  movementType:  MovementType.PICK,
+  quantityDelta: -3,
+  qtyBefore:     100,
+  qtyAfter:      97,
+  referenceType: ReferenceType.ORDER_ITEM,
+  referenceId:   "ORD-9001",
+  notes:         "Dispatched to delivery partner",
+  performedBy:   "warehouse-staff-01",
+  createdAt:     "2025-03-16T11:00:00Z"
+}
+
+qtyOnHand  = 0 +100 -20 +20 -2 +2 -3  = 97  ← wait, sl-008 not yet reflected above
+           Let's trace cleanly:
+           sl-001  +100  → 100
+           sl-002   -20  →  80
+           sl-003   +20  → 100
+           sl-005    -2  →  98   (dispatch ORD-8801)
+           sl-007    +2  → 100   (return ORD-8801)
+           sl-008    -3  →  97   (dispatch ORD-9001) ← current qtyOnHand not yet in Inventory
+                                    because sl-008 just happened — matches inv-001.qtyOnHand
+           
+qtyCommitted = 3   ← ORD-9001 was committed (+3 in sl-006) and dispatched (-3 in sl-008)
+                      so actually 0...

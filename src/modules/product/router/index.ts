@@ -25,7 +25,7 @@ productRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
     }
 });
 
-productRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+productRouter.get('/', async (request: Request, response: Response) => {
     try {
         let products = await new ProductManagement().products();
         response.status(StatusCodes.OK).send(new SuccessResponse(products, "Products List", StatusCodes.OK))
@@ -34,7 +34,7 @@ productRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.
     }
 });
 
-productRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+productRouter.get('/:id', async (request: Request, response: Response) => {
     try {
         let productId = request.params.id as string;
         let product = await new ProductManagement().productById(productId);

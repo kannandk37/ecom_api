@@ -1,0 +1,369 @@
+folder structure example
+
+module structure
+$m = "category"; @(
+   "src\modules\$m\entity",
+   "src\modules\$m\business",
+   "src\modules\$m\data\persistor\transformer",
+   "src\modules\$m\data\schema",
+   "src\modules\$m\router\transformer"
+ ) | ForEach-Object { New-Item -ItemType Directory -Force -Path $_ }; @(
+   "src\modules\$m\entity\index.ts",
+   "src\modules\$m\business\index.ts",
+   "src\modules\$m\data\persistor\transformer\index.ts",
+   "src\modules\$m\data\persistor\index.ts",
+   "src\modules\$m\data\schema\index.ts",
+   "src\modules\$m\router\transformer\index.ts",
+   "src\modules\$m\router\index.ts"
+ ) | ForEach-Object { New-Item -ItemType File -Force -Path $_ }
+
+
+entity -> index.ts
+
+export class Category {
+    id?: string;
+    name?: string;
+    description?: string;
+    subCategory?: Category; // Reference to parent/child category
+    image?: string;
+}
+
+router -> index.ts
+
+import { Request, Response, Router } from "express";
+import { specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
+import { RoleName } from "../../role/entity";
+import { errorhandler } from "../../../exceptions/errorhandler";
+import { categoryRawDatumToCategoryEntity } from "./transformer";
+import { SuccessResponse } from "../../../exceptions/successHandler";
+import { CategoryManagement } from "../business";
+import { StatusCodes } from "http-status-codes";
+
+
+export const categoryRouter = Router();
+
+categoryRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let categoryInfo = categoryRawDatumToCategoryEntity(request.body.category);
+        let persistedCategory = await new CategoryManagement().createCategory(categoryInfo);
+        response.status(StatusCodes.CREATED).send(new SuccessResponse(await new CategoryManagement().categoryById(persistedCategory.id), 'Category created successfully', StatusCodes.CREATED))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+categoryRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let categories = await new CategoryManagement().categories();
+        response.status(StatusCodes.OK).send(new SuccessResponse(categories, "Categories List", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+categoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let categoryId = request.params.id as string;
+        let category = await new CategoryManagement().categoryById(categoryId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(category, "Category of Id", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+categoryRouter.put('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let categoryId = request.params.id as string;
+        let categoryData = categoryRawDatumToCategoryEntity(request.body.category);
+        let category = await new CategoryManagement().updateCategoryById(categoryId, categoryData);
+        response.status(StatusCodes.OK).send(new SuccessResponse(category, "Updated Category of Id", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+router -> transformer -> index.ts
+
+
+import { Category } from "../../entity";
+
+export function categoryRawDatumToCategoryEntity(raw: any): Category {
+    let category = new Category();
+
+    if (raw === null) {
+        return category = null;
+    }
+
+    if (raw.id) {
+        category.id = raw.id;
+    }
+
+    if (raw.name) {
+        category.name = raw.name;
+    }
+
+    if (raw.description) {
+        category.description = raw.description;
+    }
+
+    if (raw.subCategory) {
+        category.subCategory = categoryRawDatumToCategoryEntity(raw.subCategory);
+    }
+
+    if (raw.image) {
+        category.image = raw.image;
+    }
+
+    return category;
+}
+
+export function categoriesRawDataToCategoriesEntities(raws: any[]): Category[] {
+    if (!raws || raws.length === 0) {
+        return [];
+    }
+    return raws.map(categoryRawDatumToCategoryEntity);
+}
+
+business -> index.ts
+
+import { CategoryPersistor } from "../data/persistor";
+import { Category } from "../entity";
+import { StatusCodes } from "http-status-codes";
+import ApiError from "../../../exceptions/apierror";
+export class CategoryManagement {
+    async createCategory(category: Category): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryPeristor = new CategoryPersistor();
+                let isCategoryWithName = await this.categoryByName(category.name);
+                if (isCategoryWithName) {
+                    return reject(new ApiError("Category With Name Already Exists", StatusCodes.CONFLICT))
+                }
+                let persistedCategory = await categoryPeristor.createCategory(category);
+                resolve(await this.categoryById(persistedCategory.id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async categories(): Promise<Category[]> {
+        return new Promise<Category[]>(async (resolve, reject) => {
+            try {
+                let categoryPeristor = new CategoryPersistor();
+                resolve(await categoryPeristor.categories());
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async categoryById(id: string): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryPeristor = new CategoryPersistor();
+                resolve(await categoryPeristor.categoryById(id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async categoryByName(name: string): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryPeristor = new CategoryPersistor();
+                resolve(await categoryPeristor.categoryByName(name));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async updateCategoryById(id: string, category: Category): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryPeristor = new CategoryPersistor();
+                let isCategoryWithName = await this.categoryByName(category.name);
+                if (isCategoryWithName?.id == id) {
+                    return reject(new ApiError("Category With Name Already Exists", StatusCodes.CONFLICT))
+                }
+                await categoryPeristor.updateCategoryById(id, category);
+                resolve(await this.categoryById(id));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+}
+
+data -> schema -> index.ts
+
+import { model, Schema } from "mongoose";
+
+const CategorySchema = new Schema({
+    name: { type: String, required: true, trim: true, unique: true, index: true },
+    description: { type: String },
+    subCategory: { type: Schema.Types.ObjectId, ref: 'categories', index: true },
+    image: { type: String }
+}, {
+    timestamps: true
+});
+
+export const CategoryModel = model('categories', CategorySchema);
+
+data -> persistor -> index.ts
+
+import { Category } from "../../entity";
+import { CategoryModel } from "../schema";
+import { categoryEntityToCategoryRecord, categoriesRecordsToCategoriesEntities, categoryRecordToCategoryEntity } from "./transformer";
+import { ObjectId } from "mongodb";
+
+export class CategoryPersistor {
+    async createCategory(category: Category): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryData = categoryEntityToCategoryRecord(category);
+                let categoryRecord = await CategoryModel.create(categoryData);
+                resolve(await categoryRecordToCategoryEntity(categoryRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async categories(): Promise<Category[]> {
+        return new Promise<Category[]>(async (resolve, reject) => {
+            try {
+                let categoriesRecords = await CategoryModel.find().populate({
+                    path: 'subCategory',
+                    model: CategoryModel
+                });
+                resolve(categoriesRecordsToCategoriesEntities(categoriesRecords));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async categoryById(id: string): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryRecord = await CategoryModel.findOne({ _id: new ObjectId(id) }).populate({
+                    path: 'subCategory',
+                    model: CategoryModel
+                });
+                resolve(categoryRecordToCategoryEntity(categoryRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async categoryByName(name: string): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryRecord = await CategoryModel.findOne({ name: name }).populate({ // TODO:: name should be case insensitive
+                    path: 'subCategory',
+                    model: CategoryModel
+                });
+                resolve(categoryRecordToCategoryEntity(categoryRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async updateCategoryById(id: string, category: Category): Promise<Category> {
+        return new Promise<Category>(async (resolve, reject) => {
+            try {
+                let categoryData = categoryEntityToCategoryRecord(category);
+                let categoryRecord = await CategoryModel.updateOne({
+                    _id: new ObjectId(id)
+                }, categoryData);;
+                resolve(await categoryRecordToCategoryEntity(categoryRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+}
+
+data -> persistor -> transformer -> index.ts
+
+import { Category } from "../../../entity";
+import { ObjectId } from "mongodb";
+
+export function categoryRecordToCategoryEntity(categoryRecord: any): Category {
+    let category = new Category();
+
+    if (categoryRecord === null) {
+        return category = null;
+    }
+
+    if (categoryRecord._id) {
+        category.id = categoryRecord._id?.toString();
+    }
+
+    if (categoryRecord.name) {
+        category.name = categoryRecord.name;
+    }
+
+    if (categoryRecord.description) {
+        category.description = categoryRecord.description;
+    }
+
+    if (categoryRecord.subCategory) {
+        category.subCategory = categoryRecordToCategoryEntity(categoryRecord.subCategory);
+    }
+
+    if (categoryRecord.image) {
+        category.image = categoryRecord.image;
+    }
+
+    return category;
+}
+
+export function categoryEntityToCategoryRecord(category: Category): object {
+    let record: any = {};
+
+    if (category === null) {
+        return record = null;
+    }
+
+    if (category.id) {
+        record._id = new ObjectId(category.id);
+    }
+
+    if (category.name) {
+        record.name = category.name;
+    }
+
+    if (category.description) {
+        record.description = category.description;
+    }
+
+    if (category.subCategory?.id) {
+        record.subCategory = new ObjectId(category.subCategory.id);
+    }
+
+    if (category.image) {
+        record.image = category.image;
+    }
+
+    return record;
+}
+
+export function categoriesRecordsToCategoriesEntities(categoryRecords: any[]): Category[] {
+    if (!categoryRecords || categoryRecords.length === 0) {
+        return [];
+    }
+    return categoryRecords.map((record) => categoryRecordToCategoryEntity(record));
+}
+
+export function categoriesEntitiesToCategoriesRecords(categories: Category[]): object[] {
+    if (!categories || categories.length === 0) {
+        return [];
+    }
+    return categories.map((category) => categoryEntityToCategoryRecord(category));
+}
