@@ -120,3 +120,21 @@ userAccountRouter.post(
         };
     }
 );
+
+userAccountRouter.post(
+    '/reset-password',
+    async (request: Request, response: Response) => {
+        try {
+            // TODO: have to work on reset follow
+            let userAccountManagement = new UserAccountManagement();
+            let userAccountInfo = new UserAccount();
+            userAccountInfo.email = request.body.email;
+            userAccountInfo.password = request.body.password;
+            let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
+            let token = await userAccountManagement.loginExistingUser(userAccount);
+            response.status(StatusCodes.CREATED).send(new SuccessResponse({ token: token }, "Password Reset Success", StatusCodes.CREATED));
+        } catch (error: any) {
+            errorhandler(error, response);
+        };
+    }
+);

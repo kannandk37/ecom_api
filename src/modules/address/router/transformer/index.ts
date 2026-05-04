@@ -39,6 +39,10 @@ export function addressRawDatumToAddressEntity(raw: any): Address {
         address.country = raw.country;
     }
 
+    if (raw.mobile) {
+        address.mobile = raw.mobile;
+    }
+
     if (raw.type) {
         address.type = raw.type as AddressType;
     }

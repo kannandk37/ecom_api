@@ -17,7 +17,7 @@ export function profileRecordToProfileEntity(profileRecord: any) {
         profile.user = userRecordToUserEntity(profileRecord.user);
     }
 
-    if (profile.name) {
+    if (profileRecord.name) {
         profile.name = profileRecord.name;
     }
 

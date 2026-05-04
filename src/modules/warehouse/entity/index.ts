@@ -14,8 +14,8 @@ export enum WarehouseStatus {
 
 export enum CapacityUnit {
     UNITS = 'units',
-    CUBIC_METERS = 'cubic_meters',
-    PALLETS = 'pallets'
+    // CUBIC_METERS = 'cubic_meters',
+    // PALLETS = 'pallets'
 }
 
 export class Warehouse {
@@ -27,6 +27,7 @@ export class Warehouse {
     address?: Address;
     totalCapacity?: number;
     capacityUnit?: CapacityUnit;
+    image?: string;
     createdAt?: Date;
     updatedAt?: Date;
     operator?: User;

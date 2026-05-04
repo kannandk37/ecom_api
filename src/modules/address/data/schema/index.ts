@@ -9,6 +9,7 @@ const AddressSchema = new Schema({
     state: { type: String, required: true, index: true },
     pincode: { type: String, required: true, index: true },
     country: { type: String, default: 'India' },
+    mobile: { type: String, required: true },
     isActive: { type: Boolean, default: true, index: true }, // Useful for filtering out old addresses in the UI
     type: { type: String, enum: AddressType, default: 'home' }
 }, {

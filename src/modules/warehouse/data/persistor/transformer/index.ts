@@ -42,6 +42,10 @@ export function warehouseRecordToWarehouseEntity(warehouseRecord: any): Warehous
         warehouse.capacityUnit = warehouseRecord.capacityUnit;
     }
 
+    if (warehouseRecord.image) {
+        warehouse.image = warehouseRecord.image;
+    }
+
     if (warehouseRecord.operator) {
         warehouse.operator = userRecordToUserEntity(warehouseRecord.operator);
     }
@@ -94,6 +98,10 @@ export function warehouseEntityToWarehouseRecord(warehouse: Warehouse): object {
 
     if (warehouse.capacityUnit) {
         record.capacityUnit = warehouse.capacityUnit;
+    }
+
+    if (warehouse.image) {
+        record.image = warehouse.image;
     }
 
     if (warehouse.operator) {

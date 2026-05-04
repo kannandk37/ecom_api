@@ -10,6 +10,7 @@ const WarehouseSchema = new Schema({
     totalCapacity: { type: Number },
     capacityUnit: { type: String, enum: CapacityUnit, required: true, default: CapacityUnit.UNITS },
     operator: { type: Schema.Types.ObjectId, ref: 'users', index: true },
+    image: { type: String }
 }, {
     timestamps: true
 });

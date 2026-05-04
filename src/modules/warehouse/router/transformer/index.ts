@@ -37,6 +37,10 @@ export function warehouseRawDatumToWarehouseEntity(raw: any): Warehouse {
         warehouse.totalCapacity = raw.totalCapacity;
     }
 
+    if (raw.image) {
+        warehouse.image = raw.image;
+    }
+
     if (raw.capacityUnit) {
         warehouse.capacityUnit = raw.capacityUnit as CapacityUnit;
     }

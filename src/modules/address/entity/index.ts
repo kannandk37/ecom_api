@@ -16,6 +16,7 @@ export class Address {
     state?: string;
     pincode?: string;
     country?: string;
+    mobile?: string;
     isActive?: boolean;
     type?: AddressType;
 }

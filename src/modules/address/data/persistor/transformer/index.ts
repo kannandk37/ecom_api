@@ -41,6 +41,10 @@ export function addressRecordToAddressEntity(addressRecord: any): Address {
         address.country = addressRecord.country;
     }
 
+    if (addressRecord.mobile) {
+        address.mobile = addressRecord.mobile;
+    }
+
     if (addressRecord.type) {
         address.type = addressRecord.type as AddressType;
     }
@@ -89,6 +93,10 @@ export function addressEntityToAddressRecord(address: Address): object {
 
     if (address.country) {
         record.country = address.country;
+    }
+
+    if (address.mobile) {
+        record.mobile = address.mobile;
     }
 
     if (address.type) {
