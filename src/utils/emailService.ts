@@ -273,10 +273,10 @@ export async function userOnBoardingPasswordReset({
                 
                 <p>We are pleased to welcome you to the team. As an ${roleName.charAt(0).toLocaleUpperCase() + roleName.slice(1)}, you will play a vital role in managing our organic harvest and maintaining the digital integrity of our online store.</p>
                 
-                <p>Your Email : ${userEmail}</p>
+                <p style = "font-weight: 900">Your Email : ${userEmail}</p>
 
                 <div class="promo-box">
-                    <span style="font-size: 12px; font-family: Arial, sans-serif; color: #555; display: block; margin-bottom: 5px;">YOUR TEMPORARYU PASSWORD</span>
+                    <span style="font-size: 12px; font-family: Arial, sans-serif; color: #555; display: block; margin-bottom: 5px; font-weight: 900">YOUR TEMPORARY PASSWORD</span>
                     <span class="promo-code">${password}</span>
                 </div>
 

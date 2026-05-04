@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { UserAccountManagement } from "../business/index";
-import { userAccountInfoToUserAccountEntity } from "./transformer";
+import { userAccountRawDatumToUserAccountEntity } from "./transformer";
 import { UserManagement } from "../../user/business";
 import { ProfileManagement } from "../../profile/business";
 import { AccountStatus, UserAccount } from "../entity";
@@ -87,12 +87,10 @@ userAccountRouter.post(
 
                 // welcome email
                 const welcomePromo = 'NATURE15';
-                const headerImage = path.resolve(process.cwd(), '../data/banner.png');
                 sendWelcomeEmail({
                     userEmail: profile.email,
                     userName: profile.name,
                     promoCode: welcomePromo,
-                    // heroImageUrl: headerImage
                 }).catch(() => console.log('unable to send welcome email'));
 
                 response.status(StatusCodes.CREATED).send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
@@ -114,7 +112,7 @@ userAccountRouter.post(
             let userAccountInfo = new UserAccount();
             userAccountInfo.email = request.body.email;
             userAccountInfo.password = request.body.password;
-            let userAccount = userAccountInfoToUserAccountEntity(userAccountInfo)
+            let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
             let token = await userAccountManagement.loginExistingUser(userAccount);
             response.status(StatusCodes.CREATED).send(new SuccessResponse({ token: token }, "Login in successful", StatusCodes.CREATED));
         } catch (error: any) {
