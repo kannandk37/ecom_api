@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Profile } from "../../entity";
 import { ProfileModel } from "../schema";
-import { profileEntityToProfileRecord, profileRecordToProfileEntity } from "./transformer";
+import { profileEntityToProfileRecord, profileRecordToProfileEntity, profilesRecordsToProfilesEntities } from "./transformer";
 import { ObjectId } from "mongodb";
 import { RoleModel } from "../../../role/data/schema";
 export class ProfilePersistor {
@@ -47,4 +47,20 @@ export class ProfilePersistor {
         });
     }
 
+
+        async profileByRoleIds(roleIds: string[]): Promise<Profile[]> {
+        return new Promise<Profile[]>(async (resolve, reject) => {
+            try {
+                let profileRecord = await ProfileModel.find({
+                    role: {$in : roleIds?.map((el: string) => new ObjectId(el) )}
+                }).populate({
+                    path: 'role',
+                    model: RoleModel
+                });
+                resolve(await profilesRecordsToProfilesEntities(profileRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }

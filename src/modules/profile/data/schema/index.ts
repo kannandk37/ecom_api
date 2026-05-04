@@ -5,7 +5,7 @@ export const ProfileSchema = new Schema({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true, index: true },
     mobile: { type: String, unique: true, required: true, index: true },
-    role: { type: Schema.Types.ObjectId, ref: 'roles' },
+    role: { type: Schema.Types.ObjectId, ref: 'roles', index: true },
     profilePic: { type: String },
     isEmailVerified: { type: Boolean, default: false },
     lastLogin: { type: Date, required: true }

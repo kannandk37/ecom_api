@@ -35,4 +35,15 @@ export class RoleManagement {
             }
         });
     }
+
+    async getRolesByNames(names: string[]) {
+        return new Promise<Role[]>(async (resolve, reject) => {
+            try {
+                let rolePeristor = new RolePersistor();
+                resolve(await rolePeristor.getRolesByNames(names));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }

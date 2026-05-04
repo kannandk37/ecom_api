@@ -93,7 +93,7 @@ export function profileEntityToProfileRecord(profile: Profile) {
     return record;
 }
 
-export function profilesRecordsToprofilesEntities(profileRecords: any[]): Profile[] {
+export function profilesRecordsToProfilesEntities(profileRecords: any[]): Profile[] {
     if (!profileRecords || profileRecords.length === 0) {
         return [];
     }

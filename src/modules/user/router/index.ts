@@ -13,7 +13,6 @@ import ApiError from "../../../exceptions/apierror";
 import { UserAccountManagement } from "../../user_account/business";
 import mongoose from "mongoose";
 import { ProfileManagement } from "../../profile/business";
-import path from "path";
 import { userOnBoardingPasswordReset } from "../../../utils/emailService";
 
 export const userRouter = Router();

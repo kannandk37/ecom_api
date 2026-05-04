@@ -52,4 +52,17 @@ export class RolePersistor {
             }
         });
     }
+
+    async getRolesByNames(names: string[]): Promise<Role[]> {
+        return new Promise<Role[]>(async (resolve, reject) => {
+            try {
+                let roleRecord = await RoleModel.find({
+                    name: { $in: names }
+                });
+                resolve(await rolesRecordsToRolesEntities(roleRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }

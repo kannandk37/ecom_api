@@ -2,6 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../exceptions/apierror";
 import { Profile } from "../entity";
 import { ProfilePersistor } from "../data/persistor";
+import { Role, RoleName } from "../../role/entity";
+import { RoleManagement } from "../../role/business";
 
 export class ProfileManagement {
     async createProfile(profile: Profile, transaction?: any): Promise<Profile> {
@@ -52,6 +54,22 @@ export class ProfileManagement {
             try {
                 let profilePersistor = new ProfilePersistor();
                 resolve(await profilePersistor.profileByUserId(userId));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async profilesByRoles(rolesNames: RoleName[]) {
+        return new Promise<Profile[]>(async (resolve, reject) => {
+            try {
+                let roles = await new RoleManagement().getRolesByNames(rolesNames);
+                if(roles?.length > 0) {   
+                    let profilePersistor = new ProfilePersistor();
+                    resolve(await profilePersistor.profileByRoleIds(roles?.map((el: Role) => el.id)));
+                } else {
+                    resolve([]);
+                }
             } catch (error) {
                 reject(error);
             }

@@ -35,6 +35,7 @@ import { variantRouter } from './modules/variant/router';
 import { addressRouter } from './modules/address/router';
 import { orderRouter } from './modules/order/router';
 import { resetPasswordEmail, sendWelcomeEmail, userOnBoardingPasswordReset } from './utils/emailService';
+import { profileRouter } from './modules/profile/router';
 
 dotenv.config();
 
@@ -249,6 +250,7 @@ async function userOnBoardingPasswordResetTest() {
 app.use('/api', userAccountRouter);
 app.use('/api/users', userRouter);
 app.use('/api/roles', roleRouter);
+app.use('/api/profiles', profileRouter);
 app.use('/api/categories', categoryRouter);
 app.use('/api/brands', brandRouter);
 app.use('/api/products', productRouter);
