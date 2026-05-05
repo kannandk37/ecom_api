@@ -6,6 +6,7 @@ import { UserModel } from "../../../user/data/schema";
 import { OrderItemModel } from "../../../order_item/data/schema";
 import { InvoiceModel } from "../../../invoice/data/schema";
 import { AddressModel } from "../../../address/data/schema";
+import { userPopulate } from "../../../address/data/persistor";
 
 export class OrderPersistor {
     async createOrder(order: Order): Promise<Order> {
@@ -62,13 +63,6 @@ export class OrderPersistor {
                 reject(error);
             }
         })
-    }
-}
-
-export function userPopulate() {
-    return {
-        path: 'user',
-        model: UserModel
     }
 }
 

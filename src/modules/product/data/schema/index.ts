@@ -4,7 +4,7 @@ import { Label, Unit } from "../../entity";
 const ProductSchema = new Schema({
     title: { type: String },
     name: { type: String, required: true },
-    slug: { type: String, unique: true, index: true }, // SEO URLs
+    // slug: { type: String, unique: true, index: true }, // SEO URLs
     description: { type: String, required: true },
     shortDescription: { type: String, required: true },
     category: { type: Schema.Types.ObjectId, ref: 'categories', index: true },

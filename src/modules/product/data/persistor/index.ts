@@ -40,6 +40,17 @@ export class ProductPersistor {
             }
         })
     }
+
+    async productsByCategoryId(categoryId: string): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let productsRecords = await ProductModel.find({ category: new ObjectId(categoryId) }).populate([categoryPopulate(), brandPopulate(), variantsPopulate()]);
+                resolve(await productsRecordsToProductsEntities(productsRecords));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
 }
 
 export function categoryPopulate() {

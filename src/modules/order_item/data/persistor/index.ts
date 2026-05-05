@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import { UserModel } from "../../../user/data/schema";
 import { VariantModel } from "../../../variant/data/schema";
 import { ProductModel } from "../../../product/data/schema";
+import { productPopulate } from "../../../variant/data/persistor";
 
 export class OrderItemPersistor {
     async createOrderItem(orderItem: OrderItem): Promise<OrderItem> {
@@ -39,13 +40,6 @@ export class OrderItemPersistor {
                 reject(error);
             }
         })
-    }
-}
-
-export function productPopulate() {
-    return {
-        path: 'product',
-        model: ProductModel
     }
 }
 

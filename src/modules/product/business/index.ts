@@ -35,6 +35,17 @@ export class ProductManagement {
         });
     }
 
+    async productsByCategoryId(categoryId: string): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let productPeristor = new ProductPersistor();
+                resolve(await productPeristor.productsByCategoryId(categoryId));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async validateSpecValue(spec: SpecValue): Promise<boolean> {
         switch (spec.label) {
 
