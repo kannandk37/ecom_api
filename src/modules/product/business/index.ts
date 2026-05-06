@@ -70,6 +70,17 @@ export class ProductManagement {
         }
     }
 
+    async productsByName(value: string): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let productPeristor = new ProductPersistor();
+                resolve(await productPeristor.productsByName(value));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async validateSpecs(productInfoSpecs: SpecValue[]) {
         if (!productInfoSpecs?.length) return false;
         const results = await Promise.all(

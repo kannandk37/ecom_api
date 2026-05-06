@@ -6,6 +6,7 @@ import { productRawDatumToProductEntity } from "./transformer";
 import { SuccessResponse } from "../../../exceptions/successHandler";
 import { ProductManagement } from "../business";
 import { StatusCodes } from "http-status-codes";
+import { Product } from "../entity";
 
 
 export const productRouter = Router();
@@ -27,7 +28,13 @@ productRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
 
 productRouter.get('/', async (request: Request, response: Response) => {
     try {
-        let products = await new ProductManagement().products();
+        let value = request.query.name as string;
+        let products: Product[] = [];
+        if (value) {
+            products = await new ProductManagement().productsByName(value);
+        } else {
+            products = await new ProductManagement().products();
+        }
         response.status(StatusCodes.OK).send(new SuccessResponse(products, "Products List", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);

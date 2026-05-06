@@ -51,6 +51,21 @@ export class ProductPersistor {
             }
         })
     }
+
+    async productsByName(value: string): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let productsRecords = await ProductModel.find({
+                    $or: [
+                        { name: { $regex: value, $options: "i" } }
+                    ]
+                }).populate([categoryPopulate(), brandPopulate(), variantsPopulate()]);
+                resolve(await productsRecordsToProductsEntities(productsRecords));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
 }
 
 export function categoryPopulate() {
