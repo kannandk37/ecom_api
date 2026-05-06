@@ -95,7 +95,7 @@ userAccountRouter.post(
 
                 response.status(StatusCodes.CREATED).send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
             } else {
-                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User already exists", StatusCodes.BAD_REQUEST));
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User With Email Already already exists", StatusCodes.BAD_REQUEST));
             };
         } catch (error: any) {
             errorhandler(error, response);
@@ -113,8 +113,8 @@ userAccountRouter.post(
             userAccountInfo.email = request.body.email;
             userAccountInfo.password = request.body.password;
             let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
-            let token = await userAccountManagement.loginExistingUser(userAccount);
-            response.status(StatusCodes.CREATED).send(new SuccessResponse({ token: token }, "Login in successful", StatusCodes.CREATED));
+            let result = await userAccountManagement.loginExistingUser(userAccount);
+            response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Login in successful", StatusCodes.CREATED));
         } catch (error: any) {
             errorhandler(error, response);
         };

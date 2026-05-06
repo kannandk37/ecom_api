@@ -14,9 +14,9 @@ export class UserAccountManagement {
                 let userAccountPersistor = new UserAccountPersistor();
                 let isExistingUser = await userAccountPersistor.userAccountByEmail(userAccount);
                 //TODO: can't handle it here sign up is breaking
-                if (isExistingUser) {
-                    return reject(new ApiError("User Already Exists", StatusCodes.NOT_FOUND));
-                };
+                // if (isExistingUser) {
+                //     return reject(new ApiError("User Already Exists", StatusCodes.NOT_FOUND));
+                // };
                 resolve(isExistingUser);
             } catch (error) {
                 reject(error);
@@ -34,7 +34,7 @@ export class UserAccountManagement {
         });
     };
 
-    async loginExistingUser(userAccount: UserAccount): Promise<string> {
+    async loginExistingUser(userAccount: UserAccount): Promise<any> {
         return new Promise(async (resolve, reject) => {
             try {
                 let userAccountPersistor = new UserAccountPersistor();
@@ -48,7 +48,15 @@ export class UserAccountManagement {
                     return reject(new ApiError("Invalid Password", StatusCodes.BAD_REQUEST));
                 };
                 let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
-                resolve(await this.generateToken(isExistingUser, profile.role));
+                let token = await this.generateToken(isExistingUser, profile.role);
+                let result = {
+                    id: profile.user.id,
+                    user: profile.user,
+                    profile: profile,
+                    role: profile.role,
+                    token: token
+                }
+                resolve(result);
             } catch (error) {
                 reject(error);
             };
