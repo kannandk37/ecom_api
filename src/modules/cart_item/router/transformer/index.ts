@@ -3,25 +3,29 @@ import { variantRawDatumToVariantEntity } from "../../../variant/router/transfor
 import { CartItem } from "../../entity";
 
 export function cartItemRawDatumToCartItemEntity(raw: any): CartItem {
-    let cart = new CartItem();
+    let cartItem = new CartItem();
 
     if (raw === null) {
-        return cart = null;
+        return cartItem = null;
     }
 
     if (raw.id) {
-        cart.id = raw.id;
+        cartItem.id = raw.id;
     }
 
     if (raw.product) {
-        cart.product = productRawDatumToProductEntity(raw.product);
+        cartItem.product = productRawDatumToProductEntity(raw.product);
     }
 
     if (raw.variant) {
-        cart.variant = variantRawDatumToVariantEntity(raw.variant);
+        cartItem.variant = variantRawDatumToVariantEntity(raw.variant);
     }
 
-    return cart;
+    if (raw.quantity) {
+        cartItem.quantity = raw.quantity;
+    }
+
+    return cartItem;
 }
 
 export function cartItemsRawDataToCartItemsEntities(raws: any[]): CartItem[] {

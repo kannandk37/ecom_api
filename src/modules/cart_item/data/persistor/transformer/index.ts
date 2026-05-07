@@ -3,60 +3,68 @@ import { productRecordToProductEntity } from "../../../../product/data/persistor
 import { CartItem } from "../../../entity";
 import { ObjectId } from "mongodb";
 
-export function cartItemRecordToCartItemEntity(cartRecord: any): CartItem {
-    let cart = new CartItem();
+export function cartItemRecordToCartItemEntity(cartItemRecord: any): CartItem {
+    let cartItem = new CartItem();
 
-    if (cartRecord === null) {
-        return cart = null;
+    if (cartItemRecord === null) {
+        return cartItem = null;
     }
 
-    if (cartRecord._id) {
-        cart.id = cartRecord._id?.toString();
+    if (cartItemRecord._id) {
+        cartItem.id = cartItemRecord._id?.toString();
     }
 
-    if (cartRecord.product) {
-        cart.product = productRecordToProductEntity(cartRecord.product);
+    if (cartItemRecord.product) {
+        cartItem.product = productRecordToProductEntity(cartItemRecord.product);
     }
 
-    if (cartRecord.variant) {
-        cart.variant = variantRecordToVariantEntity(cartRecord.variant);
+    if (cartItemRecord.variant) {
+        cartItem.variant = variantRecordToVariantEntity(cartItemRecord.variant);
     }
 
-    return cart;
+    if (cartItemRecord.quantity) {
+        cartItem.quantity = cartItemRecord.quantity as number;
+    }
+
+    return cartItem;
 }
 
-export function cartItemEntityToCartItemRecord(cart: CartItem): object {
+export function cartItemEntityToCartItemRecord(cartItem: CartItem): any {
     let record: any = {};
 
-    if (cart === null) {
+    if (cartItem === null) {
         return record = null;
     }
 
-    if (cart.id) {
-        record._id = new ObjectId(cart.id);
+    if (cartItem.id) {
+        record._id = new ObjectId(cartItem.id);
     }
 
-    if (cart.product?.id) {
-        record.product = new ObjectId(cart.product.id);
+    if (cartItem.product?.id) {
+        record.product = new ObjectId(cartItem.product.id);
     }
 
-    if (cart.variant?.id) {
-        record.variant = new ObjectId(cart.variant.id);
+    if (cartItem.variant?.id) {
+        record.variant = new ObjectId(cartItem.variant.id);
+    }
+
+    if (cartItem.quantity) {
+        record.quantity = cartItem.quantity;
     }
 
     return record;
 }
 
-export function cartItemsRecordsToCartItemsEntities(cartRecords: any[]): CartItem[] {
-    if (!cartRecords || cartRecords.length === 0) {
+export function cartItemsRecordsToCartItemsEntities(cartItemRecords: any[]): CartItem[] {
+    if (!cartItemRecords || cartItemRecords.length === 0) {
         return [];
     }
-    return cartRecords.map((record) => cartItemRecordToCartItemEntity(record));
+    return cartItemRecords.map((record) => cartItemRecordToCartItemEntity(record));
 }
 
-export function cartItemsEntitiesToCartItemsRecords(carts: CartItem[]): object[] {
-    if (!carts || carts.length === 0) {
+export function cartItemsEntitiesToCartItemsRecords(cartItems: CartItem[]): any[] {
+    if (!cartItems || cartItems.length === 0) {
         return [];
     }
-    return carts.map((cart) => cartItemEntityToCartItemRecord(cart));
+    return cartItems.map((cartItem) => cartItemEntityToCartItemRecord(cartItem));
 }
