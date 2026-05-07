@@ -13,7 +13,8 @@ wishlistRouter.post('/toggle', verifyToken, specificRolesOnly([RoleName.CUSTOMER
         let { userId, productId, variantId } = request.body;
         let result = await new WishlistManagement().toggleWishlist(userId, productId, variantId);
         let message = result ? 'Added to wishlist' : 'Removed from wishlist';
-        response.status(StatusCodes.OK).send(new SuccessResponse(result, message, StatusCodes.OK));
+        let statusCode = result ? StatusCodes.CREATED : StatusCodes.NO_CONTENT;
+        response.status(statusCode).send(new SuccessResponse(result, message, statusCode));
     } catch (error: any) {
         errorhandler(error, response);
     }
