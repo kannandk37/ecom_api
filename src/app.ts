@@ -36,6 +36,9 @@ import { addressRouter } from './modules/address/router';
 import { orderRouter } from './modules/order/router';
 import { resetPasswordEmail, sendWelcomeEmail, userOnBoardingPasswordReset } from './utils/emailService';
 import { profileRouter } from './modules/profile/router';
+import { wishlistRouter } from './modules/wishlist/router';
+import { cartRouter } from './modules/cart/router';
+import { cartItemRouter } from './modules/cart_item/router';
 
 dotenv.config();
 
@@ -257,6 +260,9 @@ app.use('/api/products', productRouter);
 app.use('/api/variants', variantRouter);
 app.use('/api/addresses', addressRouter);
 app.use('/api/orders', orderRouter);
+app.use('/api/wishlists', wishlistRouter);
+app.use('/api/carts', cartRouter);
+app.use('/api/cartitems', cartItemRouter);
 
 
 // Error Handlers

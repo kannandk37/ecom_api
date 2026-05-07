@@ -4,6 +4,7 @@ import { ProfileModel } from "../schema";
 import { profileEntityToProfileRecord, profileRecordToProfileEntity, profilesRecordsToProfilesEntities } from "./transformer";
 import { ObjectId } from "mongodb";
 import { RoleModel } from "../../../role/data/schema";
+import { userPopulate } from "../../../address/data/persistor";
 export class ProfilePersistor {
     async persistProfile(profile: Profile, transaction?: mongoose.ClientSession): Promise<Profile> {
         return new Promise(async (resolve, reject) => {
@@ -23,7 +24,20 @@ export class ProfilePersistor {
             try {
                 let profileRecord: any = await ProfileModel.findOne({
                     email: email
-                });
+                }).populate([userPopulate(),rolePopulate()]);
+                resolve(await profileRecordToProfileEntity(profileRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async profileByMobile(mobile: string): Promise<Profile> {
+        return new Promise<Profile>(async (resolve, reject) => {
+            try {
+                let profileRecord: any = await ProfileModel.findOne({
+                    mobile: mobile
+                }).populate([userPopulate(),rolePopulate()]);
                 resolve(await profileRecordToProfileEntity(profileRecord));
             } catch (error) {
                 reject(error);
@@ -36,10 +50,7 @@ export class ProfilePersistor {
             try {
                 let profileRecord = await ProfileModel.findOne({
                     user: new ObjectId(userId)
-                }).populate({
-                    path: 'role',
-                    model: RoleModel
-                });
+                }).populate([userPopulate(),rolePopulate()]);
                 resolve(await profileRecordToProfileEntity(profileRecord));
             } catch (error) {
                 reject(error);
@@ -48,19 +59,23 @@ export class ProfilePersistor {
     }
 
 
-        async profileByRoleIds(roleIds: string[]): Promise<Profile[]> {
+    async profileByRoleIds(roleIds: string[]): Promise<Profile[]> {
         return new Promise<Profile[]>(async (resolve, reject) => {
             try {
                 let profileRecord = await ProfileModel.find({
-                    role: {$in : roleIds?.map((el: string) => new ObjectId(el) )}
-                }).populate({
-                    path: 'role',
-                    model: RoleModel
-                });
+                    role: { $in: roleIds?.map((el: string) => new ObjectId(el)) }
+                }).populate([userPopulate(), rolePopulate()]);
                 resolve(await profilesRecordsToProfilesEntities(profileRecord));
             } catch (error) {
                 reject(error);
             }
         });
+    }
+}
+
+export function rolePopulate () {
+    return {
+        path: 'role',
+        model: RoleModel
     }
 }

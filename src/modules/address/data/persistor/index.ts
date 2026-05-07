@@ -3,6 +3,8 @@ import { Address } from "../../entity";
 import { addressEntityToAddressRecord, addressesRecordsToAddressesEntities, addressRecordToAddressEntity } from "./transformer";
 import { ObjectId } from "mongodb";
 import { UserModel } from "../../../user/data/schema";
+import { populate } from "dotenv";
+import { RoleModel } from "../../../role/data/schema";
 
 export class AddressPersistor {
     async createAddress(address: Address): Promise<Address> {
@@ -43,6 +45,12 @@ export class AddressPersistor {
 export function userPopulate() {
     return {
         path: 'user',
-        model: UserModel
+        model: UserModel,
+        populate: [
+            {
+                path: 'roles',
+                model: RoleModel
+            }
+        ]
     }
 }

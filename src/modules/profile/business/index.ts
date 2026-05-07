@@ -12,7 +12,13 @@ export class ProfileManagement {
             let validateEmail = await this.validateProfileEmail(profile);
             if (!validateEmail) {
                 return reject(
-                    new ApiError("Profile email already exists", StatusCodes.BAD_REQUEST)
+                    new ApiError("Profile Email already exists", StatusCodes.BAD_REQUEST)
+                );
+            }
+            let validateMobile = await this.validateProfileMobile(profile);
+            if (!validateMobile) {
+                return reject(
+                    new ApiError("Profile Mobile Number already exists", StatusCodes.BAD_REQUEST)
                 );
             }
             let profileRecord = await profilePersisitor.persistProfile(profile, transaction);
@@ -27,6 +33,23 @@ export class ProfileManagement {
                 let profilePersistor = new ProfilePersistor();
                 let existingProfile = await profilePersistor.profileByEmail(
                     profile.email
+                );
+                if (existingProfile) {
+                    return resolve(false);
+                }
+                resolve(true);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async validateProfileMobile(profile: Profile) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let profilePersistor = new ProfilePersistor();
+                let existingProfile = await profilePersistor.profileByMobile(
+                    profile.mobile
                 );
                 if (existingProfile) {
                     return resolve(false);
@@ -64,7 +87,7 @@ export class ProfileManagement {
         return new Promise<Profile[]>(async (resolve, reject) => {
             try {
                 let roles = await new RoleManagement().getRolesByNames(rolesNames);
-                if(roles?.length > 0) {   
+                if (roles?.length > 0) {
                     let profilePersistor = new ProfilePersistor();
                     resolve(await profilePersistor.profileByRoleIds(roles?.map((el: Role) => el.id)));
                 } else {

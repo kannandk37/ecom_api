@@ -25,7 +25,8 @@ export class UserManagement {
                     id: user.id,
                     user: user,
                     profile: profile,
-                    roles: user.roles
+                    roles: user.roles,
+                    role: profile.role
                 };
                 resolve(result);
             } catch (error) {

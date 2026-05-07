@@ -64,11 +64,11 @@ userAccountRouter.post(
 
                         // 2. Link and Create Profile
                         profile.user = newUser;
-                        await profileManagement.createProfile(profile, session);
+                        profile = await profileManagement.createProfile(profile, session);
 
                         // 3. Link and Add Account
                         userAccount.user = newUser;
-                        await userAccountManagement.addEmailAccount(userAccount, session);
+                        userAccount = await userAccountManagement.addEmailAccount(userAccount, session);
                         user = newUser;
                     });
 
@@ -84,7 +84,8 @@ userAccountRouter.post(
                 // TODO userById show only return record from user table 
                 // construct createUser with user, profile, tenant details (use getTenantById) 
                 const createdUser = await userManagement.userById(user.id);
-
+                const token = await userAccountManagement.generateToken(userAccount, profile.role);
+                const data = { token: token, ...createdUser };
                 // welcome email
                 const welcomePromo = 'NATURE15';
                 sendWelcomeEmail({
@@ -93,7 +94,7 @@ userAccountRouter.post(
                     promoCode: welcomePromo,
                 }).catch(() => console.log('unable to send welcome email'));
 
-                response.status(StatusCodes.CREATED).send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
+                response.status(StatusCodes.CREATED).send(new SuccessResponse(data, "User successfully created", StatusCodes.CREATED));
             } else {
                 response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User With Email Already already exists", StatusCodes.BAD_REQUEST));
             };

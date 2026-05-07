@@ -24,7 +24,7 @@ export class UserAccountManagement {
         });
     };
 
-    async addEmailAccount(userAccount: UserAccount, transaction?: any): Promise<string | UserAccount> {
+    async addEmailAccount(userAccount: UserAccount, transaction?: any): Promise<UserAccount> {
         return new Promise(async (resolve, reject) => {
             let encryptedPassword = await bcrypt.hash(userAccount.password, 10)
             userAccount.password = encryptedPassword
@@ -48,14 +48,15 @@ export class UserAccountManagement {
                     return reject(new ApiError("Invalid Password", StatusCodes.BAD_REQUEST));
                 };
                 let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
-                let token = await this.generateToken(isExistingUser, profile.role);
+                const token = await this.generateToken(isExistingUser, profile.role);
                 let result = {
                     id: profile.user.id,
                     user: profile.user,
                     profile: profile,
+                    roles: profile.user.roles,
                     role: profile.role,
                     token: token
-                }
+                };
                 resolve(result);
             } catch (error) {
                 reject(error);
