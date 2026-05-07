@@ -23,7 +23,7 @@ export const verifyToken = (req: AuthenticatedRequest, res: Response, next: Next
                     throw err;
                 }
                 req.user = { id: decoded.id, role: { id: decoded.role?.id, name: decoded.role?.name } };
-                console.log(`Authenticated user: ${decoded.id} with role: ${decoded.role}`);
+                console.log(`Authenticated user: ${decoded.id} with role: ${decoded.role.name}`);
             });
             next();
         } catch {

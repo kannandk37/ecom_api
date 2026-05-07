@@ -66,6 +66,24 @@ export class CartPersistor {
             }
         });
     }
+
+    async deleteCartItemInCartItemsOfCartById(id: string, cartItemId: string): Promise<Cart> {
+        return new Promise<Cart>(async (resolve, reject) => {
+            try {
+                await CartModel.updateOne(
+                    { _id: new ObjectId(id) },
+                    {
+                        $pull: {
+                            cartItems: new ObjectId(cartItemId)
+                        }
+                    }
+                );
+                resolve(await this.cartById(id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }
 
 export function cartItemsPopulate() {

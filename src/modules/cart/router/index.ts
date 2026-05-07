@@ -36,6 +36,17 @@ cartRouter.get('/me', verifyToken, specificRolesOnly([RoleName.CUSTOMER]), async
     }
 });
 
+cartRouter.delete('/:cartId/items/:itemId', verifyToken, specificRolesOnly([RoleName.CUSTOMER]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let cartId = request.params.cartId as string;
+        let cartItemId = request.params.itemId as string;
+        let cart = await new CartManagement().deleteCartItemFromCartByCartIdandCartItemId(cartId, cartItemId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(cart, `Item Removed from Cart`, StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
 cartRouter.delete('/clear', verifyToken, specificRolesOnly([RoleName.CUSTOMER]), async (request: AuthenticatedRequest, response: Response) => {
     try {
         let cartManagement = new CartManagement();

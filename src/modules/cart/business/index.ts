@@ -1,3 +1,5 @@
+import { StatusCodes } from "http-status-codes";
+import ApiError from "../../../exceptions/apierror";
 import { CartItemManagement } from "../../cart_item/business";
 import { CartItem } from "../../cart_item/entity";
 import { CartPersistor } from "../data/persistor";
@@ -41,6 +43,24 @@ export class CartManagement {
             try {
                 let cartPersistor = new CartPersistor();
                 resolve(await cartPersistor.cartByUserId(userId));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async deleteCartItemFromCartByCartIdandCartItemId(id: string, cartItemId: string): Promise<Cart> {
+        return new Promise<Cart>(async (resolve, reject) => {
+            try {
+                let cartPersistor = new CartPersistor();
+                let cart = await cartPersistor.cartById(id);
+                if (cart && cart?.id && cart.cartItems.find((el) => el.id == cartItemId)) {
+                    let removedCartItem = await new CartItemManagement().deleteCartItemById(cartItemId);
+                    await cartPersistor.deleteCartItemInCartItemsOfCartById(id, cartItemId);
+                    resolve(await this.cartById(id));
+                } else {
+                    reject(new ApiError('Unable To Remove Cart Item', StatusCodes.BAD_REQUEST));
+                }
             } catch (error) {
                 reject(error);
             }

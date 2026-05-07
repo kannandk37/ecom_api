@@ -54,9 +54,10 @@ export class CartItemPersistor {
     async updateCartItemById(id: string, cartItem: CartItem): Promise<CartItem> {
         return new Promise<CartItem>(async (resolve, reject) => {
             try {
+                let cartItemData = cartItemEntityToCartItemRecord(cartItem);
                 await CartItemModel.updateOne({
                     _id: new ObjectId(id)
-                }, cartItem);
+                }, cartItemData);
                 resolve(await this.cartItemById(id));
             } catch (error) {
                 reject(error);
