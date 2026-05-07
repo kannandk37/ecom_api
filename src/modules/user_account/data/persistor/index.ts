@@ -21,7 +21,7 @@ export class UserAccountPersistor {
         });
     };
 
-    async addEmailAccount(userAccount: UserAccount, transaction?: mongoose.ClientSession): Promise<UserAccount | string> {
+    async addEmailAccount(userAccount: UserAccount, transaction?: mongoose.ClientSession): Promise<UserAccount> {
         return new Promise(async (resolve, reject) => {
             try {
                 let foundExistingUser = await UserAccountModel.findOne({
