@@ -42,7 +42,7 @@ export async function sendWelcomeEmail({
 }: WelcomeEmailParams) {
 
     // The path to your banner
-    const heroImageUrl = 'D:/naturecandy/back-end/data/Banner.png';
+    const heroImageUrl = process.env.HERO_IMAGE_URL
 
     const htmlContent = `
     <!DOCTYPE html>
@@ -137,7 +137,7 @@ export async function resetPasswordEmail({
 }: ResetPasswordEmailParams) {
 
     // The path to your banner
-    const heroImageUrl = 'D:/naturecandy/back-end/data/Banner.png';
+    const heroImageUrl = process.env.HERO_IMAGE_URL
     const url = `https://naturecandy.vercel.app/reset-password?email=${userEmail}`
     const htmlContent = `
     <!DOCTYPE html>
@@ -229,7 +229,7 @@ export async function userOnBoardingPasswordReset({
 }: UserOnBoardingPasswordResetParams) {
 
     // The path to your banner
-    const heroImageUrl = 'D:/naturecandy/back-end/data/Banner.png';
+    const heroImageUrl = process.env.HERO_IMAGE_URL
     const url = `https://naturecandy.vercel.app/reset-password?email=${userEmail}`
     const htmlContent = `
     <!DOCTYPE html>

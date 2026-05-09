@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
+import { AuthenticatedRequest, specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
 import { RoleName } from "../../role/entity";
 import { errorhandler } from "../../../exceptions/errorhandler";
 import { SuccessResponse } from "../../../exceptions/successHandler";
@@ -21,9 +21,9 @@ wishlistRouter.post('/toggle', verifyToken, specificRolesOnly([RoleName.CUSTOMER
 });
 
 
-wishlistRouter.get('/user/:userId', verifyToken, specificRolesOnly([RoleName.CUSTOMER, RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+wishlistRouter.get('/me', verifyToken, specificRolesOnly([RoleName.CUSTOMER, RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let userId = request.params.userId as string;
+        let userId = request.user.id;
         let wishlists = await new WishlistManagement().wishlistsByUserId(userId);
         response.status(StatusCodes.OK).send(new SuccessResponse(wishlists, 'Wishlist by user', StatusCodes.OK));
     } catch (error: any) {

@@ -11,6 +11,7 @@ $files = @(
 
 
 module structure
+
 $m = "user"; @(
    "src\modules\$m\entity",
    "src\modules\$m\business",

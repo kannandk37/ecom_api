@@ -812,3 +812,53 @@ qtyOnHand  = 0 +100 -20 +20 -2 +2 -3  = 97  ← wait, sl-008 not yet reflected a
            
 qtyCommitted = 3   ← ORD-9001 was committed (+3 in sl-006) and dispatched (-3 in sl-008)
                       so actually 0...
+
+
+context
+   - user/index.ts
+   - profile/index.ts
+   - role/index.ts
+   - cart/index.ts
+   - auth/index.ts
+
+
+   export class User {
+    id?: string;
+    roles?: Role[];
+}
+
+export class Role {
+    id?: string;
+    name?: RoleName;
+    permissions?: Permission[];
+    // Added:
+    description?: string; // To help admins understand what this role is intended for.
+    isSystemRole?: boolean; // Protects core roles (like 'Super Admin') from being deleted.
+}
+
+export class Profile {
+    id?: string;
+    user?: User;
+    name?: string;
+    email?: string;
+    mobile?: string;
+    role?: Role;
+    profilePic?: string;
+    isEmailVerified?: boolean; // Vital for security and account recovery
+    lastLogin?: Date; // Important for security auditing and user engagement tracking
+}
+
+export class Cart {
+    id?: string;
+    user?: User;
+    cartItems?: CartItem[];
+    appliedPromocode?: string;
+    isActive?: boolean;
+}
+
+export class CartItem {
+    id?: string;
+    product?: Product;
+    variant?: Variant;
+    quantity?: number;
+}
