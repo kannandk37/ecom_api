@@ -15,6 +15,8 @@ import { RoleManagement } from "../../role/business";
 import { RoleName } from "../../role/entity";
 import { sendWelcomeEmail } from '../../../utils/emailService';
 import path from "path";
+import { EmailAccount } from "../../email_account/entity";
+import { EmailAccountManagement } from "../../email_account/business";
 
 export const userAccountRouter = Router();
 
@@ -47,8 +49,13 @@ userAccountRouter.post(
             userAccount.conformationCode = null;
             userAccount.resetConfirmationCode = null;
             userAccount.passwordResetedOn = new Date();
+
+            // create email account entity
+            let emailAccount = new EmailAccount();
+            emailAccount.email = request.body.email;
+
             let userAccountManagement = new UserAccountManagement();
-            let existingUserAccount = await userAccountManagement.userAccountByEmail(userAccount);
+            let existingUserAccount = await userAccountManagement.userAccountByEmail(userAccount.email);
             if (!existingUserAccount) {
                 // await sequelize.transaction(async (transaction: Transaction) => {
                 // user = await userManagement.createUser(user, transaction);
@@ -70,6 +77,11 @@ userAccountRouter.post(
                         userAccount.user = newUser;
                         userAccount = await userAccountManagement.addEmailAccount(userAccount, session);
                         user = newUser;
+
+                        // 4. Link and Add Email Account
+                        emailAccount.user = newUser;
+                        emailAccount = await new EmailAccountManagement().createEmailAccount(emailAccount, session);
+
                     });
 
                     console.log("Transaction committed successfully.");
@@ -85,7 +97,9 @@ userAccountRouter.post(
                 // construct createUser with user, profile, tenant details (use getTenantById) 
                 const createdUser = await userManagement.userById(user.id);
                 const token = await userAccountManagement.generateToken(userAccount, profile.role);
-                const data = { token: token, ...createdUser };
+                const refreshToken = await userAccountManagement.generateToken(userAccount, profile.role, true);
+                await new EmailAccountManagement().updateEmailAccount({ ...emailAccount, accessToken: token, refreshToken: refreshToken });
+                const data = { token: token, refreshToken: refreshToken, ...createdUser };
                 // welcome email
                 const welcomePromo = 'NATURE15';
                 sendWelcomeEmail({
@@ -113,9 +127,47 @@ userAccountRouter.post(
             let userAccountInfo = new UserAccount();
             userAccountInfo.email = request.body.email;
             userAccountInfo.password = request.body.password;
-            let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
-            let result = await userAccountManagement.loginExistingUser(userAccount);
-            response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Login in successful", StatusCodes.CREATED));
+            let user = await userAccountManagement.userAccountByEmail(userAccountInfo.email);
+            if (user) {
+                let profile = await new ProfileManagement().profileByEmail(userAccountInfo.email);
+                if (profile.role.name != RoleName.CUSTOMER) {
+                    response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+                } else {
+                    let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
+                    let result = await userAccountManagement.loginExistingUser(userAccount);
+                    response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Login in successful", StatusCodes.CREATED));
+                }
+            } else {
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+            }
+        } catch (error: any) {
+            errorhandler(error, response);
+        };
+    }
+);
+
+userAccountRouter.post(
+    '/enterpriselogin',
+    async (request: Request, response: Response) => {
+        try {
+            // TODO: if super admin or admin first time logs in then he need to be moved to password reset screen to change the dummy password
+            let userAccountManagement = new UserAccountManagement();
+            let userAccountInfo = new UserAccount();
+            userAccountInfo.email = request.body.email;
+            userAccountInfo.password = request.body.password;
+            let user = await userAccountManagement.userAccountByEmail(userAccountInfo.email);
+            if (user) {
+                let profile = await new ProfileManagement().profileByEmail(userAccountInfo.email);
+                if (profile.role.name == RoleName.CUSTOMER) {
+                    response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+                } else {
+                    let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
+                    let result = await userAccountManagement.loginExistingUser(userAccount);
+                    response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Login in successful", StatusCodes.CREATED));
+                }
+            } else {
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+            }
         } catch (error: any) {
             errorhandler(error, response);
         };

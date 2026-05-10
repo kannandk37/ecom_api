@@ -39,6 +39,7 @@ import { profileRouter } from './modules/profile/router';
 import { wishlistRouter } from './modules/wishlist/router';
 import { cartRouter } from './modules/cart/router';
 import { cartItemRouter } from './modules/cart_item/router';
+import { emailAccountRouter } from './modules/email_account/router';
 
 dotenv.config();
 
@@ -126,7 +127,7 @@ async function OnBoardSuperAdmin(): Promise<void> {
 
         superAminData.userAccount = userAccount;
 
-        let existingSuperAdminAccount = await new UserAccountManagement().userAccountByEmail(superAminData.userAccount);
+        let existingSuperAdminAccount = await new UserAccountManagement().userAccountByEmail(superAminData.userAccount?.email as string);
         if (!existingSuperAdminAccount) {
 
             let role = await new RoleManagement().getRoleByName(RoleName.SUPERADMIN);
@@ -263,6 +264,7 @@ app.use('/api/orders', orderRouter);
 app.use('/api/wishlists', wishlistRouter);
 app.use('/api/carts', cartRouter);
 app.use('/api/cartitems', cartItemRouter);
+app.use('/api/emailaccounts', emailAccountRouter);
 
 
 // Error Handlers

@@ -6,13 +6,15 @@ import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken'
 import { Role } from "../../role/entity";
 import { ProfileManagement } from "../../profile/business";
+import { EmailAccountManagement } from "../../email_account/business";
+import { EmailAccount } from "../../email_account/entity";
 
 export class UserAccountManagement {
-    async userAccountByEmail(userAccount: UserAccount): Promise<UserAccount> {
+    async userAccountByEmail(email: string): Promise<UserAccount> {
         return new Promise(async (resolve, reject) => {
             try {
                 let userAccountPersistor = new UserAccountPersistor();
-                let isExistingUser = await userAccountPersistor.userAccountByEmail(userAccount);
+                let isExistingUser = await userAccountPersistor.userAccountByEmail(email);
                 //TODO: can't handle it here sign up is breaking
                 // if (isExistingUser) {
                 //     return reject(new ApiError("User Already Exists", StatusCodes.NOT_FOUND));
@@ -38,7 +40,7 @@ export class UserAccountManagement {
         return new Promise(async (resolve, reject) => {
             try {
                 let userAccountPersistor = new UserAccountPersistor();
-                let isExistingUser = await userAccountPersistor.userAccountByEmail(userAccount);
+                let isExistingUser = await userAccountPersistor.userAccountByEmail(userAccount.email);
                 if (!isExistingUser) {
                     return reject(new ApiError("Email Not Found", StatusCodes.NOT_FOUND));
                 };
@@ -48,14 +50,30 @@ export class UserAccountManagement {
                     return reject(new ApiError("Invalid Password", StatusCodes.BAD_REQUEST));
                 };
                 let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
+
                 const token = await this.generateToken(isExistingUser, profile.role);
+
+                let emailAccount = await new EmailAccountManagement().emailAccountByEmail(isExistingUser);
+
+                if (!emailAccount) {
+                    return reject(new ApiError("Email Account Not Found", StatusCodes.BAD_REQUEST));
+                }
+
+                let refreshToken = await this.generateToken(isExistingUser, profile.role, true);
+
+                emailAccount.refreshToken = refreshToken;
+                emailAccount.accessToken = token;
+
+                await new EmailAccountManagement().updateEmailAccount(emailAccount);
+
                 let result = {
                     id: profile.user.id,
                     user: profile.user,
                     profile: profile,
                     roles: profile.user.roles,
                     role: profile.role,
-                    token: token
+                    token: token,
+                    refreshToken: refreshToken
                 };
                 resolve(result);
             } catch (error) {
@@ -64,11 +82,11 @@ export class UserAccountManagement {
         });
     };
 
-    async generateToken(userAccount: UserAccount, role: Role): Promise<string> {
+    async generateToken(userAccount: UserAccount, role: Role, isRefreshToken?: boolean): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 let token = jwt.sign(
-                    { id: userAccount.user.id, role: { id: role.id, name: role.name } }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.JWT_EXPIRES_IN as any }
+                    { id: userAccount.user.id, role: { id: role.id, name: role.name } }, isRefreshToken ? process.env.JWT_REFRESH_SECRET_KEY : process.env.JWT_SECRET_KEY, { expiresIn: isRefreshToken ? process.env.JWT_REFRESH_EXPIRES_IN : process.env.JWT_EXPIRES_IN as any }
                 );
                 resolve(token);
             } catch (error) {

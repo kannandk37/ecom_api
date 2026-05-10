@@ -46,7 +46,7 @@ export function userAccountRecordToUserAccountEntity(userAccountRecord: any): Us
     return userAccount;
 };
 
-export function userAccountEntityToUserAccountRecord(userAccount: UserAccount): object {
+export function userAccountEntityToUserAccountRecord(userAccount: UserAccount): any {
     let record: any = {};
 
     if (userAccount === null) {
@@ -97,7 +97,7 @@ export function userAccountRecordsToUserAccountEntities(userAccountRecords: any[
     return userAccounts
 }
 
-export function userAccountEntitiesToUserAccountRecords(userAccounts: UserAccount[]): object[] {
+export function userAccountEntitiesToUserAccountRecords(userAccounts: UserAccount[]): any[] {
     let records: any[] = [];
     userAccounts.forEach(element => {
         let record = userAccountEntityToUserAccountRecord(element)

@@ -26,7 +26,7 @@ userRouter.post('/onboarding', verifyToken, specificRolesOnly([RoleName.SUPERADM
         let userAccount = userAccountRawDatumToUserAccountEntity(request.body.userAccount);
         let password = userAccount.password;
         let userAccountManagement = new UserAccountManagement();
-        let existingUserAccount = await userAccountManagement.userAccountByEmail(userAccount);
+        let existingUserAccount = await userAccountManagement.userAccountByEmail(userAccount.email);
         if (!existingUserAccount) {
             const session = await mongoose.startSession();
             try {

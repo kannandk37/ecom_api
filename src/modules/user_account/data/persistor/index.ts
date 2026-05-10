@@ -7,12 +7,13 @@ import ApiError from "../../../../exceptions/apierror";
 import { StatusCodes } from "http-status-codes";
 
 export class UserAccountPersistor {
-    async userAccountByEmail(userAccount: UserAccount): Promise<UserAccount> {
+
+    async userAccountByEmail(email: string): Promise<UserAccount> {
         return new Promise(async (resolve, reject) => {
             try {
                 let existingUserAccount: any = await UserAccountModel.findOne(
                     {
-                        email: userAccount.email
+                        email: email
                     });
                 resolve(await userAccountRecordToUserAccountEntity(existingUserAccount));
             } catch (error) {

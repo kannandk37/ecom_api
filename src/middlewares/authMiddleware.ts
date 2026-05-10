@@ -32,6 +32,28 @@ export const verifyToken = (req: AuthenticatedRequest, res: Response, next: Next
     }
 };
 
+export const verifyRefreshToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        errorhandler(new ApiError("No Refresh Token Provided", StatusCodes.UNAUTHORIZED), res);
+    } else {
+        try {
+            const token = authHeader.split(' ')[1];
+            jwt.verify(token, process.env.JWT_REFRESH_SECRET_KEY as string, function (err: any, decoded: any) {
+                if (err) {
+                    throw err;
+                }
+                req.user = { id: decoded.id, role: { id: decoded.role?.id, name: decoded.role?.name } };
+                console.log(`Authenticated user: ${decoded.id} with role: ${decoded.role.name}`);
+            });
+            next();
+        } catch {
+            errorhandler(new ApiError("Not authorized, token failed", StatusCodes.UNAUTHORIZED), res);
+        }
+    }
+};
+
 export const adminOnly = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     if ((req as any).user?.role !== RoleName.ADMIN) {
         errorhandler(new ApiError("Access denied: Insufficient permissions", StatusCodes.FORBIDDEN), res);
