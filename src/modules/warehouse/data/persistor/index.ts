@@ -54,6 +54,17 @@ export class WarehousePersistor {
         });
     }
 
+    async warehouseByName(name: string): Promise<Warehouse> {
+        return new Promise<Warehouse>(async (resolve, reject) => {
+            try {
+                let warehouseRecord = await WarehouseModel.findOne({ name: name });
+                resolve(warehouseRecordToWarehouseEntity(warehouseRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async updateWarehouseById(id: string, warehouse: Warehouse): Promise<Warehouse> {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
