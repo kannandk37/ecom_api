@@ -51,13 +51,17 @@ export class UserAccountManagement {
                 };
                 let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
 
-                const token = await this.generateToken(isExistingUser, profile.role);
 
                 let emailAccount = await new EmailAccountManagement().emailAccountByEmail(isExistingUser);
 
                 if (!emailAccount) {
+                    let emailAccountData = new EmailAccount();
+                    emailAccountData.email = profile.email;
+                    emailAccountData.user = profile.user;
+                    await new EmailAccountManagement().createEmailAccount(emailAccountData);
                     return reject(new ApiError("Email Account Not Found", StatusCodes.BAD_REQUEST));
                 }
+                const token = await this.generateToken(isExistingUser, profile.role);
 
                 let refreshToken = await this.generateToken(isExistingUser, profile.role, true);
 

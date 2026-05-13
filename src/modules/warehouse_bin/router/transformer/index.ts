@@ -47,7 +47,7 @@ export function warehouseBinRawDatumToWarehouseBinEntity(raw: any): WarehouseBin
     return warehouseBin;
 }
 
-export function warehouseBinRawDatumToWarehouseBinEntities(raws: any[]): WarehouseBin[] {
+export function warehouseBinsRawDataToWarehouseBinsEntities(raws: any[]): WarehouseBin[] {
     if (!raws || raws.length === 0) {
         return [];
     }

@@ -3,10 +3,12 @@ import { Warehouse } from "../entity";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../exceptions/apierror";
 import { AddressManagement } from "../../address/business";
+import { WarehouseBin } from "../../warehouse_bin/entity";
+import { WarehouseBinManagement } from "../../warehouse_bin/business";
 
 export class WarehouseManagement {
 
-    async createWarehouse(warehouse: Warehouse): Promise<Warehouse> {
+    async createWarehouseAndEssentials(warehouse: Warehouse, warehouseBins: WarehouseBin[]): Promise<Warehouse> {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
                 let warehousePersistor = new WarehousePersistor();
@@ -22,6 +24,36 @@ export class WarehouseManagement {
                 let address = await new AddressManagement().createAddress(warehouse.address);
                 warehouse.address = address;
                 let persistedWarehouse = await warehousePersistor.createWarehouse(warehouse);
+                
+                // const warehouseBins: WarehouseBin[] = [];
+
+                // for (let a = 1; a <= Number(warehouseBin.aisle ?? 1); a++) {
+                //     for (let r = 1; r <= Number(warehouseBin.rack ?? 1); r++) {
+                //         for (let l = 1; l <= Number(warehouseBin.level ?? 1); l++) {
+                //             for (let p = 1; p <= Number(warehouseBin.position ?? 1); p++) {
+
+                //                 const aisle = `A${String(a).padStart(2, '0')}`;  // A01
+                //                 const rack = `R${String(r).padStart(2, '0')}`;  // R02
+                //                 const level = `L${l}`;                           // L3
+                //                 const pos = `P${p}`;                           // P4
+
+                //                 warehouseBins.push({
+                //                     warehouse: { id: warehouse.id },
+                //                     binCode: `${aisle}-${rack}-${level}-${pos}`, // A01-R02-L3-P4
+                //                     aisle,
+                //                     rack,
+                //                     level,
+                //                     position: pos,
+                //                     maxUnits: warehouseBin.maxUnits ?? 200,
+                //                     isActive: true,
+                //                 });
+                //             }
+                //         }
+                //     }
+                // }
+
+                await new WarehouseBinManagement().createWarehouseBins(warehouseBins);
+                
                 resolve(await this.warehouseById(persistedWarehouse.id));
             } catch (error) {
                 reject(error);
@@ -91,7 +123,7 @@ export class WarehouseManagement {
         });
     }
 
-    async updateWarehouseById(id: string, warehouse: Warehouse): Promise<Warehouse> {
+    async updateWarehouseAndEssentialsByWarehouseId(id: string, warehouse: Warehouse, warehouseBins: WarehouseBin[]): Promise<Warehouse> {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
                 let warehousePersistor = new WarehousePersistor();

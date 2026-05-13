@@ -6,13 +6,15 @@ import { warehouseRawDatumToWarehouseEntity } from "./transformer";
 import { SuccessResponse } from "../../../exceptions/successHandler";
 import { WarehouseManagement } from "../business";
 import { StatusCodes } from "http-status-codes";
+import { warehouseBinsRawDataToWarehouseBinsEntities } from "../../warehouse_bin/router/transformer";
 
 export const warehouseRouter = Router();
 
 warehouseRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let warehouseInfo = warehouseRawDatumToWarehouseEntity(request.body.warehouse);
-        let persistedWarehouse = await new WarehouseManagement().createWarehouse(warehouseInfo);
+        let warehouseBinInfos = warehouseBinsRawDataToWarehouseBinsEntities(request.body.warehouseBins);
+        let persistedWarehouse = await new WarehouseManagement().createWarehouseAndEssentials(warehouseInfo, warehouseBinInfos);
         response.status(StatusCodes.CREATED).send(new SuccessResponse(persistedWarehouse, 'Warehouse created successfully', StatusCodes.CREATED));
     } catch (error: any) {
         errorhandler(error, response);
@@ -42,7 +44,8 @@ warehouseRouter.put('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, Role
     try {
         let warehouseId = request.params.id as string;
         let warehouseData = warehouseRawDatumToWarehouseEntity(request.body.warehouse);
-        let warehouse = await new WarehouseManagement().updateWarehouseById(warehouseId, warehouseData);
+        let warehouseBinInfos = warehouseBinsRawDataToWarehouseBinsEntities(request.body.warehouseBins);
+        let warehouse = await new WarehouseManagement().updateWarehouseAndEssentialsByWarehouseId(warehouseId, warehouseData, warehouseBinInfos);
         response.status(StatusCodes.OK).send(new SuccessResponse(warehouse, 'Warehouse updated successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);

@@ -10,12 +10,52 @@ export class WarehouseBinManagement {
         return new Promise<WarehouseBin>(async (resolve, reject) => {
             try {
                 let warehouseBinPersistor = new WarehouseBinPersistor();
-                let isBinWithCode = await warehouseBinPersistor.warehouseBinByCode(warehouseBin.binCode);
+                let isBinWithCode = await this.warehouseBinByCode(warehouseBin.binCode);
                 if (isBinWithCode) {
                     return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT));
                 }
                 let persistedBin = await warehouseBinPersistor.createWarehouseBin(warehouseBin);
-                resolve(await this.warehouseBinById(persistedBin.id));
+                resolve(persistedBin);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async createWarehouseBins(warehouseBins: WarehouseBin[]): Promise<WarehouseBin[]> {
+        return new Promise<WarehouseBin[]>(async (resolve, reject) => {
+            try {
+                let warehouseBinPersistor = new WarehouseBinPersistor();
+                let binCodes = warehouseBins.map((warehouseBin: WarehouseBin) => warehouseBin.binCode);
+
+                let isBinWithCodes = await this.warehouseBinByCodes(binCodes);
+                if (isBinWithCodes?.length > 0) {
+                    return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT));
+                }
+                let persistedBins = await warehouseBinPersistor.createWarehouseBins(warehouseBins);
+                resolve(persistedBins);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async warehouseBinByCode(bincode: string): Promise<WarehouseBin> {
+        return new Promise<WarehouseBin>(async (resolve, reject) => {
+            try {
+                let warehouseBinPersistor = new WarehouseBinPersistor();
+                resolve(await warehouseBinPersistor.warehouseBinByCode(bincode));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async warehouseBinByCodes(bincodes: string[]): Promise<WarehouseBin[]> {
+        return new Promise<WarehouseBin[]>(async (resolve, reject) => {
+            try {
+                let warehouseBinPersistor = new WarehouseBinPersistor();
+                resolve(await warehouseBinPersistor.warehouseBinByCodes(bincodes));
             } catch (error) {
                 reject(error);
             }
