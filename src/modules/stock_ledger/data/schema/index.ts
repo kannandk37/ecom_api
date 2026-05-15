@@ -24,7 +24,7 @@ const StockLedgerSchema = new Schema({
     },
     referenceId: { type: String, default: null, index: true },
     notes: { type: String },
-    performedBy: { type: String }
+    performedBy: { type: Schema.Types.ObjectId, ref: 'users', index: true }
 }, {
     timestamps: { createdAt: true, updatedAt: false }  // updatedAt disabled — ledger is append-only
 });

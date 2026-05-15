@@ -2,13 +2,26 @@ import { InventoryPersistor } from "../data/persistor";
 import { Inventory, ReorderStatus } from "../entity";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../exceptions/apierror";
-import { BinStockPersistor } from "../../bin_stock/data/persistor";
-import { WarehouseBinPersistor } from "../../warehouse_bin/data/persistor";
 import { BinStock } from "../../bin_stock/entity";
 import { MovementType, ReferenceType, StockLedger } from "../../stock_ledger/entity";
-import { StockLedgerPersistor } from "../../stock_ledger/data/persistor";
+import { BinStockManagement } from "../../bin_stock/business";
+import { StockLedgerManagement } from "../../stock_ledger/business";
+import { WarehouseBinManagement } from "../../warehouse_bin/business";
+import { User } from "../../user/entity";
 
 export class InventoryManagement {
+
+    async createInventory(inventory: Inventory): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                let inventoryPersistor = new InventoryPersistor();
+                let persistedInventory = await inventoryPersistor.createInventory(inventory);
+                resolve(await this.inventoryById(persistedInventory.id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 
     async inventories(): Promise<Inventory[]> {
         return new Promise<Inventory[]>(async (resolve, reject) => {
@@ -47,114 +60,127 @@ export class InventoryManagement {
         });
     }
 
+    async inventoryByProductWarehouseVariant(productId: string, warehouseId: string, variantId: string): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                let inventory = await new InventoryPersistor().inventoryByProductWarehouseVariant(productId, warehouseId, variantId);
+                resolve(inventory);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async incrementInventoryQty(id: string, qtyOnHandDelta: number, qtyCommittedDelta: number): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                await new InventoryPersistor().incrementInventoryQty(id, qtyOnHandDelta, qtyCommittedDelta);
+                resolve(await this.inventoryById(id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     // ─── FLOW 2 & 3: STOCK ADJUSTMENT ─────────────────────────────────────────
     // Handles both initial (CREATE) and normal (UPDATE) adjustment in one method.
     // quantityDelta is signed: positive to add, negative to remove.
 
     async adjustStock(
-        productId: string,
-        variantId: string,
-        warehouseId: string,
-        binId: string,
-        quantity: number,     // signed
-        batchNumber: string,
-        expiryDate: Date,
-        reorderPoint?: number,
-        reorderQty?: number,
-        maxStockLevel?: number,
-        notes?: string,
-        performedBy?: string
+        inventoryInfo: Inventory,
+        binStockInfo: BinStock,
+        stockLedgerInfo: StockLedger,
+        performedBy: User,
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
-                let inventoryPersistor = new InventoryPersistor();
-                let binStockPersistor = new BinStockPersistor();
-                let stockLedgerPersistor = new StockLedgerPersistor();
-                let warehouseBinPersistor = new WarehouseBinPersistor();
+                let binStockManagement = new BinStockManagement();
+                let stockLedgerManagement = new StockLedgerManagement();
+                let warehouseBinManagement = new WarehouseBinManagement();
 
                 // Step 1 — Validate bin capacity for additions
-                let bin = await warehouseBinPersistor.warehouseBinById(binId);
+                let bin = await warehouseBinManagement.warehouseBinById(binStockInfo.bin.id);
                 if (!bin) {
                     return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND));
                 }
                 if (!bin.isActive) {
                     return reject(new ApiError("Warehouse bin is inactive", StatusCodes.BAD_REQUEST));
                 }
-                if (quantity > 0) {
-                    let existingBinStocks = await binStockPersistor.binStocksByBinId(binId);
+                if (binStockInfo.qtyOnHand > 0) {
+                    let existingBinStocks = await binStockManagement.binStocksByBinId(binStockInfo.bin.id);
                     let currentBinTotal = existingBinStocks.reduce((sum, bs) => sum + (bs.qtyOnHand ?? 0), 0);
-                    if (currentBinTotal + quantity > bin.maxUnits) {
+                    if (currentBinTotal + binStockInfo.qtyOnHand > bin.maxUnits) {
                         return reject(new ApiError(`Bin capacity exceeded. Available space: ${bin.maxUnits - currentBinTotal} units`, StatusCodes.BAD_REQUEST));
                     }
                 }
 
                 // Step 2 — Get or create Inventory
-                let inventory = await inventoryPersistor.inventoryByProductVariantWarehouse(productId, variantId, warehouseId);
+                let inventory = await this.inventoryByProductWarehouseVariant(inventoryInfo.product.id, inventoryInfo.warehouse.id, inventoryInfo.variant.id);
                 let qtyBefore = 0;
 
                 if (!inventory) {
                     // Flow 2 — Initial: create inventory
-                    if (quantity < 0) {
+                    if (inventoryInfo.qtyOnHand < 0) {
                         return reject(new ApiError("Cannot reduce stock — no inventory record exists yet", StatusCodes.BAD_REQUEST));
                     }
                     let newInventory = new Inventory();
-                    newInventory.product = { id: productId };
-                    newInventory.variant = { id: variantId };
-                    newInventory.warehouse = { id: warehouseId };
-                    newInventory.qtyOnHand = quantity;
+                    newInventory.product = inventoryInfo.product;
+                    newInventory.variant = inventoryInfo.variant;
+                    newInventory.warehouse = inventoryInfo.warehouse;
+                    newInventory.qtyOnHand = inventoryInfo.qtyOnHand;
                     newInventory.qtyReserved = 0;
                     newInventory.qtyCommitted = 0;
-                    newInventory.reorderPoint = reorderPoint;
-                    newInventory.reorderQty = reorderQty;
-                    newInventory.maxStockLevel = maxStockLevel;
+                    newInventory.reorderPoint = inventoryInfo.reorderPoint;
+                    newInventory.reorderQty = inventoryInfo.reorderQty;
+                    newInventory.maxStockLevel = inventoryInfo.maxStockLevel;
                     newInventory.reorderStatus = ReorderStatus.NONE;
                     newInventory.lastMovementAt = new Date();
-                    inventory = await inventoryPersistor.createInventory(newInventory);
+                    inventory = await this.createInventory(newInventory);
                 } else {
                     // Flow 3 — Normal: update existing
                     qtyBefore = inventory.qtyOnHand ?? 0;
-                    if (quantity < 0 && Math.abs(quantity) > qtyBefore) {
+                    if (inventoryInfo.qtyOnHand < 0 && Math.abs(inventoryInfo.qtyOnHand) > qtyBefore) {
                         return reject(new ApiError("Adjustment would result in negative stock", StatusCodes.BAD_REQUEST));
                     }
-                    inventory = await inventoryPersistor.incrementInventoryQty(inventory.id, quantity, 0);
+                    inventory = await this.incrementInventoryQty(inventory.id, inventoryInfo.qtyOnHand, 0);
                 }
 
                 // Step 3 — Create or update BinStock
-                let binStock = await binStockPersistor.binStockByBinAndBatch(binId, inventory.id, batchNumber);
+                let binStock = await binStockManagement.binStockByBinAndBatch(binStockInfo.bin.id, inventory.id, binStockInfo.batchNumber);
                 if (!binStock) {
                     let newBinStock = new BinStock();
-                    newBinStock.bin = { id: binId };
-                    newBinStock.product = { id: productId };
-                    newBinStock.variant = { id: variantId };
-                    newBinStock.inventory = { id: inventory.id };
-                    newBinStock.qtyOnHand = quantity;
-                    newBinStock.batchNumber = batchNumber;
-                    newBinStock.expiryDate = expiryDate;
+                    newBinStock.bin = binStockInfo.bin;
+                    newBinStock.product = binStockInfo.product
+                    newBinStock.variant = binStockInfo.variant
+                    newBinStock.inventory = inventory;
+                    newBinStock.qtyOnHand = binStockInfo.qtyOnHand;
+                    newBinStock.batchNumber = binStockInfo.batchNumber;
+                    newBinStock.expiryDate = binStockInfo.expiryDate;
                     newBinStock.lastCountedAt = new Date();
-                    binStock = await binStockPersistor.createBinStock(newBinStock);
+                    binStock = await binStockManagement.createBinStock(newBinStock);
                 } else {
-                    binStock = await binStockPersistor.incrementBinStockQty(binStock.id, quantity);
+                    binStock = await binStockManagement.incrementBinStockQty(binStock.id, binStockInfo.qtyOnHand);
                 }
 
                 // Step 4 — Create StockLedger
                 let ledger = new StockLedger();
-                ledger.inventory = { id: inventory.id };
-                ledger.warehouse = { id: warehouseId };
-                ledger.bin = { id: binId };
-                ledger.binStock = { id: binStock.id };
-                ledger.product = { id: productId };
-                ledger.variant = { id: variantId };
+                ledger.inventory = inventory;
+                ledger.warehouse = stockLedgerInfo.warehouse;
+                ledger.bin = stockLedgerInfo.bin;
+                ledger.binStock = binStock;
+                ledger.product = stockLedgerInfo.product;
+                ledger.variant = stockLedgerInfo.variant;
                 ledger.movementType = MovementType.ADJUSTMENT;
-                ledger.quantityDelta = quantity;
+                ledger.quantityDelta = stockLedgerInfo.quantityDelta;
                 ledger.qtyBefore = qtyBefore;
                 ledger.qtyAfter = inventory.qtyOnHand;
                 ledger.referenceType = ReferenceType.MANUAL_ADJUST;
                 ledger.referenceId = null;
-                ledger.notes = notes ?? 'Stock adjustment';
+                ledger.notes = stockLedgerInfo.notes ?? 'Stock adjustment';
                 ledger.performedBy = performedBy;
-                await stockLedgerPersistor.createStockLedger(ledger);
+                await stockLedgerManagement.createStockLedger(ledger);
 
-                resolve(await inventoryPersistor.inventoryById(inventory.id));
+                resolve(await this.inventoryById(inventory.id));
             } catch (error) {
                 reject(error);
             }
@@ -168,19 +194,19 @@ export class InventoryManagement {
         binStockId: string,
         quantity: number,   // always positive — method makes it negative
         notes: string,
-        performedBy: string
+        performedBy: User
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
-                let binStockPersistor = new BinStockPersistor();
-                let stockLedgerPersistor = new StockLedgerPersistor();
+                let binStockManagement = new BinStockManagement();
+                let stockLedgerManagement = new StockLedgerManagement();
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
                     return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
                 }
-                let binStock = await binStockPersistor.binStockById(binStockId);
+                let binStock = await binStockManagement.binStockById(binStockId);
                 if (!binStock) {
                     return reject(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND));
                 }
@@ -192,7 +218,7 @@ export class InventoryManagement {
 
                 // Update inventory and binstock
                 inventory = await inventoryPersistor.incrementInventoryQty(inventoryId, -quantity, 0);
-                await binStockPersistor.incrementBinStockQty(binStockId, -quantity);
+                await binStockManagement.incrementBinStockQty(binStockId, -quantity);
 
                 // Create StockLedger
                 let ledger = new StockLedger();
@@ -210,7 +236,7 @@ export class InventoryManagement {
                 ledger.referenceId = null;
                 ledger.notes = notes;
                 ledger.performedBy = performedBy;
-                await stockLedgerPersistor.createStockLedger(ledger);
+                await stockLedgerManagement.createStockLedger(ledger);
 
                 resolve(await inventoryPersistor.inventoryById(inventoryId));
             } catch (error) {
@@ -221,7 +247,7 @@ export class InventoryManagement {
 
     // ─── FLOW 5A: REGISTER REORDER ────────────────────────────────────────────
 
-    async registerReorder(inventoryId: string, orderedQty: number, performedBy: string): Promise<Inventory> {
+    async registerReorder(inventoryId: string, orderedQty: number, performedBy: User): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
@@ -251,14 +277,14 @@ export class InventoryManagement {
         batchNumber: string,
         expiryDate: Date,
         referenceId: string,
-        performedBy: string
+        performedBy: User
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
-                let binStockPersistor = new BinStockPersistor();
-                let stockLedgerPersistor = new StockLedgerPersistor();
-                let warehouseBinPersistor = new WarehouseBinPersistor();
+                let binStockManagement = new BinStockManagement();
+                let stockLedgerManagement = new StockLedgerManagement();
+                let warehouseBinManagement = new WarehouseBinManagement();
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
@@ -266,11 +292,11 @@ export class InventoryManagement {
                 }
 
                 // Step 1 — Bin capacity check
-                let bin = await warehouseBinPersistor.warehouseBinById(binId);
+                let bin = await warehouseBinManagement.warehouseBinById(binId);
                 if (!bin) {
                     return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND));
                 }
-                let existingBinStocks = await binStockPersistor.binStocksByBinId(binId);
+                let existingBinStocks = await binStockManagement.binStocksByBinId(binId);
                 let currentBinTotal = existingBinStocks.reduce((sum, bs) => sum + (bs.qtyOnHand ?? 0), 0);
                 if (currentBinTotal + receivedQty > bin.maxUnits) {
                     return reject(new ApiError(`Bin capacity exceeded. Available space: ${bin.maxUnits - currentBinTotal} units`, StatusCodes.BAD_REQUEST));
@@ -286,7 +312,7 @@ export class InventoryManagement {
                 await inventoryPersistor.updateInventoryById(inventoryId, updatePayload);
 
                 // Step 3 — Create or update BinStock (same batch vs new batch)
-                let binStock = await binStockPersistor.binStockByBinAndBatch(binId, inventoryId, batchNumber);
+                let binStock = await binStockManagement.binStockByBinAndBatch(binId, inventoryId, batchNumber);
                 if (!binStock) {
                     // New batch
                     let newBinStock = new BinStock();
@@ -298,10 +324,10 @@ export class InventoryManagement {
                     newBinStock.batchNumber = batchNumber;
                     newBinStock.expiryDate = expiryDate;
                     newBinStock.lastCountedAt = new Date();
-                    binStock = await binStockPersistor.createBinStock(newBinStock);
+                    binStock = await binStockManagement.createBinStock(newBinStock);
                 } else {
                     // Same batch — split shipment
-                    binStock = await binStockPersistor.incrementBinStockQty(binStock.id, receivedQty);
+                    binStock = await binStockManagement.incrementBinStockQty(binStock.id, receivedQty);
                 }
 
                 // Step 4 — StockLedger
@@ -320,7 +346,7 @@ export class InventoryManagement {
                 ledger.referenceId = referenceId;
                 ledger.notes = `Restock received — batch ${batchNumber}`;
                 ledger.performedBy = performedBy;
-                await stockLedgerPersistor.createStockLedger(ledger);
+                await stockLedgerManagement.createStockLedger(ledger);
 
                 resolve(await inventoryPersistor.inventoryById(inventoryId));
             } catch (error) {
@@ -336,15 +362,16 @@ export class InventoryManagement {
         variantId: string,
         warehouseId: string,
         quantity: number,
-        orderId: string
+        orderId: string,
+        performedBy: User
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
-                let stockLedgerPersistor = new StockLedgerPersistor();
+                let stockLedgerManagement = new StockLedgerManagement();
 
                 // Step 1 — Availability check with row-level intent (re-validate inside)
-                let inventory = await inventoryPersistor.inventoryByProductVariantWarehouse(productId, variantId, warehouseId);
+                let inventory = await inventoryPersistor.inventoryByProductWarehouseVariant(productId, warehouseId, variantId);
                 if (!inventory) {
                     return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
                 }
@@ -372,8 +399,8 @@ export class InventoryManagement {
                 ledger.referenceType = ReferenceType.ORDER_ITEM;
                 ledger.referenceId = orderId;
                 ledger.notes = 'Payment confirmed — stock committed';
-                ledger.performedBy = 'system';
-                await stockLedgerPersistor.createStockLedger(ledger);
+                ledger.performedBy = performedBy;
+                await stockLedgerManagement.createStockLedger(ledger);
 
                 resolve(inventory);
             } catch (error) {
@@ -389,19 +416,19 @@ export class InventoryManagement {
         binStockId: string,
         quantity: number,
         orderId: string,
-        performedBy: string
+        performedBy: User
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
-                let binStockPersistor = new BinStockPersistor();
-                let stockLedgerPersistor = new StockLedgerPersistor();
+                let binStockManagement = new BinStockManagement();
+                let stockLedgerManagement = new StockLedgerManagement();
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
                     return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
                 }
-                let binStock = await binStockPersistor.binStockById(binStockId);
+                let binStock = await binStockManagement.binStockById(binStockId);
                 if (!binStock) {
                     return reject(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND));
                 }
@@ -416,7 +443,7 @@ export class InventoryManagement {
 
                 // qtyOnHand decreases, qtyCommitted decreases
                 inventory = await inventoryPersistor.incrementInventoryQty(inventoryId, -quantity, -quantity);
-                await binStockPersistor.incrementBinStockQty(binStockId, -quantity);
+                await binStockManagement.incrementBinStockQty(binStockId, -quantity);
 
                 let ledger = new StockLedger();
                 ledger.inventory = { id: inventoryId };
@@ -433,7 +460,7 @@ export class InventoryManagement {
                 ledger.referenceId = orderId;
                 ledger.notes = 'Dispatched to delivery partner';
                 ledger.performedBy = performedBy;
-                await stockLedgerPersistor.createStockLedger(ledger);
+                await stockLedgerManagement.createStockLedger(ledger);
 
                 resolve(await inventoryPersistor.inventoryById(inventoryId));
             } catch (error) {
@@ -447,12 +474,13 @@ export class InventoryManagement {
     async releaseCommittedStock(
         inventoryId: string,
         quantity: number,
-        orderId: string
+        orderId: string,
+        performedBy: User
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
-                let stockLedgerPersistor = new StockLedgerPersistor();
+                let stockLedgerManagement = new StockLedgerManagement();
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
@@ -478,8 +506,8 @@ export class InventoryManagement {
                 ledger.referenceType = ReferenceType.ORDER_ITEM;
                 ledger.referenceId = orderId;
                 ledger.notes = 'Payment failed — committed stock released';
-                ledger.performedBy = 'system';
-                await stockLedgerPersistor.createStockLedger(ledger);
+                ledger.performedBy = performedBy;
+                await stockLedgerManagement.createStockLedger(ledger);
 
                 resolve(inventory);
             } catch (error) {
@@ -492,16 +520,16 @@ export class InventoryManagement {
 
     async returnStock(
         orderId: string,
-        performedBy: string
+        performedBy: User
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
-                let binStockPersistor = new BinStockPersistor();
-                let stockLedgerPersistor = new StockLedgerPersistor();
+                let binStockManagement = new BinStockManagement();
+                let stockLedgerManagement = new StockLedgerManagement();
 
                 // Step 1 — Find the dispatch ledger entry (PICK with bin assigned) for this order
-                let dispatchLedger = await stockLedgerPersistor.dispatchLedgerByOrderId(orderId);
+                let dispatchLedger = await stockLedgerManagement.dispatchLedgerByOrderId(orderId);
                 if (!dispatchLedger) {
                     return reject(new ApiError("No dispatch record found for this order", StatusCodes.NOT_FOUND));
                 }
@@ -511,7 +539,7 @@ export class InventoryManagement {
                 let quantity = Math.abs(dispatchLedger.quantityDelta);
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
-                let binStock = await binStockPersistor.binStockById(binStockId);
+                let binStock = await binStockManagement.binStockById(binStockId);
 
                 if (!inventory || !binStock) {
                     return reject(new ApiError("Inventory or bin stock not found for return", StatusCodes.NOT_FOUND));
@@ -521,7 +549,7 @@ export class InventoryManagement {
 
                 // Step 2 & 3 — Restore qtyOnHand and BinStock
                 inventory = await inventoryPersistor.incrementInventoryQty(inventoryId, quantity, 0);
-                await binStockPersistor.incrementBinStockQty(binStockId, quantity);
+                await binStockManagement.incrementBinStockQty(binStockId, quantity);
 
                 // Step 4 — StockLedger
                 let ledger = new StockLedger();
@@ -539,7 +567,7 @@ export class InventoryManagement {
                 ledger.referenceId = orderId;
                 ledger.notes = 'Returned — undelivered or cancelled';
                 ledger.performedBy = performedBy;
-                await stockLedgerPersistor.createStockLedger(ledger);
+                await stockLedgerManagement.createStockLedger(ledger);
 
                 resolve(await inventoryPersistor.inventoryById(inventoryId));
             } catch (error) {

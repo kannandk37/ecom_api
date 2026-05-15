@@ -93,7 +93,7 @@ export function warehouseEntityToWarehouseRecord(warehouse: Warehouse): object {
     }
 
     if (warehouse.totalCapacity !== undefined) {
-        record.totalCapacity = warehouse.totalCapacity;
+        record.totalCapacity = Number(warehouse.totalCapacity);
     }
 
     if (warehouse.capacityUnit) {

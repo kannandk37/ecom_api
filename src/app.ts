@@ -40,6 +40,9 @@ import { wishlistRouter } from './modules/wishlist/router';
 import { cartRouter } from './modules/cart/router';
 import { cartItemRouter } from './modules/cart_item/router';
 import { emailAccountRouter } from './modules/email_account/router';
+import { warehouseRouter } from './modules/warehouse/router';
+import { warehouseBinRouter } from './modules/warehouse_bin/router';
+import { inventoryRouter } from './modules/inventory/router';
 
 dotenv.config();
 
@@ -265,6 +268,9 @@ app.use('/api/wishlists', wishlistRouter);
 app.use('/api/carts', cartRouter);
 app.use('/api/cartitems', cartItemRouter);
 app.use('/api/emailaccounts', emailAccountRouter);
+app.use('/api/warehouses', warehouseRouter);
+app.use('/api/warehousebins', warehouseBinRouter);
+app.use('/api/inventories', inventoryRouter);
 
 
 // Error Handlers

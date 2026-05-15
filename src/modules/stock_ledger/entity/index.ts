@@ -2,6 +2,7 @@ import { Inventory } from "../../inventory/entity";
 import { Warehouse } from "../../warehouse/entity";
 import { WarehouseBin } from "../../warehouse_bin/entity";
 import { BinStock } from "../../bin_stock/entity";
+import { User } from "../../user/entity";
 
 export enum MovementType {
     INBOUND_RECEIVE = 'inbound_receive',
@@ -39,6 +40,6 @@ export class StockLedger {
     referenceType?: ReferenceType;
     referenceId?: string;
     notes?: string;
-    performedBy?: string;
+    performedBy?: User; // need to change the profile because user may have multiple role and each with different profile so , need to check that
     createdAt?: Date;        // immutable — append-only
 }

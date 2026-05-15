@@ -1,10 +1,13 @@
 import { Request, Response, Router } from "express";
-import { specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
+import { AuthenticatedRequest, specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
 import { RoleName } from "../../role/entity";
 import { errorhandler } from "../../../exceptions/errorhandler";
 import { SuccessResponse } from "../../../exceptions/successHandler";
 import { InventoryManagement } from "../business";
 import { StatusCodes } from "http-status-codes";
+import { inventoryRawDatumToInventoryEntity } from "./transformer";
+import { binStockRawDatumToBinStockEntity } from "../../bin_stock/router/transformer";
+import { stockLedgerRawDatumToStockLedgerEntity } from "../../stock_ledger/router/transformer";
 
 export const inventoryRouter = Router();
 
@@ -41,15 +44,17 @@ inventoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, Role
 });
 
 // Flow 2 & 3 — Stock adjustment (initial or normal)
-inventoryRouter.post('/adjust', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/adjust', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let { productId, variantId, warehouseId, binId, quantity, batchNumber, expiryDate,
-            reorderPoint, reorderQty, maxStockLevel, notes } = request.body;
-        let inventory = await new InventoryManagement().adjustStock(
-            productId, variantId, warehouseId, binId, quantity,
-            batchNumber, expiryDate ? new Date(expiryDate) : null,
-            reorderPoint, reorderQty, maxStockLevel, notes, request.body.performedBy
-        );
+        let inventoryInfo = request.body.inventory;
+        let binStockInfo = request.body.binStock;
+        let stockLedgerInfo = request.body.stockLedger;
+
+        let inventoryData = inventoryRawDatumToInventoryEntity(inventoryInfo);
+        let binStockData = binStockRawDatumToBinStockEntity(binStockInfo);
+        let stockLedgerData = stockLedgerRawDatumToStockLedgerEntity(stockLedgerInfo);
+
+        let inventory = await new InventoryManagement().adjustStock(inventoryData, binStockData, stockLedgerData, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Stock adjusted successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
@@ -57,10 +62,10 @@ inventoryRouter.post('/adjust', verifyToken, specificRolesOnly([RoleName.ADMIN, 
 });
 
 // Flow 4 — Damage / waste write-off
-inventoryRouter.post('/write-off', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/waste', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let { inventoryId, binStockId, quantity, notes, performedBy } = request.body;
-        let inventory = await new InventoryManagement().writeOffStock(inventoryId, binStockId, quantity, notes, performedBy);
+        let { inventoryId, binStockId, quantity, notes } = request.body;
+        let inventory = await new InventoryManagement().writeOffStock(inventoryId, binStockId, quantity, notes, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Stock written off successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
@@ -68,10 +73,10 @@ inventoryRouter.post('/write-off', verifyToken, specificRolesOnly([RoleName.ADMI
 });
 
 // Flow 5A — Register reorder
-inventoryRouter.post('/reorder/register', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/reorder/register', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let { inventoryId, orderedQty, performedBy } = request.body;
-        let inventory = await new InventoryManagement().registerReorder(inventoryId, orderedQty, performedBy);
+        let { inventoryId, orderedQty } = request.body;
+        let inventory = await new InventoryManagement().registerReorder(inventoryId, orderedQty, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Reorder registered successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
@@ -79,12 +84,12 @@ inventoryRouter.post('/reorder/register', verifyToken, specificRolesOnly([RoleNa
 });
 
 // Flow 5B — Receive restock
-inventoryRouter.post('/reorder/receive', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/reorder/receive', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let { inventoryId, binId, receivedQty, batchNumber, expiryDate, referenceId, performedBy } = request.body;
+        let { inventoryId, binId, receivedQty, batchNumber, expiryDate, referenceId } = request.body;
         let inventory = await new InventoryManagement().receiveRestock(
             inventoryId, binId, receivedQty, batchNumber,
-            expiryDate ? new Date(expiryDate) : null, referenceId, performedBy
+            expiryDate ? new Date(expiryDate) : null, referenceId, request.user
         );
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Restock received successfully', StatusCodes.OK));
     } catch (error: any) {
@@ -93,10 +98,10 @@ inventoryRouter.post('/reorder/receive', verifyToken, specificRolesOnly([RoleNam
 });
 
 // Flow 6 — Commit stock on payment (called by order service)
-inventoryRouter.post('/commit', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/commit', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
         let { productId, variantId, warehouseId, quantity, orderId } = request.body;
-        let inventory = await new InventoryManagement().commitStock(productId, variantId, warehouseId, quantity, orderId);
+        let inventory = await new InventoryManagement().commitStock(productId, variantId, warehouseId, quantity, orderId, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Stock committed successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
@@ -104,10 +109,10 @@ inventoryRouter.post('/commit', verifyToken, specificRolesOnly([RoleName.ADMIN, 
 });
 
 // Flow 7 — Dispatch
-inventoryRouter.post('/dispatch', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/dispatch', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let { inventoryId, binStockId, quantity, orderId, performedBy } = request.body;
-        let inventory = await new InventoryManagement().dispatchStock(inventoryId, binStockId, quantity, orderId, performedBy);
+        let { inventoryId, binStockId, quantity, orderId } = request.body;
+        let inventory = await new InventoryManagement().dispatchStock(inventoryId, binStockId, quantity, orderId, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Stock dispatched successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
@@ -115,10 +120,10 @@ inventoryRouter.post('/dispatch', verifyToken, specificRolesOnly([RoleName.ADMIN
 });
 
 // Flow 8 — Payment failed
-inventoryRouter.post('/release', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/release', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
         let { inventoryId, quantity, orderId } = request.body;
-        let inventory = await new InventoryManagement().releaseCommittedStock(inventoryId, quantity, orderId);
+        let inventory = await new InventoryManagement().releaseCommittedStock(inventoryId, quantity, orderId, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Committed stock released successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
@@ -126,10 +131,10 @@ inventoryRouter.post('/release', verifyToken, specificRolesOnly([RoleName.ADMIN,
 });
 
 // Flow 9 — Return / cancellation
-inventoryRouter.post('/return', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.post('/return', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let { orderId, performedBy } = request.body;
-        let inventory = await new InventoryManagement().returnStock(orderId, performedBy);
+        let { orderId } = request.body;
+        let inventory = await new InventoryManagement().returnStock(orderId, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Stock returned successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);

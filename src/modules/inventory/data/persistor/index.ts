@@ -61,7 +61,7 @@ export class InventoryPersistor {
         });
     }
 
-    async inventoryByProductVariantWarehouse(productId: string, variantId: string, warehouseId: string): Promise<Inventory> {
+    async inventoryByProductWarehouseVariant(productId: string, warehouseId: string, variantId: string): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let query: any = {

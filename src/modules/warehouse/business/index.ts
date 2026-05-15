@@ -52,8 +52,8 @@ export class WarehouseManagement {
                 //     }
                 // }
 
-                await new WarehouseBinManagement().createWarehouseBins(warehouseBins);
-                
+                await new WarehouseBinManagement().createWarehouseBins(warehouseBins.map((el) => {return {...el, warehouse : persistedWarehouse}}));
+
                 resolve(await this.warehouseById(persistedWarehouse.id));
             } catch (error) {
                 reject(error);

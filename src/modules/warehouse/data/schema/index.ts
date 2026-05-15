@@ -6,7 +6,7 @@ const WarehouseSchema = new Schema({
     name: { type: String, required: true },
     type: { type: String, enum: WarehouseType, required: true, default: WarehouseType.OWN },
     status: { type: String, enum: WarehouseStatus, required: true, default: WarehouseStatus.ACTIVE },
-    address: { type: Schema.Types.ObjectId, required: true, ref: 'addresss', index: true },
+    address: { type: Schema.Types.ObjectId, required: true, ref: 'addresses', index: true },
     totalCapacity: { type: Number },
     capacityUnit: { type: String, enum: CapacityUnit, required: true, default: CapacityUnit.UNITS },
     operator: { type: Schema.Types.ObjectId, ref: 'users', index: true },
