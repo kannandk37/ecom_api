@@ -8,6 +8,9 @@ import { BinStockManagement } from "../../bin_stock/business";
 import { StockLedgerManagement } from "../../stock_ledger/business";
 import { WarehouseBinManagement } from "../../warehouse_bin/business";
 import { User } from "../../user/entity";
+import { DateTime } from "luxon";
+import { resolve } from "node:dns";
+import { WarehouseManagement } from "../../warehouse/business";
 
 export class InventoryManagement {
 
@@ -39,6 +42,17 @@ export class InventoryManagement {
             try {
                 let inventoryPersistor = new InventoryPersistor();
                 resolve(await inventoryPersistor.inventoriesByWarehouseId(warehouseId));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async inventoriesByWarehouseProductVariant(warehouseId: string, productId: string, variantId?: string): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                let inventoryPersistor = new InventoryPersistor();
+                resolve(await inventoryPersistor.inventoriesByWarehouseProductVariant(warehouseId, productId, variantId));
             } catch (error) {
                 reject(error);
             }
@@ -80,7 +94,73 @@ export class InventoryManagement {
                 reject(error);
             }
         });
+    };
+
+    async addProductToInventoryOfAWarehouse(
+        inventoryInfo: Inventory,
+        binStockInfo: BinStock,
+        stockLedgerInfo: StockLedger,
+        performedBy: User,
+    ): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                if (inventoryInfo?.warehouseBins?.length == 0) {
+                    return reject(new ApiError("Warehouse Bin not selected", StatusCodes.BAD_REQUEST));
+                } else {
+                    let warehouseManagement = new WarehouseManagement();
+
+                    let warehouse = await warehouseManagement.warehouseById(inventoryInfo.warehouse.id);
+
+                    if (warehouse.totalCapacity < inventoryInfo.qtyOnHand) {
+                        return reject(new ApiError("Warehouse Does not have available space", StatusCodes.BAD_REQUEST));
+                    } else {
+                        let binStockManagement = new BinStockManagement();
+                        let stockLedgerManagement = new StockLedgerManagement();
+                        let warehouseBinManagement = new WarehouseBinManagement();
+
+                        let totalQty = 0;
+                        for (const warehouseBin of inventoryInfo.warehouseBins) {
+                            let bin = await warehouseBinManagement.warehouseBinById(warehouseBin.id);
+                            if (!bin) {
+                                return reject(new ApiError(`Warehouse bin ${bin.binCode} not found`, StatusCodes.NOT_FOUND));
+                            }
+                            if (!bin.warehouse?.id) {
+                                return reject(new ApiError(`Warehouse bin ${bin.binCode} not found in the Selected Warehouse`, StatusCodes.NOT_FOUND));
+                            }
+                            if (!bin.isActive) {
+                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is inactive`, StatusCodes.BAD_REQUEST));
+                            }
+                            if (!bin.isOccupied) {
+                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is already Occupied`, StatusCodes.BAD_REQUEST));
+                            }
+                            if (bin.currentStock == 0) {
+                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is 0`, StatusCodes.BAD_REQUEST));
+                            }
+                            if (bin.currentStock > bin.maxUnits) {
+                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is Higher than the Maximum Units`, StatusCodes.BAD_REQUEST));
+                            }
+
+                            totalQty = totalQty + Number(bin.currentStock ? bin.currentStock : 0);
+                        }
+
+                        if (totalQty != inventoryInfo.qtyOnHand) {
+                            return reject(new ApiError(`Total warehouse bin and inventory qty is not equal`, StatusCodes.BAD_REQUEST));
+                        }
+
+                        let isExistingInventoryForProduct = await this.inventoriesByWarehouseProductVariant(inventoryInfo.warehouse?.id, inventoryInfo.product?.id, inventoryInfo.variant?.id);
+                        if (isExistingInventoryForProduct) {
+                            return reject(new ApiError(`Product Already Exists, Please Use Adjust Stock`, StatusCodes.BAD_REQUEST));
+                        }
+
+                        // reset of the validations and code 
+                    }
+                }
+            } catch (error) {
+                reject(error);
+            }
+        })
     }
+
 
     // ─── FLOW 2 & 3: STOCK ADJUSTMENT ─────────────────────────────────────────
     // Handles both initial (CREATE) and normal (UPDATE) adjustment in one method.
@@ -131,7 +211,6 @@ export class InventoryManagement {
                     newInventory.qtyReserved = 0;
                     newInventory.qtyCommitted = 0;
                     newInventory.reorderPoint = inventoryInfo.reorderPoint;
-                    newInventory.reorderQty = inventoryInfo.reorderQty;
                     newInventory.maxStockLevel = inventoryInfo.maxStockLevel;
                     newInventory.reorderStatus = ReorderStatus.NONE;
                     newInventory.lastMovementAt = new Date();
@@ -154,9 +233,9 @@ export class InventoryManagement {
                     newBinStock.variant = binStockInfo.variant
                     newBinStock.inventory = inventory;
                     newBinStock.qtyOnHand = binStockInfo.qtyOnHand;
-                    newBinStock.batchNumber = binStockInfo.batchNumber;
+                    newBinStock.batchNumber = `BATCH-${new Date().getFullYear()}`;
                     newBinStock.expiryDate = binStockInfo.expiryDate;
-                    newBinStock.lastCountedAt = new Date();
+                    newBinStock.lastCountedAt = DateTime.now();
                     binStock = await binStockManagement.createBinStock(newBinStock);
                 } else {
                     binStock = await binStockManagement.incrementBinStockQty(binStock.id, binStockInfo.qtyOnHand);
@@ -275,7 +354,7 @@ export class InventoryManagement {
         binId: string,
         receivedQty: number,
         batchNumber: string,
-        expiryDate: Date,
+        expiryDate: DateTime,
         referenceId: string,
         performedBy: User
     ): Promise<Inventory> {
@@ -323,7 +402,7 @@ export class InventoryManagement {
                     newBinStock.qtyOnHand = receivedQty;
                     newBinStock.batchNumber = batchNumber;
                     newBinStock.expiryDate = expiryDate;
-                    newBinStock.lastCountedAt = new Date();
+                    newBinStock.lastCountedAt = DateTime.now();
                     binStock = await binStockManagement.createBinStock(newBinStock);
                 } else {
                     // Same batch — split shipment

@@ -50,6 +50,26 @@ export class InventoryPersistor {
         });
     }
 
+    async inventoriesByWarehouseProductVariant(warehouseId: string, productId: string, variantId?: string): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                let query: any = {
+                    warehouse: new ObjectId(warehouseId),
+                    product: new ObjectId(productId)
+                };
+
+                if (variantId) {
+                    query['variant'] = new ObjectId(variantId)
+                };
+
+                let inventoryRecord = await InventoryModel.findOne(query).populate(this.populateOptions);
+                resolve(inventoryRecordToInventoryEntity(inventoryRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async inventoryById(id: string): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {

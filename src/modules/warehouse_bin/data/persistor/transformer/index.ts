@@ -45,6 +45,18 @@ export function warehouseBinRecordToWarehouseBinEntity(warehouseBinRecord: any):
         warehouseBin.isActive = warehouseBinRecord.isActive;
     }
 
+    if (warehouseBinRecord.minThreshold !== undefined) {
+        warehouseBin.minThreshold = warehouseBinRecord.minThreshold;
+    }
+
+    if (warehouseBinRecord.currentStock !== undefined) {
+        warehouseBin.currentStock = warehouseBinRecord.currentStock;
+    }
+
+    if (warehouseBinRecord.isOccupied !== undefined) {
+        warehouseBin.isOccupied = warehouseBinRecord.isOccupied;
+    }
+
     return warehouseBin;
 }
 
@@ -89,6 +101,18 @@ export function warehouseBinEntityToWarehouseBinRecord(warehouseBin: WarehouseBi
 
     if (warehouseBin.isActive !== undefined) {
         record.isActive = warehouseBin.isActive;
+    }
+
+    if (warehouseBin.minThreshold !== undefined) {
+        record.minThreshold = warehouseBin.minThreshold;
+    }
+
+    if (warehouseBin.currentStock !== undefined) {
+        record.currentStock = warehouseBin.currentStock;
+    }
+
+    if (warehouseBin.isOccupied !== undefined) {
+        record.isOccupied = warehouseBin.isOccupied;
     }
 
     return record;

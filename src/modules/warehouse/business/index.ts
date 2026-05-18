@@ -11,6 +11,10 @@ export class WarehouseManagement {
     async createWarehouseAndEssentials(warehouse: Warehouse, warehouseBins: WarehouseBin[]): Promise<Warehouse> {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
+                let totalBinQuantity = warehouseBins?.reduce((sum: number, warehouse: WarehouseBin) => sum + warehouse.maxUnits, 0);
+                if(totalBinQuantity > warehouse.totalCapacity) {
+                    return reject(new ApiError("Warehouse Bin Quantity Is Higher Than The Warehouse Max Qty", StatusCodes.BAD_REQUEST));
+                }
                 let warehousePersistor = new WarehousePersistor();
                 let isWarehouseWithName = await this.warehouseByName(warehouse.name);
                 if (isWarehouseWithName) {

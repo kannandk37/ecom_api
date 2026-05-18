@@ -37,11 +37,23 @@ export function warehouseBinRawDatumToWarehouseBinEntity(raw: any): WarehouseBin
     }
 
     if (raw.maxUnits !== undefined) {
-        warehouseBin.maxUnits = raw.maxUnits;
+        warehouseBin.maxUnits = Number(raw.maxUnits);
     }
 
     if (raw.isActive !== undefined) {
         warehouseBin.isActive = raw.isActive;
+    }
+
+    if (raw.minThreshold !== undefined) {
+        warehouseBin.minThreshold = Number(raw.minThreshold);
+    }
+
+    if (raw.currentStock !== undefined) {
+        warehouseBin.currentStock = Number(raw.currentStock);
+    }
+
+    if (raw.isOccupied !== undefined) {
+        warehouseBin.isOccupied = raw.isOccupied;
     }
 
     return warehouseBin;

@@ -2,6 +2,7 @@ import { WarehouseBin } from "../../warehouse_bin/entity";
 import { Inventory } from "../../inventory/entity";
 import { Product } from "../../product/entity";
 import { Variant } from "../../variant/entity";
+import { DateTime } from "luxon";
 
 export class BinStock {
     id?: string;
@@ -11,6 +12,6 @@ export class BinStock {
     inventory?: Inventory;
     qtyOnHand?: number;
     batchNumber?: string;
-    expiryDate?: Date;
-    lastCountedAt?: Date;
+    expiryDate?: DateTime;
+    lastCountedAt?: DateTime;
 }

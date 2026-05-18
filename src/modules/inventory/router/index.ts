@@ -8,6 +8,7 @@ import { StatusCodes } from "http-status-codes";
 import { inventoryRawDatumToInventoryEntity } from "./transformer";
 import { binStockRawDatumToBinStockEntity } from "../../bin_stock/router/transformer";
 import { stockLedgerRawDatumToStockLedgerEntity } from "../../stock_ledger/router/transformer";
+import { DateTime } from "luxon";
 
 export const inventoryRouter = Router();
 
@@ -89,7 +90,7 @@ inventoryRouter.post('/reorder/receive', verifyToken, specificRolesOnly([RoleNam
         let { inventoryId, binId, receivedQty, batchNumber, expiryDate, referenceId } = request.body;
         let inventory = await new InventoryManagement().receiveRestock(
             inventoryId, binId, receivedQty, batchNumber,
-            expiryDate ? new Date(expiryDate) : null, referenceId, request.user
+            expiryDate ? DateTime.fromJSDate(new Date(expiryDate)) : null, referenceId, request.user
         );
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Restock received successfully', StatusCodes.OK));
     } catch (error: any) {

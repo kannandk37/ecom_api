@@ -1,6 +1,7 @@
 import { Product } from "../../product/entity";
 import { Variant } from "../../variant/entity";
 import { Warehouse } from "../../warehouse/entity";
+import { WarehouseBin } from "../../warehouse_bin/entity";
 
 export enum ReorderStatus {
     NONE = 'none',
@@ -13,6 +14,7 @@ export class Inventory {
     product?: Product;
     variant?: Variant;
     warehouse?: Warehouse;
+    warehouseBins?: WarehouseBin[];
     qtyOnHand?: number;
     qtyReserved?: number;
     qtyCommitted?: number;

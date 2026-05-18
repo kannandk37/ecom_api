@@ -10,4 +10,7 @@ export class WarehouseBin {
     position?: string;
     maxUnits?: number;
     isActive?: boolean;
+    minThreshold?: number;
+    currentStock?: number;
+    isOccupied?: boolean;
 }

@@ -1,6 +1,7 @@
 import { productRawDatumToProductEntity } from "../../../product/router/transformer";
 import { variantRawDatumToVariantEntity } from "../../../variant/router/transformer";
 import { warehouseRawDatumToWarehouseEntity } from "../../../warehouse/router/transformer";
+import { warehouseBinsRawDataToWarehouseBinsEntities } from "../../../warehouse_bin/router/transformer";
 import { Inventory } from "../../entity";
 
 export function inventoryRawDatumToInventoryEntity(raw: any): Inventory {
@@ -24,6 +25,10 @@ export function inventoryRawDatumToInventoryEntity(raw: any): Inventory {
 
     if (raw.warehouse) {
         inventory.warehouse = warehouseRawDatumToWarehouseEntity(raw.warehouse);
+    }
+
+    if(raw.warehouseBins?.length > 0) {
+        inventory.warehouseBins = warehouseBinsRawDataToWarehouseBinsEntities(raw.warehouseBins);
     }
 
     if (raw.reorderPoint !== undefined) {

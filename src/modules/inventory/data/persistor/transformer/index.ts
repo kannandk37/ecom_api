@@ -3,6 +3,8 @@ import { warehouseRecordToWarehouseEntity } from "../../../../warehouse/data/per
 import { ObjectId } from "mongodb";
 import { productRecordToProductEntity } from "../../../../product/data/persistor/transformer";
 import { variantRecordToVariantEntity } from "../../../../variant/data/persistor/transformer";
+import { warehouseBinsRecordsToWarehouseBinsEntities } from "../../../../warehouse_bin/data/persistor/transformer";
+import { WarehouseBin } from "../../../../warehouse_bin/entity";
 
 export function inventoryRecordToInventoryEntity(inventoryRecord: any): Inventory {
     let inventory = new Inventory();
@@ -25,6 +27,10 @@ export function inventoryRecordToInventoryEntity(inventoryRecord: any): Inventor
 
     if (inventoryRecord.warehouse) {
         inventory.warehouse = warehouseRecordToWarehouseEntity(inventoryRecord.warehouse);
+    }
+
+    if (inventoryRecord.warehouseBins?.length > 0) {
+        inventory.warehouseBins = warehouseBinsRecordsToWarehouseBinsEntities(inventoryRecord.warehouseBins);
     }
 
     if (inventoryRecord.qtyOnHand !== undefined) {
@@ -91,6 +97,10 @@ export function inventoryEntityToInventoryRecord(inventory: Inventory): object {
 
     if (inventory.warehouse?.id) {
         record.warehouse = new ObjectId(inventory.warehouse.id);
+    }
+
+    if (inventory.warehouseBins?.length > 0) {
+        record.warehouseBins = inventory.warehouseBins.map((warehouseBin: WarehouseBin) => new ObjectId(warehouseBin.id));
     }
 
     if (inventory.qtyOnHand !== undefined) {

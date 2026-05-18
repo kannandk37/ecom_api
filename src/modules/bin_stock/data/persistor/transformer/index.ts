@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { productRecordToProductEntity } from "../../../../product/data/persistor/transformer";
 import { variantRecordToVariantEntity } from "../../../../variant/data/persistor/transformer";
 import { warehouseBinRecordToWarehouseBinEntity } from "../../../../warehouse_bin/data/persistor/transformer";
+import { DateTime } from "luxon";
 
 export function binStockRecordToBinStockEntity(binStockRecord: any): BinStock {
     let binStock = new BinStock();
@@ -41,11 +42,11 @@ export function binStockRecordToBinStockEntity(binStockRecord: any): BinStock {
     }
 
     if (binStockRecord.expiryDate) {
-        binStock.expiryDate = binStockRecord.expiryDate;
+        binStock.expiryDate = DateTime.fromJSDate(binStockRecord.expiryDate);
     }
 
     if (binStockRecord.lastCountedAt) {
-        binStock.lastCountedAt = binStockRecord.lastCountedAt;
+        binStock.lastCountedAt = DateTime.fromJSDate(binStockRecord.lastCountedAt);
     }
 
     return binStock;

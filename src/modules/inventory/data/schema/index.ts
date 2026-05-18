@@ -5,6 +5,7 @@ const InventorySchema = new Schema({
     product: { type: Schema.Types.ObjectId, ref: 'products', required: true, index: true },
     variant: { type: Schema.Types.ObjectId, ref: 'variants', index: true },
     warehouse: { type: Schema.Types.ObjectId, ref: 'warehouses', required: true, index: true },
+    warehouseBins: [{type: Schema.Types.ObjectId, ref: 'warehousebins', required: true}],
     qtyOnHand: { type: Number, default: 0 },
     qtyReserved: { type: Number, default: 0 },
     qtyCommitted: { type: Number, default: 0 },

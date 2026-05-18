@@ -8,7 +8,10 @@ const WarehouseBinSchema = new Schema({
     level: { type: String, required: true },
     position: { type: String },
     maxUnits: { type: Number, required: true },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    minThreshold: { type: Number, required: true, default: 20 },
+    currentStock: { type: Number, required: true },
+    isOccupied: { type: Boolean, required: true, default: false }
 }, {
     timestamps: true
 });

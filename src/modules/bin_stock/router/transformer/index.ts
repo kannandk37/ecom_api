@@ -3,6 +3,7 @@ import { productRawDatumToProductEntity } from "../../../product/router/transfor
 import { variantRawDatumToVariantEntity } from "../../../variant/router/transformer";
 import { warehouseBinRawDatumToWarehouseBinEntity } from "../../../warehouse_bin/router/transformer";
 import { BinStock } from "../../entity";
+import { DateTime } from "luxon";
 
 export function binStockRawDatumToBinStockEntity(raw: any): BinStock {
     let binStock = new BinStock();
@@ -40,11 +41,11 @@ export function binStockRawDatumToBinStockEntity(raw: any): BinStock {
     }
 
     if (raw.expiryDate) {
-        binStock.expiryDate = new Date(raw.expiryDate);
+        binStock.expiryDate = DateTime.fromJSDate(raw.expiryDate);
     }
 
     if (raw.lastCountedAt) {
-        binStock.lastCountedAt = new Date(raw.lastCountedAt);
+        binStock.lastCountedAt = DateTime.fromJSDate(raw.lastCountedAt);
     }
 
     return binStock;

@@ -96,7 +96,7 @@ export class Inventory {
   qtyCommitted?     : number;     // hard-held by paid orders
   // qtyAvailable   — DO NOT store — compute on read: onHand - reserved - committed
   reorderPoint?     : number;     // threshold that triggers reorder
-  reorderQty?       : number;     // standard quantity to order from vendor
+  reorderQty?       : number;     // standard quantity to ordered from vendor on reorderflow
   reorderOrderedQty?: number;     // actual qty placed with vendor in Flow 5A — cleared after RECEIVED
   maxStockLevel?    : number;
   reorderStatus?    : ReorderStatus;
