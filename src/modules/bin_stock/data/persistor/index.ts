@@ -98,4 +98,15 @@ export class BinStockPersistor {
             }
         });
     }
+
+    async updateBinStockById(binId: string, binStock: BinStock): Promise<BinStock> {
+        return new Promise<BinStock>(async (resolve, reject) => {
+            try {
+                let binStockRecord = await BinStockModel.findOneAndUpdate({ _id: new ObjectId(binId) }, binStock);
+                resolve(binStockRecordToBinStockEntity(binStockRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }

@@ -2,7 +2,7 @@ import { productRawDatumToProductEntity } from "../../../product/router/transfor
 import { variantRawDatumToVariantEntity } from "../../../variant/router/transformer";
 import { warehouseRawDatumToWarehouseEntity } from "../../../warehouse/router/transformer";
 import { warehouseBinsRawDataToWarehouseBinsEntities } from "../../../warehouse_bin/router/transformer";
-import { Inventory } from "../../entity";
+import { Inventory, ReorderStatus } from "../../entity";
 
 export function inventoryRawDatumToInventoryEntity(raw: any): Inventory {
     let inventory = new Inventory();
@@ -27,7 +27,7 @@ export function inventoryRawDatumToInventoryEntity(raw: any): Inventory {
         inventory.warehouse = warehouseRawDatumToWarehouseEntity(raw.warehouse);
     }
 
-    if(raw.warehouseBins?.length > 0) {
+    if (raw.warehouseBins?.length > 0) {
         inventory.warehouseBins = warehouseBinsRawDataToWarehouseBinsEntities(raw.warehouseBins);
     }
 
@@ -41,6 +41,34 @@ export function inventoryRawDatumToInventoryEntity(raw: any): Inventory {
 
     if (raw.maxStockLevel !== undefined) {
         inventory.maxStockLevel = raw.maxStockLevel;
+    }
+
+    if (raw.qtyOnHand !== undefined) {
+        inventory.qtyOnHand = raw.qtyOnHand;
+    }
+
+    if (raw.qtyReserved !== undefined) {
+        inventory.qtyReserved = raw.qtyReserved;
+    }
+
+    if (raw.qtyCommitted !== undefined) {
+        inventory.qtyCommitted = raw.qtyCommitted;
+    }
+
+    if (raw.reorderOrderedQty !== undefined) {
+        inventory.reorderOrderedQty = raw.reorderOrderedQty;
+    }
+
+    if (raw.reorderStatus) {
+        inventory.reorderStatus = raw.reorderStatus as ReorderStatus;
+    }
+
+    if (raw.lastMovementAt) {
+        inventory.lastMovementAt = raw.lastMovementAt;
+    }
+
+    if (raw.updatedAt) {
+        inventory.updatedAt = raw.updatedAt;
     }
 
     return inventory;

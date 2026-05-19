@@ -4,7 +4,7 @@ const BinStockSchema = new Schema({
     bin: { type: Schema.Types.ObjectId, ref: 'warehousebins', required: true, index: true },
     product: { type: Schema.Types.ObjectId, ref: 'products', required: true, index: true },
     variant: { type: Schema.Types.ObjectId, ref: 'variants', index: true },
-    inventory: { type: Schema.Types.ObjectId, ref: 'inventories', required: true, index: true },
+    inventory: { type: Schema.Types.ObjectId, ref: 'inventories', index: true },
     qtyOnHand: { type: Number, default: 0 },
     batchNumber: { type: String, trim: true, index: true },
     expiryDate: { type: Date },

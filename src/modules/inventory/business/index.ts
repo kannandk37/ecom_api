@@ -98,63 +98,128 @@ export class InventoryManagement {
 
     async addProductToInventoryOfAWarehouse(
         inventoryInfo: Inventory,
-        binStockInfo: BinStock,
-        stockLedgerInfo: StockLedger,
         performedBy: User,
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 if (inventoryInfo?.warehouseBins?.length == 0) {
-                    return reject(new ApiError("Warehouse Bin not selected", StatusCodes.BAD_REQUEST));
-                } else {
-                    let warehouseManagement = new WarehouseManagement();
-
-                    let warehouse = await warehouseManagement.warehouseById(inventoryInfo.warehouse.id);
-
-                    if (warehouse.totalCapacity < inventoryInfo.qtyOnHand) {
-                        return reject(new ApiError("Warehouse Does not have available space", StatusCodes.BAD_REQUEST));
-                    } else {
-                        let binStockManagement = new BinStockManagement();
-                        let stockLedgerManagement = new StockLedgerManagement();
-                        let warehouseBinManagement = new WarehouseBinManagement();
-
-                        let totalQty = 0;
-                        for (const warehouseBin of inventoryInfo.warehouseBins) {
-                            let bin = await warehouseBinManagement.warehouseBinById(warehouseBin.id);
-                            if (!bin) {
-                                return reject(new ApiError(`Warehouse bin ${bin.binCode} not found`, StatusCodes.NOT_FOUND));
-                            }
-                            if (!bin.warehouse?.id) {
-                                return reject(new ApiError(`Warehouse bin ${bin.binCode} not found in the Selected Warehouse`, StatusCodes.NOT_FOUND));
-                            }
-                            if (!bin.isActive) {
-                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is inactive`, StatusCodes.BAD_REQUEST));
-                            }
-                            if (!bin.isOccupied) {
-                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is already Occupied`, StatusCodes.BAD_REQUEST));
-                            }
-                            if (bin.currentStock == 0) {
-                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is 0`, StatusCodes.BAD_REQUEST));
-                            }
-                            if (bin.currentStock > bin.maxUnits) {
-                                return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is Higher than the Maximum Units`, StatusCodes.BAD_REQUEST));
-                            }
-
-                            totalQty = totalQty + Number(bin.currentStock ? bin.currentStock : 0);
-                        }
-
-                        if (totalQty != inventoryInfo.qtyOnHand) {
-                            return reject(new ApiError(`Total warehouse bin and inventory qty is not equal`, StatusCodes.BAD_REQUEST));
-                        }
-
-                        let isExistingInventoryForProduct = await this.inventoriesByWarehouseProductVariant(inventoryInfo.warehouse?.id, inventoryInfo.product?.id, inventoryInfo.variant?.id);
-                        if (isExistingInventoryForProduct) {
-                            return reject(new ApiError(`Product Already Exists, Please Use Adjust Stock`, StatusCodes.BAD_REQUEST));
-                        }
-
-                        // reset of the validations and code 
-                    }
+                    return reject(new ApiError("Warehouse Bin not selected", StatusCodes.BAD_REQUEST, true));
                 }
+
+                let isExistingInventoryForProduct = await this.inventoriesByWarehouseProductVariant(inventoryInfo.warehouse?.id, inventoryInfo.product?.id, inventoryInfo.variant?.id);
+                if (isExistingInventoryForProduct) {
+                    return reject(new ApiError(`Product Already Exists, Please Use Adjust Stock`, StatusCodes.BAD_REQUEST, true));
+                }
+
+                let warehouseManagement = new WarehouseManagement();
+
+                let warehouse = await warehouseManagement.warehouseById(inventoryInfo.warehouse.id);
+
+                if (warehouse.totalCapacity < inventoryInfo.qtyOnHand) {
+                    return reject(new ApiError("Warehouse Does not have available space", StatusCodes.BAD_REQUEST, true));
+                }
+
+                if (inventoryInfo.maxStockLevel < inventoryInfo.qtyOnHand) {
+                    return reject(new ApiError("Product Quantity given is higher than Inventory Max Stock", StatusCodes.BAD_REQUEST, true));
+                }
+
+                let binStockManagement = new BinStockManagement();
+                let stockLedgerManagement = new StockLedgerManagement();
+                let warehouseBinManagement = new WarehouseBinManagement();
+
+                let totalQty = 0;
+                for (const warehouseBin of inventoryInfo.warehouseBins) {
+
+                    let bin = await warehouseBinManagement.warehouseBinById(warehouseBin.id);
+
+                    if (!bin) {
+                        return reject(new ApiError(`Warehouse bin ${bin.binCode} not found`, StatusCodes.NOT_FOUND, true));
+                    }
+
+                    if (!bin.warehouse?.id) {
+                        return reject(new ApiError(`Warehouse bin ${bin.binCode} not found in the Selected Warehouse`, StatusCodes.NOT_FOUND, true));
+                    }
+
+                    if (!bin.isActive) {
+                        return reject(new ApiError(`Warehouse bin ${bin.binCode} is inactive`, StatusCodes.BAD_REQUEST, true));
+                    }
+
+                    if (bin.isOccupied == true) {
+                        return reject(new ApiError(`Warehouse bin ${bin.binCode} is already Occupied`, StatusCodes.BAD_REQUEST, true));
+                    }
+
+                    if (warehouseBin.currentStock == 0) {
+                        return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is 0`, StatusCodes.BAD_REQUEST, true));
+                    }
+
+                    if (warehouseBin.currentStock > bin.maxUnits) {
+                        return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is Higher than the Maximum Units`, StatusCodes.BAD_REQUEST, true));
+                    }
+
+                    warehouseBin.binCode = bin.binCode;
+
+                    totalQty = totalQty + Number(warehouseBin.currentStock ? warehouseBin.currentStock : 0);
+                }
+
+                if (totalQty != inventoryInfo.qtyOnHand) {
+                    return reject(new ApiError(`Total warehouse bin and inventory qty is not equal`, StatusCodes.BAD_REQUEST, true));
+                }
+
+                let createdBinStocks: BinStock[] = [];
+                let stockLedgers: StockLedger[] = [];
+
+                let stockLedgerInfo = new StockLedger();
+
+                stockLedgerInfo.product = inventoryInfo.product;
+                stockLedgerInfo.variant = inventoryInfo.variant;
+                stockLedgerInfo.warehouse = inventoryInfo.warehouse;
+                stockLedgerInfo.movementType = MovementType.INBOUND_RECEIVE;
+                stockLedgerInfo.referenceType = ReferenceType.MANUAL_ADJUST;
+                stockLedgerInfo.performedBy = performedBy;
+
+                for (const warehouseBin of inventoryInfo.warehouseBins) {
+                    warehouseBin.isOccupied = true
+                    await warehouseBinManagement.updateWarehouseBinById(warehouseBin?.id, warehouseBin);
+
+                    let binStock = new BinStock();
+                    binStock.product = inventoryInfo.product;
+                    binStock.variant = inventoryInfo.variant;
+                    binStock.batchNumber = 'Batch-' + new Date().getFullYear() + '-0001'; // TODO: need to increase the count
+                    binStock.bin = warehouseBin;
+                    binStock.qtyOnHand = warehouseBin.currentStock;
+                    binStock.expiryDate = DateTime.now().plus({ months: 6 });
+                    binStock.lastCountedAt = DateTime.now();
+
+                    let binStockCreatedData = await binStockManagement.createBinStock(binStock);
+                    createdBinStocks.push(binStockCreatedData);
+
+                    let stockLedger = new StockLedger();
+                    stockLedger = structuredClone(stockLedgerInfo);
+                    stockLedger.bin = warehouseBin;
+                    stockLedger.binStock = binStockCreatedData;
+                    stockLedger.qtyBefore = 0;
+                    stockLedger.qtyAfter = warehouseBin.currentStock;
+                    stockLedger.quantityDelta = warehouseBin.currentStock;
+                    stockLedger.notes = `First-time receive — batch ${binStockCreatedData.batchNumber} into bin ${warehouseBin.binCode}`;
+
+                    stockLedgers.push(stockLedger);
+                }
+
+                inventoryInfo.reorderStatus = ReorderStatus.NONE;
+                inventoryInfo.lastMovementAt = new Date();
+                inventoryInfo.updatedAt = new Date();
+
+                let createdInventory = await this.createInventory(inventoryInfo);
+
+                for (const binStock of createdBinStocks) {
+                    binStock.inventory = createdInventory;
+                    await binStockManagement.updateBinStockById(binStock.id, binStock);
+                }
+
+                stockLedgers = stockLedgers.map((stockLedger: StockLedger) => { return { ...stockLedger, inventory: createdInventory } });
+
+                await stockLedgerManagement.createManyStockLedgers(stockLedgers);
+                resolve(createdInventory);
             } catch (error) {
                 reject(error);
             }

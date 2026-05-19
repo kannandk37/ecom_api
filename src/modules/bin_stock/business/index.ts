@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { BinStockPersistor } from "../data/persistor";
 import ApiError from "../../../exceptions/apierror";
 import { BinStock } from "../entity";
+import { binStockEntityToBinStockRecord } from "../data/persistor/transformer";
 
 export class BinStockManagement {
 
@@ -72,5 +73,18 @@ export class BinStockManagement {
                 reject(error);
             }
         });
+    }
+
+    async updateBinStockById(id: string, binstock: BinStock): Promise<BinStock> {
+        return new Promise<BinStock>(async (resolve, reject) => {
+            try {
+                let binStockData = binStockEntityToBinStockRecord(binstock);
+                let binStockPersistor = new BinStockPersistor();
+                await binStockPersistor.updateBinStockById(id, binStockData);
+                resolve(await this.binStockById(id));
+            } catch (error) {
+                reject(error);
+            }
+        })
     }
 }

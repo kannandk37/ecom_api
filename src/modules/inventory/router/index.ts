@@ -44,6 +44,19 @@ inventoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, Role
     }
 });
 
+inventoryRouter.post('/addProduct', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let inventoryInfo = request.body.inventory;
+
+        let inventoryData = inventoryRawDatumToInventoryEntity(inventoryInfo);
+
+        let inventory = await new InventoryManagement().addProductToInventoryOfAWarehouse(inventoryData, request.user);
+        response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Product Add to Inventory successfully', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
 // Flow 2 & 3 — Stock adjustment (initial or normal)
 inventoryRouter.post('/adjust', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {

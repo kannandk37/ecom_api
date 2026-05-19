@@ -7,6 +7,7 @@ import { BinStockModel } from "../../../bin_stock/data/schema";
 import {
     stockLedgerEntityToStockLedgerRecord,
     stockLedgerRecordToStockLedgerEntity,
+    stockLedgersEntitiesToStockLedgersRecords,
     stockLedgersRecordsToStockLedgersEntities
 } from "./transformer";
 import { ObjectId } from "mongodb";
@@ -28,6 +29,18 @@ export class StockLedgerPersistor {
                 let stockLedgerData = stockLedgerEntityToStockLedgerRecord(stockLedger);
                 let stockLedgerRecord = await StockLedgerModel.create(stockLedgerData);
                 resolve(await this.stockLedgerById(stockLedgerRecord._id.toString()));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async createManyStockLedgers(stockLedgers: StockLedger[]): Promise<StockLedger[]> {
+        return new Promise<StockLedger[]>(async (resolve, reject) => {
+            try {
+                let stockLedgerData = stockLedgersEntitiesToStockLedgersRecords(stockLedgers);
+                let stockLedgerRecord = await StockLedgerModel.insertMany(stockLedgerData);
+                resolve(stockLedgersRecordsToStockLedgersEntities(stockLedgerRecord));
             } catch (error) {
                 reject(error);
             }

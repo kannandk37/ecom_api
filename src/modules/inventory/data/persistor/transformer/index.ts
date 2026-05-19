@@ -139,6 +139,10 @@ export function inventoryEntityToInventoryRecord(inventory: Inventory): object {
         record.lastMovementAt = inventory.lastMovementAt;
     }
 
+    if (inventory.updatedAt) {
+        record.updatedAt = inventory.updatedAt;
+    }
+
     return record;
 }
 

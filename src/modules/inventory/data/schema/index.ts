@@ -11,7 +11,7 @@ const InventorySchema = new Schema({
     qtyCommitted: { type: Number, default: 0 },
     reorderPoint: { type: Number },
     reorderQty: { type: Number },
-    reorderOrderedQty: { type: Number, default: null },
+    reorderOrderedQty: { type: Number, default: 0 },
     maxStockLevel: { type: Number },
     reorderStatus: { type: String, enum: ReorderStatus, default: ReorderStatus.NONE },
     lastMovementAt: { type: Date }

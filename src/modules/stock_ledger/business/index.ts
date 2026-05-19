@@ -17,6 +17,17 @@ export class StockLedgerManagement {
         });
     }
 
+    async createManyStockLedgers(stockLedgers: StockLedger[]): Promise<StockLedger[]> {
+        return new Promise<StockLedger[]>(async (resolve, reject) => {
+            try {
+                let stockLedgerRecords = await new StockLedgerPersistor().createManyStockLedgers(stockLedgers);
+                resolve(stockLedgerRecords);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async stockLedgerById(id: string): Promise<StockLedger> {
         return new Promise<StockLedger>(async (resolve, reject) => {
             try {
@@ -54,15 +65,15 @@ export class StockLedgerManagement {
         });
     }
 
-        // Used in Flow 9 — finds the physical dispatch ledger (PICK with bin assigned) for an order
-        async dispatchLedgerByOrderId(orderId: string): Promise<StockLedger> {
-            return new Promise<StockLedger>(async (resolve, reject) => {
-                try {
-                    let stockLedger = await new StockLedgerPersistor().dispatchLedgerByOrderId(orderId);
-                    resolve(stockLedger);
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        }
+    // Used in Flow 9 — finds the physical dispatch ledger (PICK with bin assigned) for an order
+    async dispatchLedgerByOrderId(orderId: string): Promise<StockLedger> {
+        return new Promise<StockLedger>(async (resolve, reject) => {
+            try {
+                let stockLedger = await new StockLedgerPersistor().dispatchLedgerByOrderId(orderId);
+                resolve(stockLedger);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }
