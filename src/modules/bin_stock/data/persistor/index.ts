@@ -52,6 +52,17 @@ export class BinStockPersistor {
         });
     }
 
+    async binStocksByWarehouseBinAndProduct(warehouseBinId: string, productId: string): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let binStockRecords = await BinStockModel.find({ bin: new ObjectId(warehouseBinId), product: new ObjectId(productId) }).populate(this.populateOptions);
+                resolve(binStocksRecordsToBinStocksEntities(binStockRecords));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async binStocksByInventoryId(inventoryId: string): Promise<BinStock[]> {
         return new Promise<BinStock[]>(async (resolve, reject) => {
             try {
@@ -89,6 +100,23 @@ export class BinStockPersistor {
                     { _id: new ObjectId(id) },
                     {
                         $inc: { qtyOnHand: delta },
+                        $set: { lastCountedAt: new Date() }
+                    }
+                );
+                resolve(await this.binStockById(id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async decrementBinStockQty(id: string, delta: number): Promise<BinStock> {
+        return new Promise<BinStock>(async (resolve, reject) => {
+            try {
+                await BinStockModel.updateOne(
+                    { _id: new ObjectId(id) },
+                    {
+                        $inc: { qtyOnHand: -delta },
                         $set: { lastCountedAt: new Date() }
                     }
                 );

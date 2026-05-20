@@ -43,6 +43,7 @@ import { emailAccountRouter } from './modules/email_account/router';
 import { warehouseRouter } from './modules/warehouse/router';
 import { warehouseBinRouter } from './modules/warehouse_bin/router';
 import { inventoryRouter } from './modules/inventory/router';
+import { binStockRouter } from './modules/bin_stock/router';
 
 dotenv.config();
 
@@ -252,7 +253,6 @@ async function userOnBoardingPasswordResetTest() {
 
 // userOnBoardingPasswordResetTest();
 
-
 // Routes
 app.use('/api', userAccountRouter);
 app.use('/api/users', userRouter);
@@ -271,7 +271,7 @@ app.use('/api/emailaccounts', emailAccountRouter);
 app.use('/api/warehouses', warehouseRouter);
 app.use('/api/warehousebins', warehouseBinRouter);
 app.use('/api/inventories', inventoryRouter);
-
+app.use('/api/binstocks', binStockRouter);
 
 // Error Handlers
 app.use(notFound);

@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
+import { AuthenticatedRequest, specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
 import { RoleName } from "../../role/entity";
 import { errorhandler } from "../../../exceptions/errorhandler";
 import { SuccessResponse } from "../../../exceptions/successHandler";
@@ -7,6 +7,17 @@ import { StatusCodes } from "http-status-codes";
 import { BinStockManagement } from "../business";
 
 export const binStockRouter = Router();
+
+binStockRouter.get('/warehousebin/:warehouseBinId/product/:productId', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let warehouseBinId = request.params.warehouseBinId as string;
+        let productId = request.params.productId as string;
+        let binStocks = await new BinStockManagement().binStocksByWarehouseBinAndProduct(warehouseBinId, productId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(binStocks, 'Bin Stock By WarehouseBin And Product', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
 
 binStockRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {

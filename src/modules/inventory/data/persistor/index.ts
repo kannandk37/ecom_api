@@ -32,7 +32,7 @@ export class InventoryPersistor {
         return new Promise<Inventory[]>(async (resolve, reject) => {
             try {
                 let inventoryRecords = await InventoryModel.find().populate(this.populateOptions);
-                resolve(inventoriesRecordsToInventoriesEntities(inventoryRecords));
+                resolve(await inventoriesRecordsToInventoriesEntities(inventoryRecords));
             } catch (error) {
                 reject(error);
             }
@@ -43,7 +43,18 @@ export class InventoryPersistor {
         return new Promise<Inventory[]>(async (resolve, reject) => {
             try {
                 let inventoryRecords = await InventoryModel.find({ warehouse: new ObjectId(warehouseId) }).populate(this.populateOptions);
-                resolve(inventoriesRecordsToInventoriesEntities(inventoryRecords));
+                resolve(await inventoriesRecordsToInventoriesEntities(inventoryRecords));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async inventoryByWarehouseIdAndProductId(warehouseId: string, productId: string): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                let inventoryRecord = await InventoryModel.findOne({ warehouse: new ObjectId(warehouseId), product: new ObjectId(productId) }).populate(this.populateOptions);
+                resolve(await inventoryRecordToInventoryEntity(inventoryRecord));
             } catch (error) {
                 reject(error);
             }
@@ -63,7 +74,7 @@ export class InventoryPersistor {
                 };
 
                 let inventoryRecord = await InventoryModel.findOne(query).populate(this.populateOptions);
-                resolve(inventoryRecordToInventoryEntity(inventoryRecord));
+                resolve(await inventoryRecordToInventoryEntity(inventoryRecord));
             } catch (error) {
                 reject(error);
             }
@@ -74,7 +85,7 @@ export class InventoryPersistor {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryRecord = await InventoryModel.findOne({ _id: new ObjectId(id) }).populate(this.populateOptions);
-                resolve(inventoryRecordToInventoryEntity(inventoryRecord));
+                resolve(await inventoryRecordToInventoryEntity(inventoryRecord));
             } catch (error) {
                 reject(error);
             }
@@ -92,7 +103,7 @@ export class InventoryPersistor {
                     query.variant = new ObjectId(variantId);
                 }
                 let inventoryRecord = await InventoryModel.findOne(query).populate(this.populateOptions);
-                resolve(inventoryRecordToInventoryEntity(inventoryRecord));
+                resolve(await inventoryRecordToInventoryEntity(inventoryRecord));
             } catch (error) {
                 reject(error);
             }
@@ -118,6 +129,23 @@ export class InventoryPersistor {
                     { _id: new ObjectId(id) },
                     {
                         $inc: { qtyOnHand: qtyOnHandDelta, qtyCommitted: qtyCommittedDelta },
+                        $set: { lastMovementAt: new Date() }
+                    }
+                );
+                resolve(await this.inventoryById(id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async decrementInventoryQty(id: string, delta: number): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
+            try {
+                await InventoryModel.updateOne(
+                    { _id: new ObjectId(id) },
+                    {
+                        $inc: { qtyOnHand: -delta },
                         $set: { lastMovementAt: new Date() }
                     }
                 );

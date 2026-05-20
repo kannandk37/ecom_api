@@ -32,6 +32,21 @@ export class BinStockManagement {
         });
     }
 
+    async binStocksByWarehouseBinAndProduct(warehouseBinId: string, productId: string): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let binStockPersistor = new BinStockPersistor();
+                let binStocks = await binStockPersistor.binStocksByWarehouseBinAndProduct(warehouseBinId, productId);
+                if (binStocks?.length == 0) {
+                    return reject(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND));
+                }
+                resolve(binStocks);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async binStocksByBinId(binId: string): Promise<BinStock[]> {
         return new Promise<BinStock[]>(async (resolve, reject) => {
             try {
@@ -58,6 +73,16 @@ export class BinStockManagement {
         return new Promise<BinStock>(async (resolve, reject) => {
             try {
                 resolve(await new BinStockPersistor().incrementBinStockQty(id, delta));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async decrementBinStockQty(id: string, delta: number): Promise<BinStock> {
+        return new Promise<BinStock>(async (resolve, reject) => {
+            try {
+                resolve(await new BinStockPersistor().decrementBinStockQty(id, delta));
             } catch (error) {
                 reject(error);
             }

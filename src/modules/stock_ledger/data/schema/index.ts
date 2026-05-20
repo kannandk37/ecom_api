@@ -12,7 +12,6 @@ const StockLedgerSchema = new Schema({
         type: String,
         enum: MovementType,
         required: true,
-        index: true
     },
     quantityDelta: { type: Number, required: true },
     qtyBefore: { type: Number, required: true },
@@ -20,13 +19,12 @@ const StockLedgerSchema = new Schema({
     referenceType: {
         type: String,
         enum: ReferenceType,
-        index: true
     },
-    referenceId: { type: String, default: null, index: true },
+    referenceId: { type: String, default: null },
     notes: { type: String },
-    performedBy: { type: Schema.Types.ObjectId, ref: 'users', index: true }
+    performedBy: { type: Schema.Types.ObjectId, ref: 'users' }
 }, {
-    timestamps: { createdAt: true, updatedAt: false }  // updatedAt disabled — ledger is append-only
+    timestamps: true
 });
 
 export const StockLedgerModel = model('stockledgers', StockLedgerSchema);

@@ -41,11 +41,11 @@ export function binStockRawDatumToBinStockEntity(raw: any): BinStock {
     }
 
     if (raw.expiryDate) {
-        binStock.expiryDate = DateTime.fromJSDate(raw.expiryDate);
+        binStock.expiryDate = DateTime.fromISO(raw.expiryDate);
     }
 
     if (raw.lastCountedAt) {
-        binStock.lastCountedAt = DateTime.fromJSDate(raw.lastCountedAt);
+        binStock.lastCountedAt = DateTime.fromISO(raw.lastCountedAt);
     }
 
     return binStock;

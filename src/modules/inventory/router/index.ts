@@ -33,6 +33,17 @@ inventoryRouter.get('/warehouse/:warehouseId', verifyToken, specificRolesOnly([R
     }
 });
 
+inventoryRouter.get('/warehouse/:warehouseId/product/:productId', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let warehouseId = request.params.warehouseId as string;
+        let productId = request.params.productId as string;
+        let inventory = await new InventoryManagement().inventoryByWarehouseIdAndProductId(warehouseId, productId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Inventory by warehouse And Product', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
 // Get inventory by id
 inventoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
@@ -78,8 +89,15 @@ inventoryRouter.post('/adjust', verifyToken, specificRolesOnly([RoleName.ADMIN, 
 // Flow 4 — Damage / waste write-off
 inventoryRouter.post('/waste', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
     try {
-        let { inventoryId, binStockId, quantity, notes } = request.body;
-        let inventory = await new InventoryManagement().writeOffStock(inventoryId, binStockId, quantity, notes, request.user);
+        let inventoryInfo = request.body.inventory;
+        let binStockInfo = request.body.binStock;
+        let stockLedgerInfo = request.body.stockLedger;
+
+        let inventoryData = inventoryRawDatumToInventoryEntity(inventoryInfo);
+        let binStockData = binStockRawDatumToBinStockEntity(binStockInfo);
+        let stockLedgerData = stockLedgerRawDatumToStockLedgerEntity(stockLedgerInfo);
+
+        let inventory = await new InventoryManagement().writeOffStock(inventoryData, binStockData, stockLedgerData, request.user);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Stock written off successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
@@ -103,7 +121,7 @@ inventoryRouter.post('/reorder/receive', verifyToken, specificRolesOnly([RoleNam
         let { inventoryId, binId, receivedQty, batchNumber, expiryDate, referenceId } = request.body;
         let inventory = await new InventoryManagement().receiveRestock(
             inventoryId, binId, receivedQty, batchNumber,
-            expiryDate ? DateTime.fromJSDate(new Date(expiryDate)) : null, referenceId, request.user
+            expiryDate ? DateTime.fromISO(expiryDate) : null, referenceId, request.user
         );
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Restock received successfully', StatusCodes.OK));
     } catch (error: any) {

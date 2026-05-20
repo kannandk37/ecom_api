@@ -13,7 +13,4 @@ const BinStockSchema = new Schema({
     timestamps: true
 });
 
-// Unique slot per bin + inventory + batch
-BinStockSchema.index({ bin: 1, inventory: 1, batchNumber: 1 }, { unique: true });
-
 export const BinStockModel = model('binstocks', BinStockSchema);
