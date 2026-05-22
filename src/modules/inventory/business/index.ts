@@ -76,7 +76,7 @@ export class InventoryManagement {
                 let inventoryPersistor = new InventoryPersistor();
                 let inventory = await inventoryPersistor.inventoryById(id);
                 if (!inventory) {
-                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND, true));
                 }
                 resolve(inventory);
             } catch (error) {
@@ -258,6 +258,7 @@ export class InventoryManagement {
         binStockInfo: BinStock,
         stockLedgerInfo: StockLedger,
         performedBy: User,
+        canDelete?: boolean
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
@@ -268,10 +269,10 @@ export class InventoryManagement {
                 // Step 1 — Validate bin capacity for additions
                 let bin = await warehouseBinManagement.warehouseBinById(binStockInfo.bin.id);
                 if (!bin) {
-                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND, true));
                 }
                 if (!bin.isActive) {
-                    return reject(new ApiError("Warehouse bin is inactive", StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError("Warehouse bin is inactive", StatusCodes.BAD_REQUEST, true));
                 }
 
                 let binStockData = await binStockManagement.binStockById(binStockInfo.id);
@@ -342,11 +343,14 @@ export class InventoryManagement {
                     if ((binStockData.qtyOnHand - -(binStockInfo.qtyOnHand)) < 0) {
                         return reject(new ApiError("Bin Stock quantity is less the given quantity", StatusCodes.NOT_FOUND, true));
                     }
-                    let a = binStockData.qtyOnHand - -(binStockInfo.qtyOnHand)
-                    let b =  bin.currentStock - -(binStockInfo.qtyOnHand)
+
                     bin.currentStock = bin.currentStock - -(binStockInfo.qtyOnHand);
 
-                    binStockData = await binStockManagement.decrementBinStockQty(binStockData.id, -(binStockInfo.qtyOnHand));
+                    if (canDelete) {
+                        await binStockManagement.deleteById(binStockData.id);
+                    } else {
+                        binStockData = await binStockManagement.decrementBinStockQty(binStockData.id, -(binStockInfo.qtyOnHand));
+                    }
 
                     bin = await warehouseBinManagement.updateWarehouseBinById(bin.id, bin);
 
@@ -356,7 +360,7 @@ export class InventoryManagement {
                     ledger.inventory = inventory;
                     ledger.warehouse = inventory.warehouse;
                     ledger.bin = bin;
-                    ledger.binStock = binStockData;
+                    ledger.binStock = canDelete ? null : binStockData;
                     ledger.product = inventory.product;
                     ledger.variant = inventory.variant;
                     ledger.movementType = MovementType.CYCLE_COUNT_ADJUST;
@@ -374,7 +378,7 @@ export class InventoryManagement {
                 //     let existingBinStocks = await binStockManagement.binStocksByBinId(binStockInfo.bin.id);
                 //     let currentBinTotal = existingBinStocks.reduce((sum, bs) => sum + (bs.qtyOnHand ?? 0), 0);
                 //     if (currentBinTotal + binStockInfo.qtyOnHand > bin.maxUnits) {
-                //         return reject(new ApiError(`Bin capacity exceeded. Available space: ${bin.maxUnits - currentBinTotal} units`, StatusCodes.BAD_REQUEST));
+                //         return reject(new ApiError(`Bin capacity exceeded. Available space: ${bin.maxUnits - currentBinTotal} units`, StatusCodes.BAD_REQUEST, true));
                 //     }
                 // }
 
@@ -385,7 +389,7 @@ export class InventoryManagement {
                 // if (!inventory) {
                 //     // Flow 2 — Initial: create inventory
                 //     if (inventoryInfo.qtyOnHand < 0) {
-                //         return reject(new ApiError("Cannot reduce stock — no inventory record exists yet", StatusCodes.BAD_REQUEST));
+                //         return reject(new ApiError("Cannot reduce stock — no inventory record exists yet", StatusCodes.BAD_REQUEST, true));
                 //     }
                 //     let newInventory = new Inventory();
                 //     newInventory.product = inventoryInfo.product;
@@ -403,7 +407,7 @@ export class InventoryManagement {
                 //     // Flow 3 — Normal: update existing
                 //     qtyBefore = inventory.qtyOnHand ?? 0;
                 //     if (inventoryInfo.qtyOnHand < 0 && Math.abs(inventoryInfo.qtyOnHand) > qtyBefore) {
-                //         return reject(new ApiError("Adjustment would result in negative stock", StatusCodes.BAD_REQUEST));
+                //         return reject(new ApiError("Adjustment would result in negative stock", StatusCodes.BAD_REQUEST, true));
                 //     }
                 //     inventory = await this.incrementInventoryQty(inventory.id, inventoryInfo.qtyOnHand, 0);
                 // }
@@ -529,10 +533,10 @@ export class InventoryManagement {
                 let inventoryPersistor = new InventoryPersistor();
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
-                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND, true));
                 }
                 if (inventory.reorderStatus === ReorderStatus.TRIGGERED) {
-                    return reject(new ApiError("A reorder is already in progress for this inventory", StatusCodes.CONFLICT));
+                    return reject(new ApiError("A reorder is already in progress for this inventory", StatusCodes.CONFLICT, true));
                 }
                 let updatePayload = new Inventory();
                 updatePayload.reorderStatus = ReorderStatus.TRIGGERED;
@@ -564,18 +568,18 @@ export class InventoryManagement {
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
-                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND, true));
                 }
 
                 // Step 1 — Bin capacity check
                 let bin = await warehouseBinManagement.warehouseBinById(binId);
                 if (!bin) {
-                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND, true));
                 }
                 let existingBinStocks = await binStockManagement.binStocksByBinId(binId);
                 let currentBinTotal = existingBinStocks.reduce((sum, bs) => sum + (bs.qtyOnHand ?? 0), 0);
                 if (currentBinTotal + receivedQty > bin.maxUnits) {
-                    return reject(new ApiError(`Bin capacity exceeded. Available space: ${bin.maxUnits - currentBinTotal} units`, StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError(`Bin capacity exceeded. Available space: ${bin.maxUnits - currentBinTotal} units`, StatusCodes.BAD_REQUEST, true));
                 }
 
                 let qtyBefore = inventory.qtyOnHand;
@@ -649,11 +653,11 @@ export class InventoryManagement {
                 // Step 1 — Availability check with row-level intent (re-validate inside)
                 let inventory = await inventoryPersistor.inventoryByProductWarehouseVariant(productId, warehouseId, variantId);
                 if (!inventory) {
-                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND, true));
                 }
                 let qtyAvailable = (inventory.qtyOnHand ?? 0) - (inventory.qtyReserved ?? 0) - (inventory.qtyCommitted ?? 0);
                 if (qtyAvailable < quantity) {
-                    return reject(new ApiError(`Insufficient stock. Available: ${qtyAvailable}`, StatusCodes.CONFLICT));
+                    return reject(new ApiError(`Insufficient stock. Available: ${qtyAvailable}`, StatusCodes.CONFLICT, true));
                 }
 
                 // Step 2 — Commit: increase qtyCommitted, qtyOnHand unchanged
@@ -702,17 +706,17 @@ export class InventoryManagement {
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
-                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND, true));
                 }
                 let binStock = await binStockManagement.binStockById(binStockId);
                 if (!binStock) {
-                    return reject(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND, true));
                 }
                 if (quantity > binStock.qtyOnHand) {
-                    return reject(new ApiError(`Cannot pick ${quantity} units — only ${binStock.qtyOnHand} in this bin`, StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError(`Cannot pick ${quantity} units — only ${binStock.qtyOnHand} in this bin`, StatusCodes.BAD_REQUEST, true));
                 }
                 if (quantity > inventory.qtyCommitted) {
-                    return reject(new ApiError("Dispatch quantity exceeds committed stock", StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError("Dispatch quantity exceeds committed stock", StatusCodes.BAD_REQUEST, true));
                 }
 
                 let qtyBefore = inventory.qtyOnHand;
@@ -760,7 +764,7 @@ export class InventoryManagement {
 
                 let inventory = await inventoryPersistor.inventoryById(inventoryId);
                 if (!inventory) {
-                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Inventory not found", StatusCodes.NOT_FOUND, true));
                 }
 
                 let qtyBefore = inventory.qtyOnHand;
@@ -807,7 +811,7 @@ export class InventoryManagement {
                 // Step 1 — Find the dispatch ledger entry (PICK with bin assigned) for this order
                 let dispatchLedger = await stockLedgerManagement.dispatchLedgerByOrderId(orderId);
                 if (!dispatchLedger) {
-                    return reject(new ApiError("No dispatch record found for this order", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("No dispatch record found for this order", StatusCodes.NOT_FOUND, true));
                 }
 
                 let inventoryId = dispatchLedger.inventory?.id;
@@ -818,7 +822,7 @@ export class InventoryManagement {
                 let binStock = await binStockManagement.binStockById(binStockId);
 
                 if (!inventory || !binStock) {
-                    return reject(new ApiError("Inventory or bin stock not found for return", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Inventory or bin stock not found for return", StatusCodes.NOT_FOUND, true));
                 }
 
                 let qtyBefore = inventory.qtyOnHand;
