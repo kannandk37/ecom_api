@@ -9,7 +9,7 @@ export class CategoryManagement {
                 let categoryPeristor = new CategoryPersistor();
                 let isCategoryWithName = await this.categoryByName(category.name);
                 if (isCategoryWithName) {
-                    return reject(new ApiError("Category With Name Already Exists", StatusCodes.CONFLICT))
+                    return reject(new ApiError("Category With Name Already Exists", StatusCodes.CONFLICT, true))
                 }
                 let persistedCategory = await categoryPeristor.createCategory(category);
                 resolve(await this.categoryById(persistedCategory.id));
@@ -58,7 +58,7 @@ export class CategoryManagement {
                 let categoryPeristor = new CategoryPersistor();
                 let isCategoryWithName = await this.categoryByName(category.name);
                 if (isCategoryWithName?.id == id) {
-                    return reject(new ApiError("Category With Name Already Exists", StatusCodes.CONFLICT))
+                    return reject(new ApiError("Category With Name Already Exists", StatusCodes.CONFLICT, true))
                 }
                 await categoryPeristor.updateCategoryById(id, category);
                 resolve(await this.categoryById(id));

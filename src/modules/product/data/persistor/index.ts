@@ -1,6 +1,7 @@
 import { BrandModel } from "../../../brand/data/schema";
 import { CategoryModel } from "../../../category/data/schema";
 import { VariantModel } from "../../../variant/data/schema";
+import { Variant } from "../../../variant/entity";
 import { Product } from "../../entity";
 import { ProductModel } from "../schema";
 import { productEntityToProductRecord, productsRecordsToProductsEntities, productRecordToProductEntity } from "./transformer";
@@ -41,6 +42,17 @@ export class ProductPersistor {
         })
     }
 
+    async productsByIds(ids: string[]): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let productRecords = await ProductModel.find({ _id: { $in: ids?.map((id) => (new ObjectId(id))) } }).populate([categoryPopulate(), brandPopulate(), variantsPopulate()]);
+                resolve(await productsRecordsToProductsEntities(productRecords));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
     async productsByCategoryId(categoryId: string): Promise<Product[]> {
         return new Promise<Product[]>(async (resolve, reject) => {
             try {
@@ -65,6 +77,34 @@ export class ProductPersistor {
                 reject(error);
             }
         })
+    }
+
+    async addVaraintToProduct(product: Product, variant: Variant): Promise<Product> {
+        return new Promise<Product>(async (resolve, reject) => {
+            try {
+                await ProductModel.updateOne(
+                    { _id: new ObjectId(product.id) },
+                    { $addToSet: { variants: new ObjectId(variant.id) } }
+                );
+                resolve(this.productById(product?.id));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async removeVaraintFromProduct(product: Product, variant: Variant): Promise<Product> {
+        return new Promise<Product>(async (resolve, reject) => {
+            try {
+                await ProductModel.updateOne(
+                    { _id: new ObjectId(product.id) },
+                    { $pull: { variants: new ObjectId(variant.id) } }
+                );
+                resolve(this.productById(product?.id));
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 }
 

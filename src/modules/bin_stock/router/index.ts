@@ -5,6 +5,7 @@ import { errorhandler } from "../../../exceptions/errorhandler";
 import { SuccessResponse } from "../../../exceptions/successHandler";
 import { StatusCodes } from "http-status-codes";
 import { BinStockManagement } from "../business";
+import ApiError from "../../../exceptions/apierror";
 
 export const binStockRouter = Router();
 
@@ -23,6 +24,9 @@ binStockRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleN
     try {
         let binStockId = request.params.id as string;
         let binStock = await new BinStockManagement().binStockById(binStockId);
+        if (!binStock) {
+           return response.status(StatusCodes.NOT_FOUND).send(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND, true));
+        }
         response.status(StatusCodes.OK).send(new SuccessResponse(binStock, 'Bin stock by id', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);

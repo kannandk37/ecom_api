@@ -14,7 +14,7 @@ variantRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
     try {
         let variantInfo = variantRawDatumToVariantEntity(request.body.variant);
         let persistedVariant = await new VariantManagement().createVariant(variantInfo);
-        response.status(StatusCodes.CREATED).send(new SuccessResponse(await new VariantManagement().variantById(persistedVariant.id), 'Variant created successfully', StatusCodes.CREATED))
+        response.status(StatusCodes.CREATED).send(new SuccessResponse(persistedVariant, 'Variant created successfully', StatusCodes.CREATED))
     } catch (error: any) {
         errorhandler(error, response);
     }

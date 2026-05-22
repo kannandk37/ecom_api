@@ -59,7 +59,7 @@ export class CartManagement {
                     await cartPersistor.deleteCartItemInCartItemsOfCartById(id, cartItemId);
                     resolve(await this.cartById(id));
                 } else {
-                    reject(new ApiError('Unable To Remove Cart Item', StatusCodes.BAD_REQUEST));
+                    reject(new ApiError('Unable To Remove Cart Item', StatusCodes.BAD_REQUEST, true));
                 }
             } catch (error) {
                 reject(error);

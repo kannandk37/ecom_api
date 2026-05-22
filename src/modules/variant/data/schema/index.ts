@@ -9,7 +9,6 @@ const VariantSchema = new Schema({
     price: { type: Number, required: true, index: true }, // For price range filters
     images: [{ type: String }],
     sku: { type: String, unique: true, index: true }, // Inventory lookup
-    stockQuantity: { type: Number, default: 0 },
 }, { timestamps: true });
 
 export const VariantModel = model('variants', VariantSchema);

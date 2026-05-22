@@ -21,5 +21,4 @@ export class Variant {
     images?: string[];
     // Added:
     sku?: string; // Stock Keeping Unit - mandatory for inventory management
-    stockQuantity?: number; // To prevent overselling
 }

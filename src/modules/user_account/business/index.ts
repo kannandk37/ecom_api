@@ -17,7 +17,7 @@ export class UserAccountManagement {
                 let isExistingUser = await userAccountPersistor.userAccountByEmail(email);
                 //TODO: can't handle it here sign up is breaking
                 // if (isExistingUser) {
-                //     return reject(new ApiError("User Already Exists", StatusCodes.NOT_FOUND));
+                //     return reject(new ApiError("User Already Exists", StatusCodes.NOT_FOUND, true));
                 // };
                 resolve(isExistingUser);
             } catch (error) {
@@ -42,12 +42,12 @@ export class UserAccountManagement {
                 let userAccountPersistor = new UserAccountPersistor();
                 let isExistingUser = await userAccountPersistor.userAccountByEmail(userAccount.email);
                 if (!isExistingUser) {
-                    return reject(new ApiError("Email Not Found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Email Not Found", StatusCodes.NOT_FOUND, true));
                 };
                 //check password
                 let isPasswordMatch = bcrypt.compareSync(userAccount.password, isExistingUser.password);
                 if (!isPasswordMatch) {
-                    return reject(new ApiError("Invalid Password", StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError("Invalid Password", StatusCodes.BAD_REQUEST, true));
                 };
                 let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
 
@@ -59,7 +59,7 @@ export class UserAccountManagement {
                     emailAccountData.email = profile.email;
                     emailAccountData.user = profile.user;
                     await new EmailAccountManagement().createEmailAccount(emailAccountData);
-                    return reject(new ApiError("Email Account Not Found", StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError("Email Account Not Found", StatusCodes.BAD_REQUEST, true));
                 }
                 const token = await this.generateToken(isExistingUser, profile.role);
 

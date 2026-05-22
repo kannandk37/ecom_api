@@ -60,3 +60,13 @@ productRouter.get('/category/:categoryId', async (request: Request, response: Re
         errorhandler(error, response);
     }
 });
+
+productRouter.get('/warehouse/:warehouseId', async (request: Request, response: Response) => {
+    try {
+        let warehouseId = request.params.warehouseId as string;
+        let products = await new ProductManagement().productsByWarehouseId(warehouseId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(products, "Products of warehouse Id", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});

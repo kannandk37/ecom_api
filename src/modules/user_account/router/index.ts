@@ -110,7 +110,7 @@ userAccountRouter.post(
 
                 response.status(StatusCodes.CREATED).send(new SuccessResponse(data, "User successfully created", StatusCodes.CREATED));
             } else {
-                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User With Email Already already exists", StatusCodes.BAD_REQUEST));
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User With Email Already already exists", StatusCodes.BAD_REQUEST, true));
             };
         } catch (error: any) {
             errorhandler(error, response);
@@ -131,14 +131,14 @@ userAccountRouter.post(
             if (user) {
                 let profile = await new ProfileManagement().profileByEmail(userAccountInfo.email);
                 if (profile.role.name != RoleName.CUSTOMER) {
-                    response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+                    response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST, true));
                 } else {
                     let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
                     let result = await userAccountManagement.loginExistingUser(userAccount);
                     response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Login in successful", StatusCodes.CREATED));
                 }
             } else {
-                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST, true));
             }
         } catch (error: any) {
             errorhandler(error, response);
@@ -159,14 +159,14 @@ userAccountRouter.post(
             if (user) {
                 let profile = await new ProfileManagement().profileByEmail(userAccountInfo.email);
                 if (profile.role.name == RoleName.CUSTOMER) {
-                    response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+                    response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST, true));
                 } else {
                     let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
                     let result = await userAccountManagement.loginExistingUser(userAccount);
                     response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Login in successful", StatusCodes.CREATED));
                 }
             } else {
-                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST));
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST, true));
             }
         } catch (error: any) {
             errorhandler(error, response);

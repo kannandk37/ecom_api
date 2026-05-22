@@ -74,12 +74,13 @@ inventoryRouter.post('/adjust', verifyToken, specificRolesOnly([RoleName.ADMIN, 
         let inventoryInfo = request.body.inventory;
         let binStockInfo = request.body.binStock;
         let stockLedgerInfo = request.body.stockLedger;
+        let canDelete = request.body.canDelete;
 
         let inventoryData = inventoryRawDatumToInventoryEntity(inventoryInfo);
         let binStockData = binStockRawDatumToBinStockEntity(binStockInfo);
         let stockLedgerData = stockLedgerRawDatumToStockLedgerEntity(stockLedgerInfo);
 
-        let inventory = await new InventoryManagement().adjustStock(inventoryData, binStockData, stockLedgerData, request.user);
+        let inventory = await new InventoryManagement().adjustStock(inventoryData, binStockData, stockLedgerData, request.user, canDelete);
         response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Stock adjusted successfully', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);

@@ -31,7 +31,7 @@ export class UserAccountPersistor {
                 if (foundExistingUser) {
                     // throw new Error("user email already exists!!..")
                     return reject(
-                        new ApiError("Profile email already exists", StatusCodes.BAD_REQUEST)
+                        new ApiError("Profile email already exists", StatusCodes.BAD_REQUEST, true)
                     );
                 } else {
                     let userAccountRecordData = userAccountEntityToUserAccountRecord(userAccount);

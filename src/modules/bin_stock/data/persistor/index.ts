@@ -137,4 +137,15 @@ export class BinStockPersistor {
             }
         });
     }
+
+    async deleteById(binId: string): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                let binStockRecord = await BinStockModel.deleteOne({ _id: new ObjectId(binId) });
+                resolve(binStockRecord.acknowledged);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }

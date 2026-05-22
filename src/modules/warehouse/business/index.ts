@@ -13,17 +13,17 @@ export class WarehouseManagement {
             try {
                 let totalBinQuantity = warehouseBins?.reduce((sum: number, warehouse: WarehouseBin) => sum + warehouse.maxUnits, 0);
                 if(totalBinQuantity > warehouse.totalCapacity) {
-                    return reject(new ApiError("Warehouse Bin Quantity Is Higher Than The Warehouse Max Qty", StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError("Warehouse Bin Quantity Is Higher Than The Warehouse Max Qty", StatusCodes.BAD_REQUEST, true));
                 }
                 let warehousePersistor = new WarehousePersistor();
                 let isWarehouseWithName = await this.warehouseByName(warehouse.name);
                 if (isWarehouseWithName) {
-                    return reject(new ApiError("Warehouse with this Name already exists", StatusCodes.CONFLICT));
+                    return reject(new ApiError("Warehouse with this Name already exists", StatusCodes.CONFLICT, true));
                 }
                 warehouse.code = await this.generateCode(warehouse.name);
                 let isWarehouseWithCode = await this.warehouseByCode(warehouse.code);
                 if (isWarehouseWithCode) {
-                    return reject(new ApiError("Warehouse with this code already exists", StatusCodes.CONFLICT));
+                    return reject(new ApiError("Warehouse with this code already exists", StatusCodes.CONFLICT, true));
                 }
                 let address = await new AddressManagement().createAddress(warehouse.address);
                 warehouse.address = address;
@@ -71,7 +71,7 @@ export class WarehouseManagement {
                 if (warehouseName) {
                     resolve(warehouseName.match(/\b\w/g).join('').toUpperCase());
                 } else {
-                    return reject(new ApiError("Please Provide Warehouse Name", StatusCodes.CONFLICT));
+                    return reject(new ApiError("Please Provide Warehouse Name", StatusCodes.CONFLICT, true));
                 }
             } catch (error) {
                 reject(error);
@@ -96,7 +96,7 @@ export class WarehouseManagement {
                 let warehousePersistor = new WarehousePersistor();
                 let warehouse = await warehousePersistor.warehouseById(id);
                 if (!warehouse) {
-                    return reject(new ApiError("Warehouse not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Warehouse not found", StatusCodes.NOT_FOUND, true));
                 }
                 resolve(warehouse);
             } catch (error) {
@@ -133,12 +133,12 @@ export class WarehouseManagement {
                 let warehousePersistor = new WarehousePersistor();
                 let existingWarehouse = await this.warehouseById(id);
                 if (!existingWarehouse) {
-                    return reject(new ApiError("Warehouse not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Warehouse not found", StatusCodes.NOT_FOUND, true));
                 }
                 if (warehouse.code && warehouse.code !== existingWarehouse.code) {
                     let isWarehouseWithCode = await this.warehouseByCode(warehouse.code);
                     if (isWarehouseWithCode) {
-                        return reject(new ApiError("Warehouse with this code already exists", StatusCodes.CONFLICT));
+                        return reject(new ApiError("Warehouse with this code already exists", StatusCodes.CONFLICT, true));
                     }
                 }
                 resolve(await warehousePersistor.updateWarehouseById(id, warehouse));

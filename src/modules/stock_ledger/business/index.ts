@@ -34,7 +34,7 @@ export class StockLedgerManagement {
                 let stockLedgerPersistor = new StockLedgerPersistor();
                 let stockLedger = await stockLedgerPersistor.stockLedgerById(id);
                 if (!stockLedger) {
-                    return reject(new ApiError("Stock ledger entry not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Stock ledger entry not found", StatusCodes.NOT_FOUND, true));
                 }
                 resolve(stockLedger);
             } catch (error) {

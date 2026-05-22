@@ -63,7 +63,7 @@ export class EmailAccountManagement {
                 let userAccountManagement = new UserAccountManagement();
                 let isEmailAccountExitsForUser = await emailAccountPersistor.emailAccountByRefreshTokenAndUser(refreshToken, user.id);
                 if (!isEmailAccountExitsForUser) {
-                    return reject(new ApiError("Email Account Not Found", StatusCodes.BAD_REQUEST));
+                    return reject(new ApiError("Email Account Not Found", StatusCodes.BAD_REQUEST, true));
                 } else {
                     let userAccount = await userAccountManagement.userAccountByEmail(isEmailAccountExitsForUser.email);
                     let accessToken = await userAccountManagement.generateToken(userAccount, role);

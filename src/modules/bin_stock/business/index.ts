@@ -22,9 +22,6 @@ export class BinStockManagement {
             try {
                 let binStockPersistor = new BinStockPersistor();
                 let binStock = await binStockPersistor.binStockById(id);
-                if (!binStock) {
-                    return reject(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND));
-                }
                 resolve(binStock);
             } catch (error) {
                 reject(error);
@@ -37,9 +34,6 @@ export class BinStockManagement {
             try {
                 let binStockPersistor = new BinStockPersistor();
                 let binStocks = await binStockPersistor.binStocksByWarehouseBinAndProduct(warehouseBinId, productId);
-                if (binStocks?.length == 0) {
-                    return reject(new ApiError("Bin stock not found", StatusCodes.NOT_FOUND));
-                }
                 resolve(binStocks);
             } catch (error) {
                 reject(error);
@@ -107,6 +101,18 @@ export class BinStockManagement {
                 let binStockPersistor = new BinStockPersistor();
                 await binStockPersistor.updateBinStockById(id, binStockData);
                 resolve(await this.binStockById(id));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async deleteById(id: string): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                let binStockPersistor = new BinStockPersistor();
+                await binStockPersistor.deleteById(id);
+                resolve(true);
             } catch (error) {
                 reject(error);
             }

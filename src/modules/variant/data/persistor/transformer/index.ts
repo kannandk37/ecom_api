@@ -41,10 +41,6 @@ export function variantRecordToVariantEntity(variantRecord: any): Variant {
         variant.sku = variantRecord.sku;
     }
 
-    if (variantRecord.stockQuantity !== undefined) {
-        variant.stockQuantity = variantRecord.stockQuantity;
-    }
-
     return variant;
 }
 
@@ -85,10 +81,6 @@ export function variantEntityToVariantRecord(variant: Variant): object {
 
     if (variant.sku) {
         record.sku = variant.sku;
-    }
-
-    if (variant.stockQuantity !== undefined) {
-        record.stockQuantity = variant.stockQuantity;
     }
 
     return record;

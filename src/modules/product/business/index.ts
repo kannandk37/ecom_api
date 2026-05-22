@@ -1,3 +1,6 @@
+import { InventoryPersistor } from "../../inventory/data/persistor";
+import { Inventory } from "../../inventory/entity";
+import { Variant } from "../../variant/entity";
 import { ProductPersistor } from "../data/persistor";
 import { Duration, Label, Product, ShelfLifeValue, SpecValue, Storage } from "../entity";
 
@@ -35,11 +38,38 @@ export class ProductManagement {
         });
     }
 
+    async productsByIds(ids: string[]): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let productPeristor = new ProductPersistor();
+                resolve(await productPeristor.productsByIds(ids));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async productsByCategoryId(categoryId: string): Promise<Product[]> {
         return new Promise<Product[]>(async (resolve, reject) => {
             try {
                 let productPeristor = new ProductPersistor();
                 resolve(await productPeristor.productsByCategoryId(categoryId));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async productsByWarehouseId(warehouseId: string): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let inventoryPeristor = new InventoryPersistor();
+                let inventories = await inventoryPeristor.inventoriesByWarehouseId(warehouseId);
+                let products: Product[] = [];
+                if (inventories?.length > 0) {
+                    products = await this.productsByIds(inventories.map((el: Inventory) => el.product?.id))
+                }
+                resolve(products);
             } catch (error) {
                 reject(error);
             }
@@ -89,4 +119,25 @@ export class ProductManagement {
         return results.every(res => res === true);
     };
 
+    async addVaraintToProduct(product: Product, variant: Variant): Promise<Product> {
+        return new Promise<Product>(async (resolve, reject) => {
+            try {
+                let productPeristor = new ProductPersistor();
+                resolve(await productPeristor.addVaraintToProduct(product, variant));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async removeVaraintFromProduct(product: Product, variant: Variant): Promise<Product> {
+        return new Promise<Product>(async (resolve, reject) => {
+            try {
+                let productPeristor = new ProductPersistor();
+                resolve(await productPeristor.removeVaraintFromProduct(product, variant));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }

@@ -61,7 +61,7 @@ userRouter.post('/onboarding', verifyToken, specificRolesOnly([RoleName.SUPERADM
 
             response.status(StatusCodes.CREATED).send(new SuccessResponse(createdUser, "User successfully created", StatusCodes.CREATED));
         } else {
-            response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User already exists", StatusCodes.BAD_REQUEST));
+            response.status(StatusCodes.BAD_REQUEST).send(new ApiError("User already exists", StatusCodes.BAD_REQUEST, true));
         }
     } catch (error: any) {
         errorhandler(error, response);

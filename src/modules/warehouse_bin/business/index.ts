@@ -12,7 +12,7 @@ export class WarehouseBinManagement {
                 let warehouseBinPersistor = new WarehouseBinPersistor();
                 let isBinWithCode = await this.warehouseBinByCode(warehouseBin.binCode);
                 if (isBinWithCode) {
-                    return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT));
+                    return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT, true));
                 }
                 let persistedBin = await warehouseBinPersistor.createWarehouseBin(warehouseBin);
                 resolve(persistedBin);
@@ -30,7 +30,7 @@ export class WarehouseBinManagement {
 
                 let isBinWithCodes = await this.warehouseBinByCodes(binCodes);
                 if (isBinWithCodes?.length > 0) {
-                    return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT));
+                    return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT, true));
                 }
                 let persistedBins = await warehouseBinPersistor.createWarehouseBins(warehouseBins);
                 resolve(persistedBins);
@@ -90,7 +90,7 @@ export class WarehouseBinManagement {
                 let warehouseBinPersistor = new WarehouseBinPersistor();
                 let warehouseBin = await warehouseBinPersistor.warehouseBinById(id);
                 if (!warehouseBin) {
-                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND, true));
                 }
                 resolve(warehouseBin);
             } catch (error) {
@@ -105,7 +105,7 @@ export class WarehouseBinManagement {
                 let warehouseBinPersistor = new WarehouseBinPersistor();
                 let existingBin = await this.warehouseBinById(id);
                 if (!existingBin) {
-                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND));
+                    return reject(new ApiError("Warehouse bin not found", StatusCodes.NOT_FOUND, true));
                 }
                 // Guard: cannot deactivate a bin that still has stock
                 if (warehouseBin.isActive === false && existingBin.isActive === true) {
@@ -113,13 +113,13 @@ export class WarehouseBinManagement {
                     let activeBinStocks = await binStockPersistor.binStocksByBinId(id);
                     let hasStock = activeBinStocks.some(bs => bs.qtyOnHand > 0);
                     if (hasStock) {
-                        return reject(new ApiError("Cannot deactivate bin with active stock. Clear or move stock first.", StatusCodes.BAD_REQUEST));
+                        return reject(new ApiError("Cannot deactivate bin with active stock. Clear or move stock first.", StatusCodes.BAD_REQUEST, true));
                     }
                 }
                 if (warehouseBin.binCode && warehouseBin.binCode !== existingBin.binCode) {
                     let isBinWithCode = await warehouseBinPersistor.warehouseBinByCode(warehouseBin.binCode);
                     if (isBinWithCode) {
-                        return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT));
+                        return reject(new ApiError("Warehouse bin with this code already exists", StatusCodes.CONFLICT, true));
                     }
                 }
                 resolve(await warehouseBinPersistor.updateWarehouseBinById(id, warehouseBin));
