@@ -200,7 +200,11 @@ export class InventoryManagement {
                 stockLedgerInfo.performedBy = performedBy;
 
                 for (const warehouseBin of inventoryInfo.warehouseBins) {
-                    warehouseBin.isOccupied = true
+                    if(warehouseBin.currentStock == warehouseBin.maxUnits) {
+                        warehouseBin.isOccupied = true;
+                    } else {
+                        warehouseBin.isOccupied = false;
+                    }
                     await warehouseBinManagement.updateWarehouseBinById(warehouseBin?.id, warehouseBin);
 
                     let binStock = new BinStock();

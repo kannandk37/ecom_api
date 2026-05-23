@@ -1,6 +1,7 @@
 import { WarehouseBin } from "../../../entity";
 import { warehouseRecordToWarehouseEntity } from "../../../../warehouse/data/persistor/transformer";
 import { ObjectId } from "mongodb";
+import { DateTime } from "luxon";
 
 export function warehouseBinRecordToWarehouseBinEntity(warehouseBinRecord: any): WarehouseBin {
     let warehouseBin = new WarehouseBin();
@@ -55,6 +56,10 @@ export function warehouseBinRecordToWarehouseBinEntity(warehouseBinRecord: any):
 
     if (warehouseBinRecord.isOccupied !== undefined) {
         warehouseBin.isOccupied = warehouseBinRecord.isOccupied;
+    }
+
+    if (warehouseBinRecord.createdAt) {
+        warehouseBin.createdAt = DateTime.fromJSDate(warehouseBinRecord.createdAt);
     }
 
     return warehouseBin;

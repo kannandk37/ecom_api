@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { Warehouse } from "../../warehouse/entity";
 
 export class WarehouseBin {
@@ -13,4 +14,5 @@ export class WarehouseBin {
     minThreshold?: number;
     currentStock?: number;
     isOccupied?: boolean;
+    createdAt?: DateTime; //TODO: need to add it in transforemer and in all places
 }
