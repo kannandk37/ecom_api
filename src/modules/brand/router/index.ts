@@ -29,11 +29,30 @@ brandRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CU
     }
 });
 
+brandRouter.get('/brandswithproducts', async (request: Request, response: Response) => {
+    try {
+        let brands = await new BrandManagement().brandsWithProducts();
+        response.status(StatusCodes.OK).send(new SuccessResponse(brands, "Brands List", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
 brandRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let brandId = request.params.id as string;
         let brand = await new BrandManagement().brandById(brandId);
         response.status(StatusCodes.OK).send(new SuccessResponse(brand, "Brand of Id", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+brandRouter.get('/category/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let categoryId = request.params.id as string;
+        let brands = await new BrandManagement().brandByCategoryId(categoryId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(brands, "Brands Of Category Id", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
     }

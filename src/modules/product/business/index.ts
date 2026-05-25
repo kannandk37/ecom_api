@@ -60,6 +60,17 @@ export class ProductManagement {
         });
     }
 
+    async productsByBrandId(brandId: string): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let productPeristor = new ProductPersistor();
+                resolve(await productPeristor.productsByBrandId(brandId));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async productsByWarehouseId(warehouseId: string): Promise<Product[]> {
         return new Promise<Product[]>(async (resolve, reject) => {
             try {

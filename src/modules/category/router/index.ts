@@ -29,6 +29,15 @@ categoryRouter.get('/', async (request: Request, response: Response) => {
     }
 });
 
+categoryRouter.get('/categorieswithbrandsandproducts', async (request: Request, response: Response) => {
+    try {
+        let categories = await new CategoryManagement().categoriesWithBrandsAndProducts();
+        response.status(StatusCodes.OK).send(new SuccessResponse(categories, "Categories List", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
 categoryRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let categoryId = request.params.id as string;

@@ -44,4 +44,18 @@ export class BrandPersistor {
             }
         })
     }
+
+    async brandByCategoryId(categoryId: string): Promise<Brand[]> {
+        return new Promise<Brand[]>(async (resolve, reject) => {
+            try {
+                let brandRecords = await BrandModel.find({ category: new ObjectId(categoryId) }).populate({
+                    path: 'category',
+                    model: CategoryModel
+                });
+                resolve(await brandsRecordsToBrandsEntities(brandRecords));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
 }
