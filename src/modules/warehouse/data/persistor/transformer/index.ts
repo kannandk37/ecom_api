@@ -1,5 +1,6 @@
 import { addressRecordToAddressEntity } from "../../../../address/data/persistor/transformer";
 import { userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
+import { warehouseBinsRecordsToWarehouseBinsEntities } from "../../../../warehouse_bin/data/persistor/transformer";
 import { Warehouse } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -56,6 +57,10 @@ export function warehouseRecordToWarehouseEntity(warehouseRecord: any): Warehous
 
     if (warehouseRecord.updatedAt) {
         warehouse.updatedAt = warehouseRecord.updatedAt;
+    }
+
+    if (warehouseRecord.warehouseBins) {
+        warehouse.warehouseBins = warehouseBinsRecordsToWarehouseBinsEntities(warehouseRecord.warehouseBins);
     }
 
     return warehouse;

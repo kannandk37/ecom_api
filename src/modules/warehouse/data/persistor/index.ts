@@ -24,7 +24,7 @@ export class WarehousePersistor {
     async warehouses(): Promise<Warehouse[]> {
         return new Promise<Warehouse[]>(async (resolve, reject) => {
             try {
-                let warehouseRecords = await WarehouseModel.find();
+                let warehouseRecords = await WarehouseModel.find().populate('warehouseBins');
                 resolve(warehousesRecordsToWarehousesEntities(warehouseRecords));
             } catch (error) {
                 reject(error);

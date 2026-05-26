@@ -24,7 +24,7 @@ export class ProfilePersistor {
             try {
                 let profileRecord: any = await ProfileModel.findOne({
                     email: email
-                }).populate([userPopulate(),rolePopulate()]);
+                }).populate([userPopulate(), rolePopulate()]);
                 resolve(await profileRecordToProfileEntity(profileRecord));
             } catch (error) {
                 reject(error);
@@ -37,7 +37,7 @@ export class ProfilePersistor {
             try {
                 let profileRecord: any = await ProfileModel.findOne({
                     mobile: mobile
-                }).populate([userPopulate(),rolePopulate()]);
+                }).populate([userPopulate(), rolePopulate()]);
                 resolve(await profileRecordToProfileEntity(profileRecord));
             } catch (error) {
                 reject(error);
@@ -46,11 +46,11 @@ export class ProfilePersistor {
     }
 
     async profileByUserId(userId: string): Promise<Profile> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise<Profile>(async (resolve, reject) => {
             try {
                 let profileRecord = await ProfileModel.findOne({
                     user: new ObjectId(userId)
-                }).populate([userPopulate(),rolePopulate()]);
+                }).populate([userPopulate(), rolePopulate()]);
                 resolve(await profileRecordToProfileEntity(profileRecord));
             } catch (error) {
                 reject(error);
@@ -58,6 +58,29 @@ export class ProfilePersistor {
         });
     }
 
+    async profileById(id: string): Promise<Profile> {
+        return new Promise<Profile>(async (resolve, reject) => {
+            try {
+                let profileRecord = await ProfileModel.findOne({
+                    _id: new ObjectId(id)
+                }).populate([userPopulate(), rolePopulate()]);
+                resolve(await profileRecordToProfileEntity(profileRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async profiles(): Promise<Profile[]> {
+        return new Promise<Profile[]>(async (resolve, reject) => {
+            try {
+                let profileRecords = await ProfileModel.find().populate([userPopulate(), rolePopulate()]);
+                resolve(await profilesRecordsToProfilesEntities(profileRecords));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 
     async profileByRoleIds(roleIds: string[]): Promise<Profile[]> {
         return new Promise<Profile[]>(async (resolve, reject) => {
@@ -73,7 +96,7 @@ export class ProfilePersistor {
     }
 }
 
-export function rolePopulate () {
+export function rolePopulate() {
     return {
         path: 'role',
         model: RoleModel

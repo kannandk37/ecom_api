@@ -5,6 +5,7 @@ import ApiError from "../../../exceptions/apierror";
 import { AddressManagement } from "../../address/business";
 import { WarehouseBin } from "../../warehouse_bin/entity";
 import { WarehouseBinManagement } from "../../warehouse_bin/business";
+import { InventoryManagement } from "../../inventory/business";
 
 export class WarehouseManagement {
 
@@ -12,7 +13,7 @@ export class WarehouseManagement {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
                 let totalBinQuantity = warehouseBins?.reduce((sum: number, warehouse: WarehouseBin) => sum + warehouse.maxUnits, 0);
-                if(totalBinQuantity > warehouse.totalCapacity) {
+                if (totalBinQuantity > warehouse.totalCapacity) {
                     return reject(new ApiError("Warehouse Bin Quantity Is Higher Than The Warehouse Max Qty", StatusCodes.BAD_REQUEST, true));
                 }
                 let warehousePersistor = new WarehousePersistor();
@@ -28,7 +29,7 @@ export class WarehouseManagement {
                 let address = await new AddressManagement().createAddress(warehouse.address);
                 warehouse.address = address;
                 let persistedWarehouse = await warehousePersistor.createWarehouse(warehouse);
-                
+
                 // const warehouseBins: WarehouseBin[] = [];
 
                 // for (let a = 1; a <= Number(warehouseBin.aisle ?? 1); a++) {
@@ -56,7 +57,7 @@ export class WarehouseManagement {
                 //     }
                 // }
 
-                await new WarehouseBinManagement().createWarehouseBins(warehouseBins.map((el) => {return {...el, warehouse : persistedWarehouse}}));
+                await new WarehouseBinManagement().createWarehouseBins(warehouseBins.map((el) => { return { ...el, warehouse: persistedWarehouse } }));
 
                 resolve(await this.warehouseById(persistedWarehouse.id));
             } catch (error) {
@@ -142,6 +143,71 @@ export class WarehouseManagement {
                     }
                 }
                 resolve(await warehousePersistor.updateWarehouseById(id, warehouse));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async warehouseDetails(): Promise<{
+        warehouse: Warehouse,
+        warehouseBins: WarehouseBin[],
+        totalWareHouseBins: number;
+        totalCapacitySpace: number;
+        totalAvailableSpace: number;
+        totalOccupiedSpace: number;
+        noOfProducts: number
+    }[]> {
+        return new Promise<{
+            warehouse: Warehouse,
+            warehouseBins: WarehouseBin[],
+            totalWareHouseBins: number;
+            totalCapacitySpace: number;
+            totalAvailableSpace: number;
+            totalOccupiedSpace: number;
+            noOfProducts: number
+        }[]>(async (resolve, reject) => {
+            try {
+                let warehousePersistor = new WarehousePersistor();
+                let warehouses = await warehousePersistor.warehouses();
+                let result: {
+                    warehouse: Warehouse,
+                    warehouseBins: WarehouseBin[],
+                    totalWareHouseBins: number;
+                    totalCapacitySpace: number;
+                    totalAvailableSpace: number;
+                    totalOccupiedSpace: number;
+                    noOfProducts: number
+                }[] = [];
+                if (warehouses?.length) {
+                    for (const warehouse of warehouses) {
+
+                        let capacity = warehouse.warehouseBins?.reduce((sum: number, warehouseBin: WarehouseBin) => { return sum + (warehouseBin.maxUnits ?? 0) }, 0);
+                        let occupied = warehouse.warehouseBins?.reduce((sum: number, warehouseBin: WarehouseBin) => { return sum + (warehouseBin.currentStock ?? 0) }, 0);
+                        let inventories = await new InventoryManagement().inventoriesByWarehouseId(warehouse?.id);
+                        let uniqueProductCount = new Set(inventories.map(inventory => inventory.product?.id)).size;
+
+                        let datum: {
+                            warehouse: Warehouse,
+                            warehouseBins: WarehouseBin[],
+                            totalWareHouseBins: number;
+                            totalCapacitySpace: number;
+                            totalAvailableSpace: number;
+                            totalOccupiedSpace: number;
+                            noOfProducts: number
+                        } = {
+                            warehouse: warehouse,
+                            warehouseBins: warehouse.warehouseBins,
+                            totalWareHouseBins: warehouse.warehouseBins?.length ?? 0,
+                            totalCapacitySpace: capacity,
+                            totalAvailableSpace: occupied,
+                            totalOccupiedSpace: (capacity - occupied),
+                            noOfProducts: uniqueProductCount
+                        }
+                        result.push(datum);
+                    }
+                }
+                resolve(result);
             } catch (error) {
                 reject(error);
             }

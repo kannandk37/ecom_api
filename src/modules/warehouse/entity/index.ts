@@ -1,5 +1,6 @@
 import { Address } from "../../address/entity";
 import { User } from "../../user/entity";
+import { WarehouseBin } from "../../warehouse_bin/entity";
 
 export enum WarehouseType {
     OWN = 'own',
@@ -31,4 +32,7 @@ export class Warehouse {
     createdAt?: Date;
     updatedAt?: Date;
     operator?: User;
+
+    // only for data fetching on relationship
+    warehouseBins?: WarehouseBin[]
 }

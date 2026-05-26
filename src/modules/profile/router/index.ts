@@ -19,3 +19,26 @@ profileRouter.get('/staffs',
         errorhandler(error, response);
     }
 });
+
+profileRouter.get('/',
+     verifyToken, specificRolesOnly([RoleName.SUPERADMIN, RoleName.ADMIN]), 
+     async (request: Request, response: Response) => {
+    try {
+        let profileManagement = new ProfileManagement();
+        response.status(StatusCodes.OK).send(new SuccessResponse(await profileManagement.profilesByRoles([RoleName.SUPERADMIN, RoleName.ADMIN, RoleName.CUSTOMER]), 'Profiles List', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+profileRouter.get('/:id',
+     verifyToken, specificRolesOnly([RoleName.SUPERADMIN, RoleName.ADMIN]), 
+     async (request: Request, response: Response) => {
+    try {
+        let id = request.params.id as string;
+        let profileManagement = new ProfileManagement();
+        response.status(StatusCodes.OK).send(new SuccessResponse(await profileManagement.profileById(id), 'Profiles List', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});

@@ -61,7 +61,7 @@ export class ProfileManagement {
         });
     }
 
-    async profileByEmail(email: string) {
+    async profileByEmail(email: string): Promise<Profile> {
         return new Promise<Profile>(async (resolve, reject) => {
             try {
                 let profilePersistor = new ProfilePersistor();
@@ -72,7 +72,7 @@ export class ProfileManagement {
         })
     }
 
-    async profileByUserId(userId: string) {
+    async profileByUserId(userId: string): Promise<Profile> {
         return new Promise<Profile>(async (resolve, reject) => {
             try {
                 let profilePersistor = new ProfilePersistor();
@@ -83,7 +83,18 @@ export class ProfileManagement {
         })
     }
 
-    async profilesByRoles(rolesNames: RoleName[]) {
+    async profileById(id: string): Promise<Profile> {
+        return new Promise<Profile>(async (resolve, reject) => {
+            try {
+                let profilePersistor = new ProfilePersistor();
+                resolve(await profilePersistor.profileById(id));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async profilesByRoles(rolesNames: RoleName[]): Promise<Profile[]> {
         return new Promise<Profile[]>(async (resolve, reject) => {
             try {
                 let roles = await new RoleManagement().getRolesByNames(rolesNames);
@@ -93,6 +104,17 @@ export class ProfileManagement {
                 } else {
                     resolve([]);
                 }
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async profiles(): Promise<Profile[]> {
+        return new Promise<Profile[]>(async (resolve, reject) => {
+            try {
+                let profilePersistor = new ProfilePersistor();
+                resolve(await profilePersistor.profiles());
             } catch (error) {
                 reject(error);
             }

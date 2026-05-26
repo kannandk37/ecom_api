@@ -15,4 +15,10 @@ const WarehouseSchema = new Schema({
     timestamps: true
 });
 
+WarehouseSchema.virtual('warehouseBins', {
+  ref: 'warehousebins',
+  localField: '_id',
+  foreignField: 'warehouse'
+});
+
 export const WarehouseModel = model('warehouses', WarehouseSchema);

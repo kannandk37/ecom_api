@@ -7,6 +7,8 @@ import { SuccessResponse } from "../../../exceptions/successHandler";
 import { WarehouseManagement } from "../business";
 import { StatusCodes } from "http-status-codes";
 import { warehouseBinsRawDataToWarehouseBinsEntities } from "../../warehouse_bin/router/transformer";
+import { Warehouse } from "../entity";
+import { WarehouseBin } from "../../warehouse_bin/entity";
 
 export const warehouseRouter = Router();
 
@@ -25,6 +27,23 @@ warehouseRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNam
     try {
         let warehouses = await new WarehouseManagement().warehouses();
         response.status(StatusCodes.OK).send(new SuccessResponse(warehouses, 'Warehouses list', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+warehouseRouter.get('/details', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+    try {
+        let warehouses: {
+                warehouse: Warehouse,
+                warehouseBins: WarehouseBin[],
+                totalWareHouseBins: number;
+                totalCapacitySpace: number;
+                totalAvailableSpace: number;
+                totalOccupiedSpace: number;
+                noOfProducts: number;
+            }[] = await new WarehouseManagement().warehouseDetails();
+        response.status(StatusCodes.OK).send(new SuccessResponse(warehouses, 'Warehouses', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
     }
