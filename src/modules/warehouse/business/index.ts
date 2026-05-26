@@ -200,8 +200,8 @@ export class WarehouseManagement {
                             warehouseBins: warehouse.warehouseBins,
                             totalWareHouseBins: warehouse.warehouseBins?.length ?? 0,
                             totalCapacitySpace: capacity,
-                            totalAvailableSpace: occupied,
-                            totalOccupiedSpace: (capacity - occupied),
+                            totalAvailableSpace: (capacity - occupied),
+                            totalOccupiedSpace: occupied,
                             noOfProducts: uniqueProductCount
                         }
                         result.push(datum);
