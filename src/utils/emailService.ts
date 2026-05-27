@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import path from 'path';
 
 export interface WelcomeEmailParams {
     userEmail: string;
@@ -229,7 +230,8 @@ export async function userOnBoardingPasswordReset({
 }: UserOnBoardingPasswordResetParams) {
 
     // The path to your banner
-    const heroImageUrl = process.env.HERO_IMAGE_URL
+    const imagePath = path.join(process.cwd(), 'data', 'Banner.png');
+    const heroImageUrl = imagePath
     const url = `https://naturecandy.vercel.app/reset-password?email=${userEmail}`
     const htmlContent = `
     <!DOCTYPE html>
