@@ -239,7 +239,7 @@ async function resetPasswordEmailTest() {
 // resetPasswordEmailTest();
 
 async function userOnBoardingPasswordResetTest() {
-    const { name, email, password, roleName } = { name: 'Tester', email: "kipisad958@gzeos.com", password: 'TEMP_SWETHA', roleName: "ADMIN" };
+    const { name, email, password, roleName } = { name: 'Tester', email: "gawes98466@gzeos.com", password: 'TEMP_SWETHA', roleName: "ADMIN" };
 
     await userOnBoardingPasswordReset({
         userEmail: email,
