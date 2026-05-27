@@ -239,7 +239,7 @@ async function resetPasswordEmailTest() {
 // resetPasswordEmailTest();
 
 async function userOnBoardingPasswordResetTest() {
-    const { name, email, password, roleName } = { name: 'Swetha', email: "swethag872003@gmail.com", password: 'TEMP_SWETHA', roleName: "ADMIN" };
+    const { name, email, password, roleName } = { name: 'Tester', email: "kipisad958@gzeos.com", password: 'TEMP_SWETHA', roleName: "ADMIN" };
 
     await userOnBoardingPasswordReset({
         userEmail: email,
@@ -251,7 +251,7 @@ async function userOnBoardingPasswordResetTest() {
 
 }
 
-// userOnBoardingPasswordResetTest();
+userOnBoardingPasswordResetTest();
 
 // Routes
 app.use('/api', userAccountRouter);

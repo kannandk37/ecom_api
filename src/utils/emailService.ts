@@ -297,7 +297,7 @@ export async function userOnBoardingPasswordReset({
         const info = await transporter.sendMail({
             from: '"Nature\'s Candy" <kannandk37@gmail.com>',
             to: userEmail,
-            subject: "Reset password for Nature's Candy",
+            subject: `Welcome On Board ${userName}`,
             html: htmlContent,
             attachments: [
                 {
