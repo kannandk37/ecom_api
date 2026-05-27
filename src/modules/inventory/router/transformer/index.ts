@@ -55,6 +55,14 @@ export function inventoryRawDatumToInventoryEntity(raw: any): Inventory {
         inventory.qtyCommitted = raw.qtyCommitted;
     }
 
+    if (raw.totalDamaged !== undefined) {
+        inventory.totalDamaged = raw.totalDamaged;
+    }
+
+    if (raw.totalSold !== undefined) {
+        inventory.totalSold = raw.totalSold;
+    }
+
     if (raw.reorderOrderedQty !== undefined) {
         inventory.reorderOrderedQty = raw.reorderOrderedQty;
     }

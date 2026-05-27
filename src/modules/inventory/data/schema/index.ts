@@ -9,6 +9,8 @@ const InventorySchema = new Schema({
     qtyOnHand: { type: Number, default: 0 },
     qtyReserved: { type: Number, default: 0 },
     qtyCommitted: { type: Number, default: 0 },
+    totalDamaged: { type: Number, default: 0 },
+    totalSold: { type: Number, default: 0 },
     reorderPoint: { type: Number },
     reorderQty: { type: Number },
     reorderOrderedQty: { type: Number, default: 0 },

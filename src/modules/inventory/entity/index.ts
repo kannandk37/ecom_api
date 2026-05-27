@@ -18,6 +18,8 @@ export class Inventory {
     qtyOnHand?: number;
     qtyReserved?: number;
     qtyCommitted?: number;
+    totalSold?: number;
+    totalDamaged?: number;
     // qtyAvailable    — compute on read: qtyOnHand - qtyReserved - qtyCommitted
     reorderPoint?: number;
     reorderQty?: number;

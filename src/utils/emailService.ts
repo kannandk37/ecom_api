@@ -93,12 +93,12 @@ export async function sendWelcomeEmail({
                     <span class="promo-code">${promoCode}</span>
                 </div>
 
-                <a href="https://naturecandy.vercel.app" class="cta-button">Shop Now</a>
+                <a href="https://naturecandy.vercel.app" class="cta-button" target="_blank" rel="noopener noreferrer">Shop Now</a>
             </div>
 
             <div class="footer">
                 <p>Need assistance with your selection?<br>
-                Reply to this email or <a href="https://naturecandy.vercel.app/">visit our help center</a>.</p>
+                Reply to this email or <a href="https://naturecandy.vercel.app/" target="_blank" rel="noopener noreferrer">visit our help center</a>.</p>
                 <p>© ${new Date().getFullYear()} Nature's Candy. Ethically sourced, curated with care.</p>
             </div>
         </div>
@@ -181,7 +181,7 @@ export async function resetPasswordEmail({
                 
                 <p>We received a request to reset your password. Click the button below to secure your account and return to your curated collection.</p>
 
-                <a href=${url} class="cta-button">Reset Password</a>
+                <a href=${url} class="cta-button" target="_blank" rel="noopener noreferrer">Reset Password</a>
 
                 <p>If you did not request this, you can safely ignore this email. Your account security remains our highest priority.</p>
 
@@ -189,7 +189,7 @@ export async function resetPasswordEmail({
 
             <div class="footer">
                 <p>Need assistance with your selection?<br>
-                Reply to this email or <a href="https://naturecandy.vercel.app/">visit our help center</a>.</p>
+                Reply to this email or <a href="https://naturecandy.vercel.app/" target="_blank" rel="noopener noreferrer">visit our help center</a>.</p>
                 <p>© ${new Date().getFullYear()} Nature's Candy. Ethically sourced, curated with care.</p>
             </div>
         </div>
@@ -280,12 +280,12 @@ export async function userOnBoardingPasswordReset({
                     <span class="promo-code">${password}</span>
                 </div>
 
-                <a href=${url} class="cta-button">Reset Password</a>
+                <a href=${url} class="cta-button" target="_blank" rel="noopener noreferrer">Reset Password</a>
             </div>
 
             <div class="footer">
                 <p>Need assistance with your selection?<br>
-                Reply to this email or <a href="https://naturecandy.vercel.app/">visit our help center</a>.</p>
+                Reply to this email or <a href="https://naturecandy.vercel.app/" target="_blank" rel="noopener noreferrer">visit our help center</a>.</p>
                 <p>© ${new Date().getFullYear()} Nature's Candy. Ethically sourced, curated with care.</p>
             </div>
         </div>

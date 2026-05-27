@@ -45,6 +45,14 @@ export function inventoryRecordToInventoryEntity(inventoryRecord: any): Inventor
         inventory.qtyCommitted = inventoryRecord.qtyCommitted;
     }
 
+    if (inventoryRecord.totalDamaged !== undefined) {
+        inventory.totalDamaged = inventoryRecord.totalDamaged;
+    }
+
+    if (inventoryRecord.totalSold !== undefined) {
+        inventory.totalSold = inventoryRecord.totalSold;
+    }
+
     if (inventoryRecord.reorderPoint !== undefined) {
         inventory.reorderPoint = inventoryRecord.reorderPoint;
     }
@@ -113,6 +121,14 @@ export function inventoryEntityToInventoryRecord(inventory: Inventory): object {
 
     if (inventory.qtyCommitted !== undefined) {
         record.qtyCommitted = inventory.qtyCommitted;
+    }
+
+    if (inventory.totalDamaged !== undefined) {
+        record.totalDamaged = inventory.totalDamaged;
+    }
+
+    if (inventory.totalSold !== undefined) {
+        record.totalSold = inventory.totalSold;
     }
 
     if (inventory.reorderPoint !== undefined) {
