@@ -251,7 +251,7 @@ async function userOnBoardingPasswordResetTest() {
 
 }
 
-userOnBoardingPasswordResetTest();
+// userOnBoardingPasswordResetTest();
 
 // Routes
 app.use('/api', userAccountRouter);
