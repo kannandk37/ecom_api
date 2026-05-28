@@ -40,12 +40,11 @@ export class WarehouseBinManagement {
             transferSuggestions: WarehouseBin[],
         }>(async (resolve, reject) => {
             try {
-                let warehouseBinPersistor = new WarehouseBinPersistor();
                 let warehouseBins = await this.warehouseBinsByWarehouseId(warehouse?.id);
                 if (warehouseBins?.length == 0) {
                     return new ApiError('No Bins Exists For This Warehouse', StatusCodes.NOT_FOUND, true);
                 }
-
+                // need to check if this warehouse bin is for the product and variant
                 let availableBins = warehouseBins.filter((warehousebin: WarehouseBin) => warehousebin.isActive && !warehousebin.isOccupied && (warehousebin.maxUnits ?? 0) - (warehousebin.currentStock ?? 0) > 0)
 
                 if (availableBins?.length == 0) {
