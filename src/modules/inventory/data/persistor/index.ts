@@ -122,13 +122,27 @@ export class InventoryPersistor {
         });
     }
 
-    async incrementInventoryQty(id: string, qtyOnHandDelta: number, qtyCommittedDelta: number): Promise<Inventory> {
+    async incrementInventoryQty(id: string, qtyOnHandDelta?: number, qtyCommittedDelta?: number, totalDamaged?: number, totalSold?: number): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
+                let incrementalValue: any = {};
+                if (qtyOnHandDelta) {
+                    incrementalValue.qtyOnHandDelta = qtyOnHandDelta;
+                }
+                if (qtyCommittedDelta) {
+                    incrementalValue.qtyCommittedDelta = qtyCommittedDelta;
+                }
+                if (totalDamaged) {
+                    incrementalValue.totalDamaged = totalDamaged;
+                }
+                if (totalSold) {
+                    incrementalValue.totalSold = totalSold;
+                }
+
                 await InventoryModel.updateOne(
                     { _id: new ObjectId(id) },
                     {
-                        $inc: { qtyOnHand: qtyOnHandDelta, qtyCommitted: qtyCommittedDelta },
+                        $inc: incrementalValue,
                         $set: { lastMovementAt: new Date() }
                     }
                 );

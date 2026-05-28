@@ -96,10 +96,10 @@ export class InventoryManagement {
         });
     }
 
-    async incrementInventoryQty(id: string, qtyOnHandDelta: number, qtyCommittedDelta: number): Promise<Inventory> {
+    async incrementInventoryQty(id: string, qtyOnHandDelta?: number, qtyCommittedDelta?: number, totalDamaged?: number, totalSold?: number): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
-                await new InventoryPersistor().incrementInventoryQty(id, qtyOnHandDelta, qtyCommittedDelta);
+                await new InventoryPersistor().incrementInventoryQty(id, qtyOnHandDelta, qtyCommittedDelta, totalDamaged, totalSold);
                 resolve(await this.inventoryById(id));
             } catch (error) {
                 reject(error);
@@ -139,6 +139,10 @@ export class InventoryManagement {
 
                 if (warehouse.totalCapacity < inventoryInfo.qtyOnHand) {
                     return reject(new ApiError("Warehouse Does not have available space", StatusCodes.BAD_REQUEST, true));
+                }
+
+                if (inventoryInfo.qtyReserved < inventoryInfo.qtyOnHand) {
+                    return reject(new ApiError("Product Reserved Quantity given is higher than Product Quantity", StatusCodes.BAD_REQUEST, true));
                 }
 
                 if (inventoryInfo.maxStockLevel < inventoryInfo.qtyOnHand) {
@@ -200,7 +204,7 @@ export class InventoryManagement {
                 stockLedgerInfo.performedBy = performedBy;
 
                 for (const warehouseBin of inventoryInfo.warehouseBins) {
-                    if(warehouseBin.currentStock == warehouseBin.maxUnits) {
+                    if (warehouseBin.currentStock == warehouseBin.maxUnits) {
                         warehouseBin.isOccupied = true;
                     } else {
                         warehouseBin.isOccupied = false;
@@ -327,7 +331,7 @@ export class InventoryManagement {
 
                     bin = await warehouseBinManagement.updateWarehouseBinById(bin.id, bin);
 
-                    inventory = await this.incrementInventoryQty(inventory?.id, binStockInfo.qtyOnHand, inventory.qtyCommitted);
+                    inventory = await this.incrementInventoryQty(inventory?.id, binStockInfo.qtyOnHand);
 
                     ledger.inventory = inventory;
                     ledger.warehouse = inventory.warehouse;
@@ -504,6 +508,8 @@ export class InventoryManagement {
                 bin = await warehouseBinManagement.updateWarehouseBinById(bin.id, bin);
 
                 inventory = await this.decrementInventoryQty(inventory?.id, binStockInfo.qtyOnHand);
+
+                inventory = await this.incrementInventoryQty(inventory?.id, binStockInfo.qtyOnHand, null, binStockInfo.qtyOnHand, null);
 
                 let ledger = new StockLedger();
                 ledger.inventory = inventory;
