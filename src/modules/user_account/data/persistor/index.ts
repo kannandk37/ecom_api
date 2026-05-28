@@ -43,4 +43,32 @@ export class UserAccountPersistor {
             };
         });
     };
+
+    async userAccountById(id: string): Promise<UserAccount> {
+        return new Promise<UserAccount>(async (resolve, reject) => {
+            try {
+                let userAccount = await UserAccountModel.findOne({
+                    _id: new ObjectId(id)
+                })
+                resolve(await userAccountRecordToUserAccountEntity(userAccount))
+            } catch (error) {
+                reject(error);
+            };
+        });
+    };
+
+    async updatePasswordById(id: string, password: string): Promise<UserAccount> {
+        return new Promise<UserAccount>(async (resolve, reject) => {
+            try {
+                await UserAccountModel.findOneAndUpdate({
+                    _id: new ObjectId(id)
+                }, {
+                    password: password
+                })
+                resolve(await this.userAccountById(id))
+            } catch (error) {
+                reject(error);
+            };
+        });
+    };
 }

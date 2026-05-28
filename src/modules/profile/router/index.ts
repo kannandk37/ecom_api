@@ -31,6 +31,17 @@ profileRouter.get('/',
     }
 });
 
+profileRouter.get('/email/:email',
+     async (request: Request, response: Response) => {
+    try {
+        let email = request.params.email as string;
+        let profileManagement = new ProfileManagement();
+        response.status(StatusCodes.OK).send(new SuccessResponse(await profileManagement.profileByEmail(email), 'Profile By Email', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
 profileRouter.get('/:id',
      verifyToken, specificRolesOnly([RoleName.SUPERADMIN, RoleName.ADMIN]), 
      async (request: Request, response: Response) => {

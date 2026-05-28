@@ -28,11 +28,27 @@ export class UserAccountManagement {
 
     async addEmailAccount(userAccount: UserAccount, transaction?: any): Promise<UserAccount> {
         return new Promise(async (resolve, reject) => {
-            let encryptedPassword = await bcrypt.hash(userAccount.password, 10)
-            userAccount.password = encryptedPassword
-            let userAccountPersistor = new UserAccountPersistor();
-            let addedEmailAccount = await userAccountPersistor.addEmailAccount(userAccount, transaction);
-            resolve(addedEmailAccount)
+            try {
+                let encryptedPassword = await bcrypt.hash(userAccount.password, 10)
+                userAccount.password = encryptedPassword
+                let userAccountPersistor = new UserAccountPersistor();
+                let addedEmailAccount = await userAccountPersistor.addEmailAccount(userAccount, transaction);
+                resolve(addedEmailAccount)
+            } catch (error) {
+                reject(error);
+            }
+        });
+    };
+
+    async updatePasswordById(id: string, password: string): Promise<UserAccount> {
+        return new Promise<UserAccount>(async (resolve, reject) => {
+            try {
+                let userAccountPersistor = new UserAccountPersistor();
+                let userAccount = await userAccountPersistor.updatePasswordById(id, password);
+                resolve(userAccount);
+            } catch (error) {
+                reject(error);
+            }
         });
     };
 
@@ -85,6 +101,55 @@ export class UserAccountManagement {
             };
         });
     };
+
+    async resetPasswordByEmailAndPassword(userAccount: UserAccount): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let userAccountPersistor = new UserAccountPersistor();
+                let isExistingUser = await userAccountPersistor.userAccountByEmail(userAccount.email);
+                if (!isExistingUser) {
+                    return reject(new ApiError("Email Not Found", StatusCodes.NOT_FOUND, true));
+                };
+                let encryptedPassword = await bcrypt.hash(userAccount.password, 10);
+
+                isExistingUser = await userAccountPersistor.updatePasswordById(isExistingUser?.id, encryptedPassword);
+
+                let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
+
+
+                let emailAccount = await new EmailAccountManagement().emailAccountByEmail(isExistingUser);
+
+                if (!emailAccount) {
+                    let emailAccountData = new EmailAccount();
+                    emailAccountData.email = profile.email;
+                    emailAccountData.user = profile.user;
+                    await new EmailAccountManagement().createEmailAccount(emailAccountData);
+                    return reject(new ApiError("Email Account Not Found", StatusCodes.BAD_REQUEST, true));
+                }
+                const token = await this.generateToken(isExistingUser, profile.role);
+
+                let refreshToken = await this.generateToken(isExistingUser, profile.role, true);
+
+                emailAccount.refreshToken = refreshToken;
+                emailAccount.accessToken = token;
+
+                await new EmailAccountManagement().updateEmailAccount(emailAccount);
+
+                let result = {
+                    id: profile.user.id,
+                    user: profile.user,
+                    profile: profile,
+                    roles: profile.user.roles,
+                    role: profile.role,
+                    token: token,
+                    refreshToken: refreshToken
+                };
+                resolve(result);
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
 
     async generateToken(userAccount: UserAccount, role: Role, isRefreshToken?: boolean): Promise<string> {
         return new Promise(async (resolve, reject) => {

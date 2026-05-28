@@ -184,8 +184,8 @@ userAccountRouter.post(
             userAccountInfo.email = request.body.email;
             userAccountInfo.password = request.body.password;
             let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
-            let token = await userAccountManagement.loginExistingUser(userAccount);
-            response.status(StatusCodes.CREATED).send(new SuccessResponse({ token: token }, "Password Reset Success", StatusCodes.CREATED));
+            let result = await userAccountManagement.resetPasswordByEmailAndPassword(userAccount);
+            response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Password Reset Success", StatusCodes.CREATED));
         } catch (error: any) {
             errorhandler(error, response);
         };
