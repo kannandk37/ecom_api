@@ -1,7 +1,7 @@
 import { brandRecordToBrandEntity } from "../../../../brand/data/persistor/transformer";
 import { categoryRecordToCategoryEntity } from "../../../../category/data/persistor/transformer";
 import { variantsRecordsToVariantsEntities } from "../../../../variant/data/persistor/transformer";
-import { Duration, Label, Product, SpecValue, Unit, Storage } from "../../../entity";
+import { Duration, Label, Product, SpecValue, Storage } from "../../../entity";
 import { ObjectId } from "mongodb";
 
 export function productRecordToProductEntity(productRecord: any): Product {
@@ -41,18 +41,6 @@ export function productRecordToProductEntity(productRecord: any): Product {
 
     if (productRecord.variants && productRecord.variants.length > 0) {
         product.variants = variantsRecordsToVariantsEntities(productRecord.variants);
-    }
-
-    if (productRecord.price !== undefined) {
-        product.price = productRecord.price;
-    }
-
-    if (productRecord.weight) {
-        product.weight = productRecord.weight;
-    }
-
-    if (productRecord.unit) {
-        product.unit = productRecord.unit as Unit;
     }
 
     if (productRecord.images && productRecord.images.length > 0) {
@@ -115,18 +103,6 @@ export function productEntityToProductRecord(product: Product): object {
 
     if (product.variants && product.variants.length > 0) {
         record.variants = product.variants.map((item) => new ObjectId(item.id));
-    }
-
-    if (product.price !== undefined) {
-        record.price = product.price;
-    }
-
-    if (product.weight) {
-        record.weight = product.weight;
-    }
-
-    if (product.unit) {
-        record.unit = product.unit;
     }
 
     if (product.images && product.images.length > 0) {

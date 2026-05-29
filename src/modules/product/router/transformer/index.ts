@@ -2,7 +2,7 @@ import { brandRawDatumToBrandEntity } from "../../../brand/router/transformer";
 import { categoryRawDatumToCategoryEntity } from "../../../category/router/transformer";
 import { variantsRawDataToVariantsEntities } from "../../../variant/router/transformer";
 import { transformSpecs } from "../../data/persistor/transformer";
-import { Product, Unit } from "../../entity";
+import { Product } from "../../entity";
 
 export function productRawDatumToProductEntity(raw: any): Product {
     let product = new Product();
@@ -27,10 +27,6 @@ export function productRawDatumToProductEntity(raw: any): Product {
         product.description = raw.description;
     }
 
-    if (raw.price) {
-        product.price = raw.price;
-    }
-
     if (raw.shortDescription) {
         product.shortDescription = raw.shortDescription;
     }
@@ -45,18 +41,6 @@ export function productRawDatumToProductEntity(raw: any): Product {
 
     if (raw.variants) {
         product.variants = variantsRawDataToVariantsEntities(raw.variants);
-    }
-
-    if (raw.price) {
-        product.price = raw.price;
-    }
-
-    if (raw.weight) {
-        product.weight = raw.weight;
-    }
-
-    if (raw.unit) {
-        product.unit = raw.unit as Unit;
     }
 
     if (raw.images) {

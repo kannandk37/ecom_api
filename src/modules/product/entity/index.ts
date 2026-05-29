@@ -19,10 +19,6 @@ export enum Duration {
     YEARS = 'years'
 }
 
-export enum Unit {
-    KG = 'kg',
-    G = 'g'
-}
 export enum Label {
     ORIGIN = 'origin',
     SHELF_LIFE = 'shelf life',
@@ -49,9 +45,6 @@ export class Product {
     category?: Category;
     brand?: Brand;
     variants?: Variant[];
-    price?: number;
-    weight?: string;
-    unit?: Unit;
     images?: string[];
     features?: string[];
     specs?: SpecValue[];

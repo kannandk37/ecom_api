@@ -1,5 +1,5 @@
 import { productEntityToProductRecord, productRecordToProductEntity } from "../../../../product/data/persistor/transformer";
-import { Variant, VariantGrade, VariantType } from "../../../entity";
+import { Unit, Variant, VariantGrade, VariantType } from "../../../entity";
 import { ObjectId } from "mongodb";
 
 export function variantRecordToVariantEntity(variantRecord: any): Variant {
@@ -31,6 +31,14 @@ export function variantRecordToVariantEntity(variantRecord: any): Variant {
 
     if (variantRecord.price !== undefined) {
         variant.price = variantRecord.price;
+    }
+
+    if (variantRecord.weight) {
+        variant.weight = variantRecord.weight;
+    }
+
+    if (variantRecord.unit) {
+        variant.unit = variantRecord.unit as Unit;
     }
 
     if (variantRecord.images && variantRecord.images.length > 0) {
@@ -73,6 +81,14 @@ export function variantEntityToVariantRecord(variant: Variant): object {
 
     if (variant.price !== undefined) {
         record.price = variant.price;
+    }
+
+    if (variant.weight) {
+        record.weight = variant.weight;
+    }
+
+    if (variant.unit) {
+        record.unit = variant.unit;
     }
 
     if (variant.images && variant.images.length > 0) {

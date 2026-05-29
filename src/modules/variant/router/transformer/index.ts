@@ -1,5 +1,5 @@
 import { productRawDatumToProductEntity } from "../../../product/router/transformer";
-import { Variant, VariantGrade, VariantType } from "../../entity";
+import { Unit, Variant, VariantGrade, VariantType } from "../../entity";
 
 export function variantRawDatumToVariantEntity(raw: any): Variant {
     let variant = new Variant();
@@ -32,6 +32,14 @@ export function variantRawDatumToVariantEntity(raw: any): Variant {
         variant.price = raw.price;
     }
 
+    if (raw.weight) {
+        variant.weight = raw.weight;
+    }
+
+    if (raw.unit) {
+        variant.unit = raw.unit as Unit;
+    }
+
     if (raw.images) {
         variant.images = raw.images;
     }
@@ -47,6 +55,5 @@ export function variantsRawDataToVariantsEntities(raws: any[]): Variant[] {
     if (!raws || raws.length === 0) {
         return [];
     }
-
     return raws.map(variantRawDatumToVariantEntity);
 }

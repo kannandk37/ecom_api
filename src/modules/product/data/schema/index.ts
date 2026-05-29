@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { Label, Unit } from "../../entity";
+import { Label } from "../../entity";
 
 const ProductSchema = new Schema({
     title: { type: String },
@@ -10,9 +10,6 @@ const ProductSchema = new Schema({
     category: { type: Schema.Types.ObjectId, ref: 'categories', index: true },
     brand: { type: Schema.Types.ObjectId, ref: 'brands', index: true },
     variants: [{ type: Schema.Types.ObjectId, ref: 'variants' }],
-    price: { type: Number, required: true },
-    weight: { type: String },
-    unit: { type: String, enum: Unit },
     images: [{ type: String, required: true }],
     features: [{ type: String, required: true }],
     specs: [{ type: { label: { type: String, required: true, enum: Label }, value: { type: Schema.Types.Mixed, required: true } }, required: true }],

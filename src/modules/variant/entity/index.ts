@@ -11,6 +11,10 @@ export enum VariantGrade {
     GRADE2 = 'grade2'
 }
 
+export enum Unit {
+    KG = 'kg',
+    G = 'g'
+}
 export class Variant {
     id?: string;
     name?: string;
@@ -18,6 +22,8 @@ export class Variant {
     type?: VariantType;
     grade?: VariantGrade;
     price?: number;
+    unit?: Unit;
+    weight?: string;
     images?: string[];
     // Added:
     sku?: string; // Stock Keeping Unit - mandatory for inventory management
