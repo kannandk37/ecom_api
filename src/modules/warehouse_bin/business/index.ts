@@ -6,6 +6,7 @@ import { BinStockPersistor } from "../../bin_stock/data/persistor";
 import { Product } from "../../product/entity";
 import { Warehouse } from "../../warehouse/entity";
 import { Variant } from "../../variant/entity";
+import { InventoryManagement } from "../../inventory/business";
 
 export class WarehouseBinManagement {
 
@@ -40,11 +41,15 @@ export class WarehouseBinManagement {
             transferSuggestions: WarehouseBin[],
         }>(async (resolve, reject) => {
             try {
+                let isExistingInventoryForProduct = await new InventoryManagement().inventoriesByWarehouseProductVariant(warehouse?.id, product?.id, variant?.id);
+                if (isExistingInventoryForProduct) {
+                    return reject(new ApiError(`Product Already Exists, Please Use Adjust Stock`, StatusCodes.BAD_REQUEST, true));
+                }
                 let warehouseBins = await this.warehouseBinsByWarehouseId(warehouse?.id);
                 if (warehouseBins?.length == 0) {
                     return new ApiError('No Bins Exists For This Warehouse', StatusCodes.NOT_FOUND, true);
                 }
-                // need to check if this warehouse bin is for the product and variant
+                //TODO: if need we can allocate the products by checking if this warehouse bin is for the product and variant
                 let availableBins = warehouseBins.filter((warehousebin: WarehouseBin) => warehousebin.isActive && !warehousebin.isOccupied && (warehousebin.maxUnits ?? 0) - (warehousebin.currentStock ?? 0) > 0)
 
                 if (availableBins?.length == 0) {

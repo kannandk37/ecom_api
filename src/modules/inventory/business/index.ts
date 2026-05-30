@@ -141,7 +141,7 @@ export class InventoryManagement {
                     return reject(new ApiError("Warehouse Does not have available space", StatusCodes.BAD_REQUEST, true));
                 }
 
-                if (inventoryInfo.qtyReserved < inventoryInfo.qtyOnHand) {
+                if (inventoryInfo.qtyReserved > inventoryInfo.qtyOnHand) {
                     return reject(new ApiError("Product Reserved Quantity given is higher than Product Quantity", StatusCodes.BAD_REQUEST, true));
                 }
 
