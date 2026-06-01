@@ -26,6 +26,12 @@ export class WarehouseManagement {
                 if (isWarehouseWithCode) {
                     return reject(new ApiError("Warehouse with this code already exists", StatusCodes.CONFLICT, true));
                 }
+
+                let warehouseBinsWithBinCodes = await new WarehouseBinManagement().warehouseBinByCodes(warehouseBins.map((el) => el.binCode));
+                if(warehouseBinsWithBinCodes?.length > 0) {
+                    return reject(new ApiError("Warehouse Bins with this Bin Code already exists", StatusCodes.CONFLICT, true));
+                }
+
                 let address = await new AddressManagement().createAddress(warehouse.address);
                 warehouse.address = address;
                 let persistedWarehouse = await warehousePersistor.createWarehouse(warehouse);
