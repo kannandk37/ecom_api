@@ -33,12 +33,13 @@ inventoryRouter.get('/warehouse/:warehouseId', verifyToken, specificRolesOnly([R
     }
 });
 
-inventoryRouter.get('/warehouse/:warehouseId/product/:productId', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+inventoryRouter.get('/warehouse/:warehouseId/product/:productId/variant/:variantId', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let warehouseId = request.params.warehouseId as string;
         let productId = request.params.productId as string;
-        let inventory = await new InventoryManagement().inventoryByWarehouseIdAndProductId(warehouseId, productId);
-        response.status(StatusCodes.OK).send(new SuccessResponse(inventory, 'Inventory by warehouse And Product', StatusCodes.OK));
+        let variantId = request.params.variantId && request.params.variantId != 'null' ? request.params.variantId as string : null;
+        let inventories = await new InventoryManagement().inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId, productId, variantId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(inventories, 'Inventories by warehouse And Product And Variant', StatusCodes.OK));
     } catch (error: any) {
         errorhandler(error, response);
     }

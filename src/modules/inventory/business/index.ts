@@ -48,11 +48,11 @@ export class InventoryManagement {
         });
     }
 
-    async inventoryByWarehouseIdAndProductId(warehouseId: string, productId: string): Promise<Inventory> {
-        return new Promise<Inventory>(async (resolve, reject) => {
+    async inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId: string, productId: string, variantId?: string): Promise<Inventory[]> {
+        return new Promise<Inventory[]>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
-                resolve(await inventoryPersistor.inventoryByWarehouseIdAndProductId(warehouseId, productId));
+                resolve(await inventoryPersistor.inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId, productId, variantId));
             } catch (error) {
                 reject(error);
             }

@@ -7,13 +7,28 @@ import {
     inventoriesRecordsToInventoriesEntities
 } from "./transformer";
 import { ObjectId } from "mongodb";
+import { ProductModel } from "../../../product/data/schema";
+import { VariantModel } from "../../../variant/data/schema";
 
 export class InventoryPersistor {
 
     private populateOptions = [
-        { path: 'warehouse', model: WarehouseModel },
-        { path: 'product' },
-        { path: 'variant' }
+        {
+            path: 'warehouse',
+            model: WarehouseModel
+        },
+        {
+            path: 'product',
+            model: ProductModel,
+            populate: {
+                path: 'variants',
+                model: VariantModel
+            }
+        },
+        {
+            path: 'variant',
+            model: VariantModel
+        }
     ];
 
     async createInventory(inventory: Inventory): Promise<Inventory> {
@@ -50,11 +65,20 @@ export class InventoryPersistor {
         });
     }
 
-    async inventoryByWarehouseIdAndProductId(warehouseId: string, productId: string): Promise<Inventory> {
-        return new Promise<Inventory>(async (resolve, reject) => {
+    async inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId: string, productId: string, variantId?: string): Promise<Inventory[]> {
+        return new Promise<Inventory[]>(async (resolve, reject) => {
             try {
-                let inventoryRecord = await InventoryModel.findOne({ warehouse: new ObjectId(warehouseId), product: new ObjectId(productId) }).populate(this.populateOptions);
-                resolve(await inventoryRecordToInventoryEntity(inventoryRecord));
+                let query: any = {
+                    warehouse: new ObjectId(warehouseId),
+                    product: new ObjectId(productId)
+                };
+
+                if (variantId) {
+                    query.variantId = new ObjectId(variantId)
+                }
+
+                let inventoryRecords = await InventoryModel.find(query).populate(this.populateOptions);
+                resolve(await inventoriesRecordsToInventoriesEntities(inventoryRecords));
             } catch (error) {
                 reject(error);
             }
