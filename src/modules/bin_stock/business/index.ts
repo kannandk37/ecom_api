@@ -3,6 +3,8 @@ import { BinStockPersistor } from "../data/persistor";
 import ApiError from "../../../exceptions/apierror";
 import { BinStock } from "../entity";
 import { binStockEntityToBinStockRecord } from "../data/persistor/transformer";
+import { WarehouseManagement } from "../../warehouse/business";
+import { WarehouseBin } from "../../warehouse_bin/entity";
 
 export class BinStockManagement {
 
@@ -35,6 +37,62 @@ export class BinStockManagement {
                 let binStockPersistor = new BinStockPersistor();
                 let binStocks = await binStockPersistor.binStocksByWarehouseBinAndProduct(warehouseBinId, productId);
                 resolve(binStocks);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async binStocksByWarehouseBinAndProductAndVariant(warehouseBinId: string, productId: string, variantId: string): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let binStockPersistor = new BinStockPersistor();
+                let binStocks = await binStockPersistor.binStocksByWarehouseBinAndProductAndVariant(warehouseBinId, productId, variantId);
+                resolve(binStocks);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async binStocksByWarehouseAndProductAndVariant(warehouseId: string, productId: string, variantId: string): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let warehouse = await new WarehouseManagement().warehouseById(warehouseId);
+                if (!warehouse) {
+                    return reject(new ApiError("Warehouse not found", StatusCodes.NOT_FOUND, true));
+                }
+                let binStockPersistor = new BinStockPersistor();
+                let binStocks = await binStockPersistor.binStocksByWarehouseBinsAndProductAndVariant(warehouse.warehouseBins.map((warehouseBin: WarehouseBin) => warehouseBin.id), productId, variantId);
+                resolve(binStocks);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async binStocksByWarehouse(warehouseId: string): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let warehouse = await new WarehouseManagement().warehouseById(warehouseId);
+                if (!warehouse) {
+                    return reject(new ApiError("Warehouse not found", StatusCodes.NOT_FOUND, true));
+                }
+                let binStockPersistor = new BinStockPersistor();
+                let binStocks = await binStockPersistor.binStocksByWarehouseBins(warehouse.warehouseBins.map((warehouseBin: WarehouseBin) => warehouseBin.id));
+                resolve(binStocks);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async lastCreatedBinStock(): Promise<BinStock> {
+        return new Promise<BinStock>(async (resolve, reject) => {
+            try {
+                let binStockPersistor = new BinStockPersistor();
+                let binStock = await binStockPersistor.lastCreatedBinStock();
+                resolve(binStock);
             } catch (error) {
                 reject(error);
             }

@@ -1,5 +1,5 @@
 import { addressRawDatumToAddressEntity } from "../../../address/router/transformer";
-import { userRawDatumToUserEntity } from "../../../user/router/transformer";
+import { profileRawDatumToProfileEntity } from "../../../profile/router/transformer";
 import { CapacityUnit, Warehouse, WarehouseStatus, WarehouseType } from "../../entity";
 
 export function warehouseRawDatumToWarehouseEntity(raw: any): Warehouse {
@@ -46,7 +46,7 @@ export function warehouseRawDatumToWarehouseEntity(raw: any): Warehouse {
     }
 
     if (raw.operator) {
-        warehouse.operator = userRawDatumToUserEntity(raw.operator);
+        warehouse.operator = profileRawDatumToProfileEntity(raw.operator);
     }
 
     return warehouse;

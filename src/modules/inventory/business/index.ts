@@ -7,10 +7,9 @@ import { MovementType, ReferenceType, StockLedger } from "../../stock_ledger/ent
 import { BinStockManagement } from "../../bin_stock/business";
 import { StockLedgerManagement } from "../../stock_ledger/business";
 import { WarehouseBinManagement } from "../../warehouse_bin/business";
-import { User } from "../../user/entity";
 import { DateTime } from "luxon";
-import { resolve } from "node:dns";
 import { WarehouseManagement } from "../../warehouse/business";
+import { Profile } from "../../profile/entity";
 
 export class InventoryManagement {
 
@@ -48,8 +47,8 @@ export class InventoryManagement {
         });
     }
 
-    async inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId: string, productId: string, variantId?: string): Promise<Inventory[]> {
-        return new Promise<Inventory[]>(async (resolve, reject) => {
+    async inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId: string, productId: string, variantId?: string): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
                 resolve(await inventoryPersistor.inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId, productId, variantId));
@@ -120,7 +119,7 @@ export class InventoryManagement {
 
     async addProductToInventoryOfAWarehouse(
         inventoryInfo: Inventory,
-        performedBy: User,
+        performedBy: Profile,
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
@@ -178,13 +177,12 @@ export class InventoryManagement {
                         return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is 0`, StatusCodes.BAD_REQUEST, true));
                     }
 
-                    if (warehouseBin.currentStock > bin.maxUnits) {
+                    if ((bin.currentStock + warehouseBin.currentStock) > bin.maxUnits) {
                         return reject(new ApiError(`Warehouse bin ${bin.binCode} is Qty is Higher than the Maximum Units`, StatusCodes.BAD_REQUEST, true));
                     }
 
-                    warehouseBin.binCode = bin.binCode;
-
                     totalQty = totalQty + Number(warehouseBin.currentStock ? warehouseBin.currentStock : 0);
+                    warehouseBin.binCode = bin.binCode;
                 }
 
                 if (totalQty != inventoryInfo.qtyOnHand) {
@@ -204,17 +202,25 @@ export class InventoryManagement {
                 stockLedgerInfo.performedBy = performedBy;
 
                 for (const warehouseBin of inventoryInfo.warehouseBins) {
-                    if (warehouseBin.currentStock == warehouseBin.maxUnits) {
+
+                    let bin = await warehouseBinManagement.warehouseBinById(warehouseBin.id);
+
+                    let qtyOnHand = warehouseBin.currentStock + bin.currentStock;
+
+                    if (qtyOnHand == bin.maxUnits) {
                         warehouseBin.isOccupied = true;
                     } else {
                         warehouseBin.isOccupied = false;
                     }
-                    await warehouseBinManagement.updateWarehouseBinById(warehouseBin?.id, warehouseBin);
 
+                    let lastCreatedBinStock = await new BinStockManagement().lastCreatedBinStock();
+                    let recursiveBatchNumber = lastCreatedBinStock
+                        ? Number(lastCreatedBinStock.batchNumber.split('-')[lastCreatedBinStock.batchNumber.split('-').length - 1]) + 1
+                        : 1;
                     let binStock = new BinStock();
                     binStock.product = inventoryInfo.product;
                     binStock.variant = inventoryInfo.variant;
-                    binStock.batchNumber = 'Batch-' + new Date().getFullYear() + '-0001'; // TODO: need to increase the count
+                    binStock.batchNumber = `BATCH-${new Date().getFullYear()}-${recursiveBatchNumber}}`; // TODO: need to increase the count
                     binStock.bin = warehouseBin;
                     binStock.qtyOnHand = warehouseBin.currentStock;
                     binStock.expiryDate = DateTime.now().plus({ months: 6 });
@@ -233,6 +239,10 @@ export class InventoryManagement {
                     stockLedger.notes = `First-time receive — batch ${binStockCreatedData.batchNumber} into bin ${warehouseBin.binCode}`;
 
                     stockLedgers.push(stockLedger);
+
+                    warehouseBin.currentStock = qtyOnHand;
+
+                    await warehouseBinManagement.updateWarehouseBinById(warehouseBin?.id, warehouseBin);
                 }
 
                 inventoryInfo.reorderStatus = ReorderStatus.NONE;
@@ -265,7 +275,7 @@ export class InventoryManagement {
         inventoryInfo: Inventory,
         binStockInfo: BinStock,
         stockLedgerInfo: StockLedger,
-        performedBy: User,
+        performedBy: Profile,
         canDelete?: boolean
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
@@ -284,50 +294,89 @@ export class InventoryManagement {
                 }
 
                 let binStockData = await binStockManagement.binStockById(binStockInfo.id);
-                if (!binStockData) {
+                if (binStockInfo.id && !binStockData) {
                     return reject(new ApiError("Bin Stock not found", StatusCodes.NOT_FOUND, true));
+                }
+
+                if (!binStockInfo.qtyOnHand) {
+                    return reject(new ApiError("Provided Bin Stock quantity", StatusCodes.NOT_FOUND, true));
                 }
 
                 if (binStockInfo.qtyOnHand == 0) {
                     return reject(new ApiError("Bin Stock quantity Provided is Zero(0)", StatusCodes.NOT_FOUND, true));
                 }
 
-                let inventory = await this.inventoryById(inventoryInfo.id);
+                let inventory = await this.inventoryById(inventoryInfo?.id);
                 if (!inventory) {
                     return reject(new ApiError("Inventory Data not found", StatusCodes.NOT_FOUND, true));
-                }
-
-                if ((inventory.qtyOnHand + binStockInfo.qtyOnHand) > inventory.maxStockLevel) {
-                    return reject(new ApiError("Given quantity is higher than the Inventory max quantity", StatusCodes.NOT_FOUND, true));
                 }
 
                 let qtyBefore = inventory.qtyOnHand;
 
                 if (binStockInfo.qtyOnHand > 0) {
-                    if ((binStockData.qtyOnHand + binStockInfo.qtyOnHand) > binStockData.bin.maxUnits) {
+
+                    if ((inventory.qtyOnHand + binStockInfo.qtyOnHand) > inventory.maxStockLevel) {
+                        return reject(new ApiError("Given quantity is higher than the Inventory max quantity", StatusCodes.NOT_FOUND, true));
+                    }
+
+                    if (((binStockData?.qtyOnHand ?? 0) + binStockInfo.qtyOnHand) > bin.maxUnits) {
                         return reject(new ApiError("Given quantity is higher than the Warehouse bin max quantity", StatusCodes.NOT_FOUND, true));
                     }
 
                     bin.currentStock = bin.currentStock + binStockInfo.qtyOnHand;
 
+                    if (bin.currentStock > bin.maxUnits) {
+                        return reject(new ApiError("Given quantity is higher than the Warehouse bin max quantity", StatusCodes.NOT_FOUND, true));
+                    } // TODO: if this case happens then new warehousebin should be should be allocated but 
+                    // should it be asked from user because we are allocating different bin, need to add a confirmation from user so validate on FE
+                    // also if no bin can be allocated then show error
+
+                    // as of now how its working is it adds a product, in warehousebins and in binstock for each warehousebins,
+                    // on manage on reduce it selects an batch and reduce the quantity
+                    // same for waste
+                    // on add it adds new batch for every add, and in a new binstock only not with the existing binstock of the same product
+
                     let ledger = new StockLedger();
-                    if (!binStockInfo.expiryDate.hasSame(binStockData.expiryDate, 'day')) {
+                    if (binStockData?.expiryDate) {
+                        if (!binStockInfo.expiryDate.hasSame(binStockData?.expiryDate, 'day')) {
+                            let lastCreatedBinStock = await new BinStockManagement().lastCreatedBinStock();
+                            let recursiveBatchNumber = lastCreatedBinStock
+                                ? Number(lastCreatedBinStock.batchNumber.split('-')[lastCreatedBinStock.batchNumber.split('-').length - 1]) + 1
+                                : 1;
+
+                            let newBinStock = new BinStock();
+                            newBinStock.bin = binStockInfo.bin;
+                            newBinStock.product = binStockInfo.product
+                            newBinStock.variant = binStockInfo.variant
+                            newBinStock.inventory = inventory;
+                            newBinStock.qtyOnHand = binStockInfo.qtyOnHand;
+                            newBinStock.batchNumber = `BATCH-${new Date().getFullYear()}-${recursiveBatchNumber}`; // TODO: need to increment the batch number
+                            newBinStock.expiryDate = binStockInfo.expiryDate;
+                            newBinStock.lastCountedAt = DateTime.now();
+                            newBinStock = await binStockManagement.createBinStock(newBinStock);
+                            ledger.binStock = newBinStock;
+                        } else {
+                            binStockData = await binStockManagement.incrementBinStockQty(binStockData?.id, binStockInfo.qtyOnHand);
+                            ledger.binStock = binStockData;
+                        }
+                    } else {
+                        let lastCreatedBinStock = await new BinStockManagement().lastCreatedBinStock();
+                        let recursiveBatchNumber = lastCreatedBinStock
+                            ? Number(lastCreatedBinStock.batchNumber.split('-')[lastCreatedBinStock.batchNumber.split('-').length - 1]) + 1
+                            : 1;
+
                         let newBinStock = new BinStock();
-                        newBinStock.bin = binStockData.bin;
-                        newBinStock.product = binStockData.product
-                        newBinStock.variant = binStockData.variant
+                        newBinStock.bin = binStockInfo.bin;
+                        newBinStock.product = binStockInfo.product
+                        newBinStock.variant = binStockInfo.variant
                         newBinStock.inventory = inventory;
                         newBinStock.qtyOnHand = binStockInfo.qtyOnHand;
-                        newBinStock.batchNumber = `BATCH-${new Date().getFullYear()}`; // TODO: need to increment the batch number
+                        newBinStock.batchNumber = `BATCH-${new Date().getFullYear()}-${recursiveBatchNumber}`; // TODO: need to increment the batch number
                         newBinStock.expiryDate = binStockInfo.expiryDate;
                         newBinStock.lastCountedAt = DateTime.now();
                         newBinStock = await binStockManagement.createBinStock(newBinStock);
                         ledger.binStock = newBinStock;
-                    } else {
-                        binStockData = await binStockManagement.incrementBinStockQty(binStockData.id, binStockInfo.qtyOnHand);
-                        ledger.binStock = binStockData;
                     }
-
 
                     bin = await warehouseBinManagement.updateWarehouseBinById(bin.id, bin);
 
@@ -348,16 +397,24 @@ export class InventoryManagement {
                     ledger.performedBy = performedBy;
                     await stockLedgerManagement.createStockLedger(ledger);
                 } else {
-                    if ((binStockData.qtyOnHand - -(binStockInfo.qtyOnHand)) < 0) {
+                    if (!binStockData) {
+                        return reject(new ApiError("Bin Stock not found", StatusCodes.NOT_FOUND, true));
+                    }
+
+                    if ((inventory.qtyOnHand - binStockInfo.qtyOnHand) < 0) {
+                        return reject(new ApiError("Given quantity is higher than the Inventory max quantity", StatusCodes.NOT_FOUND, true));
+                    }
+
+                    if ((binStockData?.qtyOnHand - -(binStockInfo.qtyOnHand)) < 0) {
                         return reject(new ApiError("Bin Stock quantity is less the given quantity", StatusCodes.NOT_FOUND, true));
                     }
 
                     bin.currentStock = bin.currentStock - -(binStockInfo.qtyOnHand);
 
                     if (canDelete) {
-                        await binStockManagement.deleteById(binStockData.id);
+                        await binStockManagement.deleteById(binStockData?.id);
                     } else {
-                        binStockData = await binStockManagement.decrementBinStockQty(binStockData.id, -(binStockInfo.qtyOnHand));
+                        binStockData = await binStockManagement.decrementBinStockQty(binStockData?.id, -(binStockInfo.qtyOnHand));
                     }
 
                     bin = await warehouseBinManagement.updateWarehouseBinById(bin.id, bin);
@@ -429,7 +486,7 @@ export class InventoryManagement {
                 //     newBinStock.variant = binStockInfo.variant
                 //     newBinStock.inventory = inventory;
                 //     newBinStock.qtyOnHand = binStockInfo.qtyOnHand;
-                //     newBinStock.batchNumber = `BATCH-${new Date().getFullYear()}`;
+                //     newBinStock.batchNumber = `BATCH-${new Date().getFullYear()}-000001`;
                 //     newBinStock.expiryDate = binStockInfo.expiryDate;
                 //     newBinStock.lastCountedAt = DateTime.now();
                 //     binStock = await binStockManagement.createBinStock(newBinStock);
@@ -468,7 +525,7 @@ export class InventoryManagement {
         inventoryInfo: Inventory,
         binStockInfo: BinStock,
         stockLedgerInfo: StockLedger,
-        performedBy: User,
+        performedBy: Profile,
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
@@ -537,7 +594,7 @@ export class InventoryManagement {
 
     // ─── FLOW 5A: REGISTER REORDER ────────────────────────────────────────────
 
-    async registerReorder(inventoryId: string, orderedQty: number, performedBy: User): Promise<Inventory> {
+    async registerReorder(inventoryId: string, orderedQty: number, performedBy: Profile): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let inventoryPersistor = new InventoryPersistor();
@@ -567,7 +624,7 @@ export class InventoryManagement {
         batchNumber: string,
         expiryDate: DateTime,
         referenceId: string,
-        performedBy: User
+        performedBy: Profile
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
@@ -653,7 +710,7 @@ export class InventoryManagement {
         warehouseId: string,
         quantity: number,
         orderId: string,
-        performedBy: User
+        performedBy: Profile
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
@@ -706,7 +763,7 @@ export class InventoryManagement {
         binStockId: string,
         quantity: number,
         orderId: string,
-        performedBy: User
+        performedBy: Profile
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
@@ -765,7 +822,7 @@ export class InventoryManagement {
         inventoryId: string,
         quantity: number,
         orderId: string,
-        performedBy: User
+        performedBy: Profile
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
@@ -810,7 +867,7 @@ export class InventoryManagement {
 
     async returnStock(
         orderId: string,
-        performedBy: User
+        performedBy: Profile
     ): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {

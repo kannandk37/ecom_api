@@ -11,6 +11,9 @@ import {
     stockLedgersRecordsToStockLedgersEntities
 } from "./transformer";
 import { ObjectId } from "mongodb";
+import { ProductModel } from "../../../product/data/schema";
+import { VariantModel } from "../../../variant/data/schema";
+import { ProfileModel } from "../../../profile/data/schema";
 
 export class StockLedgerPersistor {
 
@@ -19,8 +22,9 @@ export class StockLedgerPersistor {
         { path: 'warehouse', model: WarehouseModel },
         { path: 'bin', model: WarehouseBinModel },
         { path: 'binStock', model: BinStockModel },
-        { path: 'product' },
-        { path: 'variant' }
+        { path: 'product', model: ProductModel },
+        { path: 'variant', model: VariantModel },
+        { path: 'performedBy', model: ProfileModel }
     ];
 
     async createStockLedger(stockLedger: StockLedger): Promise<StockLedger> {

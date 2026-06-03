@@ -8,11 +8,12 @@ import {
     binStocksRecordsToBinStocksEntities
 } from "./transformer";
 import { ObjectId } from "mongodb";
+import { WarehouseModel } from "../../../warehouse/data/schema";
 
 export class BinStockPersistor {
 
     private populateOptions = [
-        { path: 'bin', model: WarehouseBinModel },
+        { path: 'bin', model: WarehouseBinModel, populate: { path: 'warehouse', model: WarehouseModel } },
         { path: 'inventory', model: InventoryModel },
         { path: 'product' },
         { path: 'variant' }
@@ -41,6 +42,17 @@ export class BinStockPersistor {
         });
     }
 
+    async lastCreatedBinStock(): Promise<BinStock> {
+        return new Promise<BinStock>(async (resolve, reject) => {
+            try {
+                let binStockRecord = await BinStockModel.findOne().sort({ createdAt: -1 }).populate(this.populateOptions);
+                resolve(binStockRecordToBinStockEntity(binStockRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async binStocksByBinId(binId: string): Promise<BinStock[]> {
         return new Promise<BinStock[]>(async (resolve, reject) => {
             try {
@@ -56,6 +68,49 @@ export class BinStockPersistor {
         return new Promise<BinStock[]>(async (resolve, reject) => {
             try {
                 let binStockRecords = await BinStockModel.find({ bin: new ObjectId(warehouseBinId), product: new ObjectId(productId) }).populate(this.populateOptions);
+                resolve(binStocksRecordsToBinStocksEntities(binStockRecords));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async binStocksByWarehouseBinAndProductAndVariant(warehouseBinId: string, productId: string, variantId: string): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let binStockRecords = await BinStockModel.find({
+                    bin: new ObjectId(warehouseBinId),
+                    product: new ObjectId(productId),
+                    variant: new ObjectId(variantId),
+                }).populate(this.populateOptions);
+                resolve(binStocksRecordsToBinStocksEntities(binStockRecords));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async binStocksByWarehouseBins(warehouseBinIds: string[]): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let binStockRecords = await BinStockModel.find({
+                    bin: { $in: warehouseBinIds.map((id: string) => new ObjectId(id)) }
+                }).populate(this.populateOptions);
+                resolve(binStocksRecordsToBinStocksEntities(binStockRecords));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async binStocksByWarehouseBinsAndProductAndVariant(warehouseBinIds: string[], productId: string, variantId: string): Promise<BinStock[]> {
+        return new Promise<BinStock[]>(async (resolve, reject) => {
+            try {
+                let binStockRecords = await BinStockModel.find({
+                    bin: { $in: warehouseBinIds.map((id: string) => new ObjectId(id)) },
+                    product: new ObjectId(productId),
+                    variant: new ObjectId(variantId)
+                }).populate(this.populateOptions);
                 resolve(binStocksRecordsToBinStocksEntities(binStockRecords));
             } catch (error) {
                 reject(error);

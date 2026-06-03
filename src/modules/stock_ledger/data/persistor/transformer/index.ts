@@ -6,7 +6,7 @@ import { binStockRecordToBinStockEntity } from "../../../../bin_stock/data/persi
 import { ObjectId } from "mongodb";
 import { variantRecordToVariantEntity } from "../../../../variant/data/persistor/transformer";
 import { productRecordToProductEntity } from "../../../../product/data/persistor/transformer";
-import { userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
+import { profileRecordToProfileEntity } from "../../../../profile/data/persistor/transformer";
 
 export function stockLedgerRecordToStockLedgerEntity(stockLedgerRecord: any): StockLedger {
     let stockLedger = new StockLedger();
@@ -72,7 +72,7 @@ export function stockLedgerRecordToStockLedgerEntity(stockLedgerRecord: any): St
     }
 
     if (stockLedgerRecord.performedBy) {
-        stockLedger.performedBy = userRecordToUserEntity(stockLedgerRecord.performedBy);
+        stockLedger.performedBy = profileRecordToProfileEntity(stockLedgerRecord.performedBy);
     }
 
     if (stockLedgerRecord.createdAt) {

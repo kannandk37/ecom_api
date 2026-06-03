@@ -2,7 +2,9 @@ import { Inventory } from "../../inventory/entity";
 import { Warehouse } from "../../warehouse/entity";
 import { WarehouseBin } from "../../warehouse_bin/entity";
 import { BinStock } from "../../bin_stock/entity";
-import { User } from "../../user/entity";
+import { Profile } from "../../profile/entity";
+import { Product } from "../../product/entity";
+import { Variant } from "../../variant/entity";
 
 export enum MovementType {
     INBOUND_RECEIVE = 'inbound_receive',
@@ -31,8 +33,8 @@ export class StockLedger {
     warehouse?: Warehouse;
     bin?: WarehouseBin;
     binStock?: BinStock;
-    product?: any;         // replace with your Product entity import
-    variant?: any;         // replace with your Variant entity import
+    product?: Product;
+    variant?: Variant;
     movementType?: MovementType;
     quantityDelta?: number;
     qtyBefore?: number;
@@ -40,6 +42,6 @@ export class StockLedger {
     referenceType?: ReferenceType;
     referenceId?: string;
     notes?: string;
-    performedBy?: User; // need to change the profile because user may have multiple role and each with different profile so , need to check that
+    performedBy?: Profile;
     createdAt?: Date;        // immutable — append-only
 }

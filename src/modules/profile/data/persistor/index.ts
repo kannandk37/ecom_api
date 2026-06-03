@@ -58,6 +58,20 @@ export class ProfilePersistor {
         });
     }
 
+    async profileByUserIdAndRoleId(userId: string, roleId: string): Promise<Profile> {
+        return new Promise<Profile>(async (resolve, reject) => {
+            try {
+                let profileRecord = await ProfileModel.findOne({
+                    user: new ObjectId(userId),
+                    role: new ObjectId(roleId)
+                }).populate([userPopulate(), rolePopulate()]);
+                resolve(await profileRecordToProfileEntity(profileRecord));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async profileById(id: string): Promise<Profile> {
         return new Promise<Profile>(async (resolve, reject) => {
             try {

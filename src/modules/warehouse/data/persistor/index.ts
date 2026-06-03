@@ -1,3 +1,4 @@
+import { ProfileModel } from "../../../profile/data/schema";
 import { Warehouse } from "../../entity";
 import { WarehouseModel } from "../schema";
 import {
@@ -24,7 +25,7 @@ export class WarehousePersistor {
     async warehouses(): Promise<Warehouse[]> {
         return new Promise<Warehouse[]>(async (resolve, reject) => {
             try {
-                let warehouseRecords = await WarehouseModel.find().populate('warehouseBins');
+                let warehouseRecords = await WarehouseModel.find().populate('warehouseBins').populate({path: 'operator', model: ProfileModel});
                 resolve(warehousesRecordsToWarehousesEntities(warehouseRecords));
             } catch (error) {
                 reject(error);
@@ -35,7 +36,7 @@ export class WarehousePersistor {
     async warehouseById(id: string): Promise<Warehouse> {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
-                let warehouseRecord = await WarehouseModel.findOne({ _id: new ObjectId(id) });
+                let warehouseRecord = await WarehouseModel.findOne({ _id: new ObjectId(id) }).populate('warehouseBins').populate({path: 'operator', model: ProfileModel});
                 resolve(warehouseRecordToWarehouseEntity(warehouseRecord));
             } catch (error) {
                 reject(error);
@@ -46,7 +47,7 @@ export class WarehousePersistor {
     async warehouseByCode(code: string): Promise<Warehouse> {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
-                let warehouseRecord = await WarehouseModel.findOne({ code: code });
+                let warehouseRecord = await WarehouseModel.findOne({ code: code }).populate('warehouseBins').populate({path: 'operator', model: ProfileModel});
                 resolve(warehouseRecordToWarehouseEntity(warehouseRecord));
             } catch (error) {
                 reject(error);
@@ -57,7 +58,7 @@ export class WarehousePersistor {
     async warehouseByName(name: string): Promise<Warehouse> {
         return new Promise<Warehouse>(async (resolve, reject) => {
             try {
-                let warehouseRecord = await WarehouseModel.findOne({ name: name });
+                let warehouseRecord = await WarehouseModel.findOne({ name: name }).populate('warehouseBins').populate({path: 'operator', model: ProfileModel});
                 resolve(warehouseRecordToWarehouseEntity(warehouseRecord));
             } catch (error) {
                 reject(error);

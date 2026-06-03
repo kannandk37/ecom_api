@@ -20,6 +20,40 @@ binStockRouter.get('/warehousebin/:warehouseBinId/product/:productId', verifyTok
     }
 });
 
+binStockRouter.get('/warehousebin/:warehouseBinId/product/:productId/variant/:variantId', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let warehouseBinId = request.params.warehouseBinId as string;
+        let productId = request.params.productId as string;
+        let variantId = request.params.variantId as string;
+        let binStocks = await new BinStockManagement().binStocksByWarehouseBinAndProductAndVariant(warehouseBinId, productId, variantId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(binStocks, 'Bin Stock By WarehouseBin And Product And Variant', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+binStockRouter.get('/warehouse/:warehouseId', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let warehouseBinId = request.params.warehouseId as string;
+        let binStocks = await new BinStockManagement().binStocksByWarehouse(warehouseBinId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(binStocks, 'Bin Stock By Warehouse', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+binStockRouter.get('/warehouse/:warehouseId/product/:productId/variant/:variantId', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let warehouseBinId = request.params.warehouseId as string;
+        let productId = request.params.productId as string;
+        let variantId = request.params.variantId as string;
+        let binStocks = await new BinStockManagement().binStocksByWarehouseAndProductAndVariant(warehouseBinId, productId, variantId);
+        response.status(StatusCodes.OK).send(new SuccessResponse(binStocks, 'Bin Stock By Warehouse And Product And Variant', StatusCodes.OK));
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
 binStockRouter.get('/:id', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let binStockId = request.params.id as string;

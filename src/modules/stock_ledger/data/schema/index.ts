@@ -22,7 +22,7 @@ const StockLedgerSchema = new Schema({
     },
     referenceId: { type: String, default: null },
     notes: { type: String },
-    performedBy: { type: Schema.Types.ObjectId, ref: 'users' }
+    performedBy: { type: Schema.Types.ObjectId, ref: 'profiles' }
 }, {
     timestamps: true
 });

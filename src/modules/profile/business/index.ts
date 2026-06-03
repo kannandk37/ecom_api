@@ -83,6 +83,17 @@ export class ProfileManagement {
         })
     }
 
+    async profileByUserIdAndRoleId(userId: string, roleId: string): Promise<Profile> {
+        return new Promise<Profile>(async (resolve, reject) => {
+            try {
+                let profilePersistor = new ProfilePersistor();
+                resolve(await profilePersistor.profileByUserIdAndRoleId(userId, roleId));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
     async profileById(id: string): Promise<Profile> {
         return new Promise<Profile>(async (resolve, reject) => {
             try {

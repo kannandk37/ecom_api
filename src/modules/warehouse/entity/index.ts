@@ -1,5 +1,5 @@
 import { Address } from "../../address/entity";
-import { User } from "../../user/entity";
+import { Profile } from "../../profile/entity";
 import { WarehouseBin } from "../../warehouse_bin/entity";
 
 export enum WarehouseType {
@@ -31,7 +31,7 @@ export class Warehouse {
     image?: string;
     createdAt?: Date;
     updatedAt?: Date;
-    operator?: User;
+    operator?: Profile;
 
     // only for data fetching on relationship
     warehouseBins?: WarehouseBin[]

@@ -9,7 +9,7 @@ const WarehouseSchema = new Schema({
     address: { type: Schema.Types.ObjectId, required: true, ref: 'addresses', index: true },
     totalCapacity: { type: Number },
     capacityUnit: { type: String, enum: CapacityUnit, required: true, default: CapacityUnit.UNITS },
-    operator: { type: Schema.Types.ObjectId, ref: 'users', index: true },
+    operator: { type: Schema.Types.ObjectId, ref: 'profiles', index: true },
     image: { type: String }
 }, {
     timestamps: true

@@ -65,8 +65,8 @@ export class InventoryPersistor {
         });
     }
 
-    async inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId: string, productId: string, variantId?: string): Promise<Inventory[]> {
-        return new Promise<Inventory[]>(async (resolve, reject) => {
+    async inventoryByWarehouseIdAndProductIdAndVariantId(warehouseId: string, productId: string, variantId?: string): Promise<Inventory> {
+        return new Promise<Inventory>(async (resolve, reject) => {
             try {
                 let query: any = {
                     warehouse: new ObjectId(warehouseId),
@@ -74,11 +74,11 @@ export class InventoryPersistor {
                 };
 
                 if (variantId) {
-                    query.variantId = new ObjectId(variantId)
+                    query.variant = new ObjectId(variantId)
                 }
 
-                let inventoryRecords = await InventoryModel.find(query).populate(this.populateOptions);
-                resolve(await inventoriesRecordsToInventoriesEntities(inventoryRecords));
+                let inventoryRecord = await InventoryModel.findOne(query).populate(this.populateOptions);
+                resolve(await inventoryRecordToInventoryEntity(inventoryRecord));
             } catch (error) {
                 reject(error);
             }
@@ -146,15 +146,15 @@ export class InventoryPersistor {
         });
     }
 
-    async incrementInventoryQty(id: string, qtyOnHandDelta?: number, qtyCommittedDelta?: number, totalDamaged?: number, totalSold?: number): Promise<Inventory> {
+    async incrementInventoryQty(id: string, qtyOnHand?: number, qtyCommitted?: number, totalDamaged?: number, totalSold?: number): Promise<Inventory> {
         return new Promise<Inventory>(async (resolve, reject) => {
             try {
-                let incrementalValue: any = {};
-                if (qtyOnHandDelta) {
-                    incrementalValue.qtyOnHandDelta = qtyOnHandDelta;
+                let incrementalValue: Inventory = {};
+                if (qtyOnHand) {
+                    incrementalValue.qtyOnHand = qtyOnHand;
                 }
-                if (qtyCommittedDelta) {
-                    incrementalValue.qtyCommittedDelta = qtyCommittedDelta;
+                if (qtyCommitted) {
+                    incrementalValue.qtyCommitted = qtyCommitted;
                 }
                 if (totalDamaged) {
                     incrementalValue.totalDamaged = totalDamaged;

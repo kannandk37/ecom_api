@@ -1,5 +1,5 @@
 import { addressRecordToAddressEntity } from "../../../../address/data/persistor/transformer";
-import { userRecordToUserEntity } from "../../../../user/data/persistor/transformer";
+import { profileRecordToProfileEntity } from "../../../../profile/data/persistor/transformer";
 import { warehouseBinsRecordsToWarehouseBinsEntities } from "../../../../warehouse_bin/data/persistor/transformer";
 import { Warehouse } from "../../../entity";
 import { ObjectId } from "mongodb";
@@ -48,7 +48,7 @@ export function warehouseRecordToWarehouseEntity(warehouseRecord: any): Warehous
     }
 
     if (warehouseRecord.operator) {
-        warehouse.operator = userRecordToUserEntity(warehouseRecord.operator);
+        warehouse.operator = profileRecordToProfileEntity(warehouseRecord.operator);
     }
 
     if (warehouseRecord.createdAt) {

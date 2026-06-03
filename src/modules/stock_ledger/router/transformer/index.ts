@@ -1,7 +1,7 @@
 import { binStockRawDatumToBinStockEntity } from "../../../bin_stock/router/transformer";
 import { inventoryRawDatumToInventoryEntity } from "../../../inventory/router/transformer";
 import { productRawDatumToProductEntity } from "../../../product/router/transformer";
-import { userRawDatumToUserEntity } from "../../../user/router/transformer";
+import { profileRawDatumToProfileEntity } from "../../../profile/router/transformer";
 import { variantRawDatumToVariantEntity } from "../../../variant/router/transformer";
 import { warehouseRawDatumToWarehouseEntity } from "../../../warehouse/router/transformer";
 import { warehouseBinRawDatumToWarehouseBinEntity } from "../../../warehouse_bin/router/transformer";
@@ -71,7 +71,7 @@ export function stockLedgerRawDatumToStockLedgerEntity(raw: any): StockLedger {
     }
 
     if (raw.performedBy) {
-        stockLedger.performedBy = userRawDatumToUserEntity(raw.performedBy);
+        stockLedger.performedBy = profileRawDatumToProfileEntity(raw.performedBy);
     }
 
     if (raw.createdAt) {
