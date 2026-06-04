@@ -72,7 +72,7 @@ userAccountRouter.post(
                         // 2. Link and Create Profile
                         profile.user = newUser;
                         profile = await profileManagement.createProfile(profile, session);
-
+                        profile.role = role;
                         // 3. Link and Add Account
                         userAccount.user = newUser;
                         userAccount = await userAccountManagement.addEmailAccount(userAccount, session);
@@ -85,9 +85,10 @@ userAccountRouter.post(
                     });
 
                     console.log("Transaction committed successfully.");
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Transaction aborted due to error:", error);
                     // withTransaction automatically aborts the transaction on error
+                    errorhandler(error, response)
                 } finally {
                     await session.endSession();
                 }

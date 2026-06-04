@@ -1,3 +1,4 @@
+import { InventoryManagement } from "../../inventory/business";
 import { InventoryPersistor } from "../../inventory/data/persistor";
 import { Inventory } from "../../inventory/entity";
 import { Variant } from "../../variant/entity";
@@ -27,6 +28,26 @@ export class ProductManagement {
         });
     }
 
+    async inStockProducts(): Promise<Product[]> {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let inventoryProducts = await new InventoryManagement().inventories();
+                if (inventoryProducts?.length > 0) {
+                    let productsByIds = await new ProductPersistor().productsByIds(inventoryProducts.map((inventory: Inventory) => inventory.product?.id));
+                    if (productsByIds?.length > 0) {
+                        resolve(productsByIds);
+                    } else {
+                        resolve([]);
+                    }
+                } else {
+                    resolve([]);
+                }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async productById(id: string): Promise<Product> {
         return new Promise<Product>(async (resolve, reject) => {
             try {
@@ -49,11 +70,31 @@ export class ProductManagement {
         });
     }
 
+    async inStockProductsByCategoryId(categoryId: string) {
+        return new Promise<Product[]>(async (resolve, reject) => {
+            try {
+                let inventoryProducts = await new InventoryManagement().inventories();
+                if (inventoryProducts?.length > 0) {
+                    let productsByIds = await new ProductPersistor().productsByIds(inventoryProducts.map((inventory: Inventory) => inventory.product?.id));
+                    if (productsByIds?.length > 0) {
+                        resolve(productsByIds?.filter((product: Product) => product.category?.id == categoryId));
+                    } else {
+                        resolve([]);
+                    }
+                } else {
+                    resolve([]);
+                }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     async productsByCategoryId(categoryId: string): Promise<Product[]> {
         return new Promise<Product[]>(async (resolve, reject) => {
             try {
-                let productPeristor = new ProductPersistor();
-                resolve(await productPeristor.productsByCategoryId(categoryId));
+                let productPersistor = new ProductPersistor();
+                resolve(await productPersistor.productsByCategoryId(categoryId));
             } catch (error) {
                 reject(error);
             }
@@ -111,11 +152,25 @@ export class ProductManagement {
         }
     }
 
-    async productsByName(value: string): Promise<Product[]> {
+    async productsByName(name: string, inStock: boolean): Promise<Product[]> {
         return new Promise<Product[]>(async (resolve, reject) => {
             try {
-                let productPeristor = new ProductPersistor();
-                resolve(await productPeristor.productsByName(value));
+                if (inStock) {
+                    let inventoryProducts = await new InventoryManagement().inventories();
+                    if (inventoryProducts?.length > 0) {
+                        let productsByIds = await new ProductPersistor().productsByIds(inventoryProducts.map((inventory: Inventory) => inventory.product?.id));
+                        if (productsByIds?.length > 0) {
+                            resolve(productsByIds?.filter((product: Product) => product.name == name));
+                        } else {
+                            resolve([]);
+                        }
+                    } else {
+                        resolve([]);
+                    }
+                } else {
+                    let productPeristor = new ProductPersistor();
+                    resolve(await productPeristor.productsByName(name));
+                }
             } catch (error) {
                 reject(error);
             }

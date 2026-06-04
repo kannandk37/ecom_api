@@ -28,10 +28,13 @@ productRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
 
 productRouter.get('/', async (request: Request, response: Response) => {
     try {
-        let value = request.query.name as string;
+        let inStock = request.query?.inStock as string ? request.query?.inStock == 'true' ? true : false : false;
+        let name = request.query.name as string;
         let products: Product[] = [];
-        if (value) {
-            products = await new ProductManagement().productsByName(value);
+        if (name) {
+            products = await new ProductManagement().productsByName(name, inStock);
+        } else if (inStock) {
+            products = await new ProductManagement().inStockProducts();
         } else {
             products = await new ProductManagement().products();
         }
@@ -54,8 +57,15 @@ productRouter.get('/:id', async (request: Request, response: Response) => {
 productRouter.get('/category/:categoryId', async (request: Request, response: Response) => {
     try {
         let categoryId = request.params.categoryId as string;
-        let products = await new ProductManagement().productsByCategoryId(categoryId);
-        response.status(StatusCodes.OK).send(new SuccessResponse(products, "Products of category Id", StatusCodes.OK))
+        let inStock = request.query?.inStock as string ? request.query?.inStock == 'true' ? true : false : false;
+        let products: Product[] = [];
+        if (inStock) {
+            products = await new ProductManagement().inStockProductsByCategoryId(categoryId);
+            response.status(StatusCodes.OK).send(new SuccessResponse(products, "Products of category Id Which are In Stock", StatusCodes.OK))
+        } else {
+            products = await new ProductManagement().productsByCategoryId(categoryId);
+            response.status(StatusCodes.OK).send(new SuccessResponse(products, "Products of category Id", StatusCodes.OK))
+        }
     } catch (error: any) {
         errorhandler(error, response);
     }

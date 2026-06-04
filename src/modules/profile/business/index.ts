@@ -8,21 +8,25 @@ import { RoleManagement } from "../../role/business";
 export class ProfileManagement {
     async createProfile(profile: Profile, transaction?: any): Promise<Profile> {
         return new Promise(async (resolve, reject) => {
-            let profilePersisitor = new ProfilePersistor();
-            let validateEmail = await this.validateProfileEmail(profile);
-            if (!validateEmail) {
-                return reject(
-                    new ApiError("Profile Email already exists", StatusCodes.BAD_REQUEST)
-                );
+            try {
+                let profilePersisitor = new ProfilePersistor();
+                let validateEmail = await this.validateProfileEmail(profile);
+                if (!validateEmail) {
+                    return reject(
+                        new ApiError("Profile Email already exists", StatusCodes.BAD_REQUEST, true)
+                    );
+                }
+                let validateMobile = await this.validateProfileMobile(profile);
+                if (!validateMobile) {
+                    return reject(
+                        new ApiError("Profile Mobile Number already exists", StatusCodes.BAD_REQUEST, true)
+                    );
+                }
+                let profileRecord = await profilePersisitor.persistProfile(profile, transaction);
+                resolve(profileRecord);
+            } catch (error) {
+                reject(error);
             }
-            let validateMobile = await this.validateProfileMobile(profile);
-            if (!validateMobile) {
-                return reject(
-                    new ApiError("Profile Mobile Number already exists", StatusCodes.BAD_REQUEST)
-                );
-            }
-            let profileRecord = await profilePersisitor.persistProfile(profile, transaction);
-            resolve(profileRecord);
         });
     }
 
