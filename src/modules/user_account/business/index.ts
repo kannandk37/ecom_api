@@ -68,7 +68,7 @@ export class UserAccountManagement {
                 let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
 
 
-                let emailAccount = await new EmailAccountManagement().emailAccountByEmail(isExistingUser);
+                let emailAccount = await new EmailAccountManagement().emailAccountByEmail(isExistingUser.email);
 
                 if (!emailAccount) {
                     let emailAccountData = new EmailAccount();
@@ -117,7 +117,7 @@ export class UserAccountManagement {
                 let profile = await new ProfileManagement().profileByUserId(isExistingUser.user.id);
 
 
-                let emailAccount = await new EmailAccountManagement().emailAccountByEmail(isExistingUser);
+                let emailAccount = await new EmailAccountManagement().emailAccountByEmail(isExistingUser.email);
 
                 if (!emailAccount) {
                     let emailAccountData = new EmailAccount();

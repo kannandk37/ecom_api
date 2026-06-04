@@ -20,10 +20,10 @@ export class EmailAccountPersistor {
         });
     }
 
-    async emailAccountByEmail(emailAccount: EmailAccount): Promise<EmailAccount> {
+    async emailAccountByEmail(email: string): Promise<EmailAccount> {
         return new Promise<EmailAccount>(async (resolve, reject) => {
             try {
-                let emailAccountRecord = await EmailAccountModel.findOne({ email: emailAccount.email }).populate([userPopulate()]);
+                let emailAccountRecord = await EmailAccountModel.findOne({ email: email }).populate([userPopulate()]);
                 let emailAccountEntity = emailAccountRecordToEmailAccountEntity(emailAccountRecord);
                 resolve(emailAccountEntity);
             } catch (error) {
@@ -48,7 +48,7 @@ export class EmailAccountPersistor {
         return new Promise<EmailAccount>(async (resolve, reject) => {
             try {
                 let emailAccountData = emailAccountEntityToEmailAccountRecord(emailAccount);
-                let emailAccountRecord = await EmailAccountModel.findOneAndUpdate({ _id: emailAccountData._id }, emailAccountData, { new: true, session: transaction });
+                let emailAccountRecord = await EmailAccountModel.findOneAndUpdate({ _id: new ObjectId(emailAccount.id) }, emailAccountData, { new: true, session: transaction });
                 let emailAccountEntity = emailAccountRecordToEmailAccountEntity(emailAccountRecord);
                 resolve(emailAccountEntity);
             } catch (error) {

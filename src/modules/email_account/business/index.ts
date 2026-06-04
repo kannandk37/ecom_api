@@ -20,11 +20,11 @@ export class EmailAccountManagement {
         });
     };
 
-    async emailAccountByEmail(emailAccount: EmailAccount): Promise<EmailAccount> {
+    async emailAccountByEmail(email: string): Promise<EmailAccount> {
         return new Promise<EmailAccount>(async (resolve, reject) => {
             try {
                 let emailAccountPersistor = new EmailAccountPersistor();
-                let isExistingEmailAccount = await emailAccountPersistor.emailAccountByEmail(emailAccount);
+                let isExistingEmailAccount = await emailAccountPersistor.emailAccountByEmail(email);
                 resolve(isExistingEmailAccount);
             } catch (error) {
                 reject(error);

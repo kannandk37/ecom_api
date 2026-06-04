@@ -13,7 +13,7 @@ import { Profile } from "../../profile/entity";
 import mongoose from "mongoose";
 import { RoleManagement } from "../../role/business";
 import { RoleName } from "../../role/entity";
-import { sendWelcomeEmail } from '../../../utils/emailService';
+import { resetPasswordEmail, sendWelcomeEmail } from '../../../utils/emailService';
 import path from "path";
 import { EmailAccount } from "../../email_account/entity";
 import { EmailAccountManagement } from "../../email_account/business";
@@ -93,10 +93,8 @@ userAccountRouter.post(
                     await session.endSession();
                 }
 
-                // return newly created user
-                // TODO userById show only return record from user table 
-                // construct createUser with user, profile, tenant details (use getTenantById) 
                 const createdUser = await userManagement.userById(user.id);
+                emailAccount = await new EmailAccountManagement().emailAccountByEmail(request.body.email);
                 const token = await userAccountManagement.generateToken(userAccount, profile.role);
                 const refreshToken = await userAccountManagement.generateToken(userAccount, profile.role, true);
                 await new EmailAccountManagement().updateEmailAccount({ ...emailAccount, accessToken: token, refreshToken: refreshToken });
@@ -187,6 +185,31 @@ userAccountRouter.post(
             let userAccount = userAccountRawDatumToUserAccountEntity(userAccountInfo)
             let result = await userAccountManagement.resetPasswordByEmailAndPassword(userAccount);
             response.status(StatusCodes.CREATED).send(new SuccessResponse(result, "Password Reset Success", StatusCodes.CREATED));
+        } catch (error: any) {
+            errorhandler(error, response);
+        };
+    }
+);
+
+userAccountRouter.post(
+    '/forgot-password',
+    async (request: Request, response: Response) => {
+        try {
+            let userAccountManagement = new UserAccountManagement();
+            let userAccountInfo = new UserAccount();
+            userAccountInfo.email = request.body.email;
+            let user = await userAccountManagement.userAccountByEmail(userAccountInfo.email);
+            if (user) {
+                let profile = await new ProfileManagement().profileByEmail(userAccountInfo.email);
+                await resetPasswordEmail({
+                    userEmail: userAccountInfo.email,
+                    userName: profile.name,
+                })
+                console.log({ message: 'Reset Password Email Sent successfully' });
+                response.status(StatusCodes.CREATED).send(new SuccessResponse(true, 'Email sent successfully Password Reset Success', StatusCodes.OK));
+            } else {
+                response.status(StatusCodes.BAD_REQUEST).send(new ApiError("Email or Passsword Does not exists", StatusCodes.BAD_REQUEST, true));
+            }
         } catch (error: any) {
             errorhandler(error, response);
         };

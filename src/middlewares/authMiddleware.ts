@@ -26,7 +26,8 @@ export const verifyToken = (req: AuthenticatedRequest, res: Response, next: Next
                 console.log(`Authenticated user: ${decoded.id} with role: ${decoded.role.name}`);
             });
             next();
-        } catch {
+        } catch (error) {
+            console.error("Token verification failed:", error);
             errorhandler(new ApiError("Not authorized, token failed", StatusCodes.UNAUTHORIZED), res);
         }
     }
@@ -48,7 +49,8 @@ export const verifyRefreshToken = (req: AuthenticatedRequest, res: Response, nex
                 console.log(`Authenticated user: ${decoded.id} with role: ${decoded.role.name}`);
             });
             next();
-        } catch {
+        } catch (error) {
+            console.error("Refresh token verification failed:", error);
             errorhandler(new ApiError("Not authorized, token failed", StatusCodes.UNAUTHORIZED), res);
         }
     }
