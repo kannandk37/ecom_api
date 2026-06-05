@@ -1,7 +1,5 @@
 import { WishlistPersistor } from "../data/persistor";
 import { Wishlist } from "../entity";
-import { StatusCodes } from "http-status-codes";
-import ApiError from "../../../exceptions/apierror";
 
 export class WishlistManagement {
 
@@ -13,7 +11,8 @@ export class WishlistManagement {
 
                 if (existing) {
                     await wishlistPersistor.deleteWishlistById(existing.id);
-                    resolve(null);
+                    delete existing.id;
+                    return resolve(existing);
                 } else {
                     let newWishlist = new Wishlist();
                     newWishlist.user = { id: userId };
@@ -22,7 +21,7 @@ export class WishlistManagement {
                         newWishlist.variant = { id: variantId };
                     }
                     let created = await wishlistPersistor.createWishlist(newWishlist);
-                    resolve(created);
+                    return resolve(created);
                 }
             } catch (error) {
                 reject(error);

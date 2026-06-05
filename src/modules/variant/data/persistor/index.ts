@@ -43,6 +43,12 @@ export class VariantPersistor {
 export function productPopulate() {
     return {
         path: 'product',
-        model: ProductModel
+        model: ProductModel,
+        populate: [
+            {
+                path: 'variants',
+                model: VariantModel
+            }
+        ]
     }
 }
