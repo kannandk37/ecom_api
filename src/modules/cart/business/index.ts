@@ -84,11 +84,22 @@ export class CartManagement {
         return new Promise<Cart>(async (resolve, reject) => {
             try {
                 let cartPersistor = new CartPersistor();
-                let persistedCartItem = await new CartItemManagement().createCartItem(cartItem);
                 let cart = await this.cartById(id);
-                let cartItems = cart.cartItems?.length > 0 ? cart.cartItems : []
-                cartItems?.push(persistedCartItem);
-                resolve(await cartPersistor.updateCartItemsOfCartById(id, cartItems));
+                let cartItems = cart.cartItems?.length > 0 ? cart.cartItems : [];
+                if (cartItems?.length > 0) {
+                    let isProductVariantAlreadyInCart = cartItems.find((el: CartItem) => el.product.id == cartItem.product.id && el.variant.id == cartItem.variant.id);
+                    if (isProductVariantAlreadyInCart) {
+                        cartItem.quantity = isProductVariantAlreadyInCart.quantity + 1;
+                        await new CartItemManagement().updateCartItemById(isProductVariantAlreadyInCart.id, cartItem)
+                        return resolve(await this.cartById(id));
+                    } else {
+                        let persistedCartItem = await new CartItemManagement().createCartItem(cartItem);
+                        cartItems?.push(persistedCartItem);
+                        return resolve(await cartPersistor.updateCartItemsOfCartById(id, cartItems));
+                    }
+                } else {
+                    return resolve(cart);
+                }
             } catch (error) {
                 reject(error);
             }
