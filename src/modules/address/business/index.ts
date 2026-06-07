@@ -34,4 +34,15 @@ export class AddressManagement {
             }
         });
     }
+
+    async addressByUserId(userId: string): Promise<Address[]> {
+        return new Promise<Address[]>(async (resolve, reject) => {
+            try {
+                let addressPeristor = new AddressPersistor();
+                resolve(await addressPeristor.addressByUserId(userId));
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 }

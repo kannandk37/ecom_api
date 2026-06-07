@@ -40,6 +40,17 @@ export class AddressPersistor {
             }
         })
     }
+
+    async addressByUserId(userId: string): Promise<Address[]> {
+        return new Promise<Address[]>(async (resolve, reject) => {
+            try {
+                let addressRecords = await AddressModel.find({ user: new ObjectId(userId) }).populate([userPopulate()]);
+                resolve(await addressesRecordsToAddressesEntities(addressRecords));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
 }
 
 export function userPopulate() {

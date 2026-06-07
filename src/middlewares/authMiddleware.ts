@@ -51,7 +51,7 @@ export const verifyRefreshToken = (req: AuthenticatedRequest, res: Response, nex
             next();
         } catch (error) {
             console.error("Refresh token verification failed:", error);
-            errorhandler(new ApiError("Not authorized, token failed", StatusCodes.UNAUTHORIZED), res);
+            errorhandler(new ApiError("Not authorized, refresh token failed", StatusCodes.UNAUTHORIZED), res);
         }
     }
 };

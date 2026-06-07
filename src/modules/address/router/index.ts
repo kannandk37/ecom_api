@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
+import { AuthenticatedRequest, specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
 import { RoleName } from "../../role/entity";
 import { errorhandler } from "../../../exceptions/errorhandler";
 import { addressRawDatumToAddressEntity } from "./transformer";
@@ -23,6 +23,16 @@ addressRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName
 addressRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let addresses = await new AddressManagement().addresses();
+        response.status(StatusCodes.OK).send(new SuccessResponse(addresses, "Addresses List", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+addressRouter.get('/me', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let user = request.user;
+        let addresses = await new AddressManagement().addressByUserId(user.id);
         response.status(StatusCodes.OK).send(new SuccessResponse(addresses, "Addresses List", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
