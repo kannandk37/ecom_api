@@ -55,7 +55,7 @@ export class CartManagement {
                 let cartPersistor = new CartPersistor();
                 let cart = await cartPersistor.cartById(id);
                 if (cart && cart?.id && cart.cartItems.find((el) => el.id == cartItemId)) {
-                    let removedCartItem = await new CartItemManagement().deleteCartItemById(cartItemId);
+                    await new CartItemManagement().deleteCartItemById(cartItemId);
                     await cartPersistor.deleteCartItemInCartItemsOfCartById(id, cartItemId);
                     resolve(await this.cartById(id));
                 } else {
@@ -72,7 +72,9 @@ export class CartManagement {
             try {
                 let cartPersistor = new CartPersistor();
                 let cart = await cartPersistor.cartById(id);
-                await new CartItemManagement().deleteCartItemsByIds(cart.cartItems?.map((el) => el.id))
+                if (cart && cart?.id && cart.cartItems?.length > 0) {
+                    await new CartItemManagement().deleteCartItemsByIds(cart.cartItems?.map((el) => el.id))
+                };
                 resolve(await cartPersistor.deleteCartById(id));
             } catch (error) {
                 reject(error);
