@@ -2,6 +2,7 @@ import { model, Schema } from "mongoose";
 import { AddressType } from "../../entity";
 
 const AddressSchema = new Schema({
+    name: {type: String, required: true},
     user: { type: Schema.Types.ObjectId, ref: 'users', index: true }, // Index added for fast lookup of a user's address list
     line1: { type: String, required: true },
     line2: { type: String },

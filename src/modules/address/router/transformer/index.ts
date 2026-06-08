@@ -11,6 +11,10 @@ export function addressRawDatumToAddressEntity(raw: any): Address {
         address.id = raw.id;
     }
 
+    if (raw.name) {
+        address.name = raw.name;
+    }
+
     if (raw.user) {
         address.user = userRawDatumToUserEntity(raw.user);
     }

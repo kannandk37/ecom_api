@@ -9,6 +9,7 @@ export enum AddressType {
 
 export class Address {
     id?: string;
+    name?: string;
     user?: User;
     line1?: string;
     line2?: string;

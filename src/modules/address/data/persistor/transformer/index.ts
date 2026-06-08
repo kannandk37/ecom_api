@@ -13,6 +13,10 @@ export function addressRecordToAddressEntity(addressRecord: any): Address {
         address.id = addressRecord._id?.toString();
     }
 
+    if (addressRecord.name) {
+        address.name = addressRecord.name;
+    }
+
     if (addressRecord.user) {
         address.user = userRecordToUserEntity(addressRecord.user);
     }
@@ -65,6 +69,10 @@ export function addressEntityToAddressRecord(address: Address): object {
 
     if (address.id) {
         record._id = new ObjectId(address.id);
+    }
+
+    if (address.name) {
+        record.name = address.name;
     }
 
     if (address.user?.id) {
