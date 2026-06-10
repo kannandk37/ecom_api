@@ -1,6 +1,7 @@
 import { Address } from "../../address/entity";
 import { Invoice } from "../../invoice/entity";
 import { OrderItem } from "../../order_item/entity";
+import { Profile } from "../../profile/entity";
 import { User } from "../../user/entity";
 
 export enum OrderStatus {
@@ -17,6 +18,7 @@ export enum OrderStatus {
 export class Order {
     id?: string;
     user?: User;
+    profile?: Profile;
     orderId: string;
     orderItems?: OrderItem[];
     billingAddress?: Address;

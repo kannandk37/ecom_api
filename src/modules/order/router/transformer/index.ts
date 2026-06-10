@@ -1,6 +1,7 @@
 import { addressRawDatumToAddressEntity } from "../../../address/router/transformer";
 import { invoiceRawDatumToInvoiceEntity } from "../../../invoice/router/transformer";
 import { orderItemsRawDataToOrderItemsEntities } from "../../../order_item/router/transformer";
+import { profileRawDatumToProfileEntity } from "../../../profile/router/transformer";
 import { userRawDatumToUserEntity } from "../../../user/router/transformer";
 import { Order, OrderStatus } from "../../entity";
 
@@ -17,6 +18,10 @@ export function orderRawDatumToOrderEntity(raw: any): Order {
 
     if (raw.user) {
         order.user = userRawDatumToUserEntity(raw.user);
+    }
+
+    if (raw.profile) {
+        order.profile = profileRawDatumToProfileEntity(raw.profile);
     }
 
     if (raw.orderItems) {

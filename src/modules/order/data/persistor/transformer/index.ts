@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { orderItemsRecordsToOrderItemsEntities } from "../../../../order_item/data/persistor/transformer";
 import { invoiceRecordToInvoiceEntity } from "../../../../invoice/data/persistor/transformer";
 import { addressRecordToAddressEntity } from "../../../../address/data/persistor/transformer";
+import { profileRecordToProfileEntity } from "../../../../profile/data/persistor/transformer";
 
 export function orderRecordToOrderEntity(orderRecord: any): Order {
     let order = new Order();
@@ -18,6 +19,10 @@ export function orderRecordToOrderEntity(orderRecord: any): Order {
 
     if (orderRecord.user) {
         order.user = userRecordToUserEntity(orderRecord.user);
+    }
+
+    if (orderRecord.profile) {
+        order.profile = profileRecordToProfileEntity(orderRecord.profile);
     }
 
     if (orderRecord.orderItems && orderRecord.orderItems.length > 0) {
@@ -68,6 +73,10 @@ export function orderEntityToOrderRecord(order: Order): object {
 
     if (order.user?.id) {
         record.user = new ObjectId(order.user.id);
+    }
+
+    if (order.profile?.id) {
+        record.profile = new ObjectId(order.profile.id);
     }
 
     if (order.orderItems && order.orderItems.length > 0) {
