@@ -13,7 +13,8 @@ orderRouter.post('/add', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNam
     try {
         let orderInfo = orderRawDatumToOrderEntity(request.body.order);
         let persistedOrder = await new OrderManagement().createOrder(orderInfo);
-        response.status(StatusCodes.CREATED).send(new SuccessResponse(await new OrderManagement().orderById(persistedOrder.id), 'Order created successfully', StatusCodes.CREATED))
+        new OrderManagement().constructAndUpdateOrderWithSnapShotById(persistedOrder?.id);
+        response.status(StatusCodes.CREATED).send(new SuccessResponse(persistedOrder, 'Order created successfully', StatusCodes.CREATED))
     } catch (error: any) {
         errorhandler(error, response);
     }

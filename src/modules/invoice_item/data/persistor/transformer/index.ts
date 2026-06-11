@@ -81,14 +81,14 @@ export function invoiceItemEntityToInvoiceItemRecord(invoiceItem: InvoiceItem): 
     return record;
 }
 
-export function invoiceItemRecordsToInvoiceItemEntities(invoiceItemRecords: any[]): InvoiceItem[] {
+export function invoiceItemsRecordsToInvoiceItemsEntities(invoiceItemRecords: any[]): InvoiceItem[] {
     if (!invoiceItemRecords || invoiceItemRecords.length === 0) {
         return [];
     }
     return invoiceItemRecords.map((record) => invoiceItemRecordToInvoiceItemEntity(record));
 }
 
-export function invoiceItemEntitiesToInvoiceItemRecords(invoiceItems: InvoiceItem[]): object[] {
+export function invoiceItemsEntitiesToInvoiceItemsRecords(invoiceItems: InvoiceItem[]): object[] {
     if (!invoiceItems || invoiceItems.length === 0) {
         return [];
     }

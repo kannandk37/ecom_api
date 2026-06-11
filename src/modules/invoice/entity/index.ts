@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { InvoiceItem } from "../../invoice_item/entity";
 
 export enum InvoiceStatus {
@@ -13,5 +14,5 @@ export class Invoice {
     invoiceItems?: InvoiceItem[];
     totalAmount?: number;
     status?: InvoiceStatus;
-    createdAt?: Date;
+    createdAt?: DateTime;
 }

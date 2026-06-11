@@ -32,10 +32,43 @@ export class OrderPersistor {
         })
     }
 
+    async ordersCount(): Promise<number> {
+        return new Promise<number>(async (resolve, reject) => {
+            try {
+                let orderRecordCount = await OrderModel.countDocuments();
+                resolve(orderRecordCount);
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async orderByOrderId(orderId: string): Promise<Order> {
+        return new Promise<Order>(async (resolve, reject) => {
+            try {
+                let orderRecord = await OrderModel.findOne({ orderId: orderId }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                resolve(await orderRecordToOrderEntity(orderRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
     async orderById(id: string): Promise<Order> {
         return new Promise<Order>(async (resolve, reject) => {
             try {
                 let orderRecord = await OrderModel.findOne({ _id: new ObjectId(id) }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                resolve(await orderRecordToOrderEntity(orderRecord));
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    async updateOrderWithSnapShotById(id: string, snapShot: any): Promise<Order> {
+        return new Promise<Order>(async (resolve, reject) => {
+            try {
+                let orderRecord = await OrderModel.updateOne({ _id: new ObjectId(id) }, { $set: { snapShot: snapShot } });
                 resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);

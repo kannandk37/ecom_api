@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { invoiceItemsRawDataToInvoiceItemsEntities } from "../../../invoice_item/router/transformer";
 import { Invoice } from "../../entity";
 
@@ -25,7 +26,7 @@ export function invoiceRawDatumToInvoiceEntity(raw: any): Invoice {
     }
 
     if (raw.createdAt) {
-        invoice.createdAt = new Date(raw.createdAt);
+        invoice.createdAt = DateTime.fromISO(raw.createdAt);
     }
 
     return invoice;

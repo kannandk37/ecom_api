@@ -1,4 +1,5 @@
-import { invoiceItemRecordsToInvoiceItemEntities } from "../../../../invoice_item/data/persistor/transformer";
+import { DateTime } from "luxon";
+import { invoiceItemsRecordsToInvoiceItemsEntities } from "../../../../invoice_item/data/persistor/transformer";
 import { Invoice, InvoiceStatus } from "../../../entity";
 import { ObjectId } from "mongodb";
 
@@ -14,7 +15,7 @@ export function invoiceRecordToInvoiceEntity(invoiceRecord: any): Invoice {
     }
 
     if (invoiceRecord.invoiceItemIds && invoiceRecord.invoiceItemIds.length > 0) {
-        invoice.invoiceItems = invoiceItemRecordsToInvoiceItemEntities(invoiceRecord.invoiceItemIds);
+        invoice.invoiceItems = invoiceItemsRecordsToInvoiceItemsEntities(invoiceRecord.invoiceItemIds);
     }
 
     if (invoiceRecord.totalAmount !== undefined) {
@@ -26,7 +27,7 @@ export function invoiceRecordToInvoiceEntity(invoiceRecord: any): Invoice {
     }
 
     if (invoiceRecord.createdAt) {
-        invoice.createdAt = invoiceRecord.createdAt;
+        invoice.createdAt = DateTime.fromJSDate(invoiceRecord.createdAt);
     }
 
     return invoice;
@@ -62,14 +63,14 @@ export function invoiceEntityToInvoiceRecord(invoice: Invoice): object {
     return record;
 }
 
-export function invoiceRecordsToInvoiceEntities(invoiceRecords: any[]): Invoice[] {
+export function invoicesRecordsToInvoicesEntities(invoiceRecords: any[]): Invoice[] {
     if (!invoiceRecords || invoiceRecords.length === 0) {
         return [];
     }
     return invoiceRecords.map((record) => invoiceRecordToInvoiceEntity(record));
 }
 
-export function invoiceEntitiesToInvoiceRecords(invoices: Invoice[]): object[] {
+export function invoicesEntitiesToInvoicesRecords(invoices: Invoice[]): object[] {
     if (!invoices || invoices.length === 0) {
         return [];
     }
