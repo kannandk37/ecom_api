@@ -9,7 +9,7 @@ import { StatusCodes } from "http-status-codes";
 
 export const orderRouter = Router();
 
-orderRouter.post('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
+orderRouter.post('/add', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.SUPERADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let orderInfo = orderRawDatumToOrderEntity(request.body.order);
         let persistedOrder = await new OrderManagement().createOrder(orderInfo);

@@ -1,6 +1,6 @@
-import { Invoice } from "../../invoice/entity";
+import { Invoice, InvoiceStatus } from "../../invoice/entity";
 import { OrderItem } from "../../order_item/entity";
-import { Payment, PaymentStatus } from "../../payment/entity";
+import { Payment } from "../../payment/entity";
 
 export class InvoiceItem {
     id?: string;
@@ -9,5 +9,5 @@ export class InvoiceItem {
     amount?: number;
     payment?: Payment;
     paidOn?: Date;
-    status?: PaymentStatus;
+    status?: InvoiceStatus;
 }

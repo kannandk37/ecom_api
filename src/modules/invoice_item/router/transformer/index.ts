@@ -1,3 +1,4 @@
+import { InvoiceStatus } from "../../../invoice/entity";
 import { invoiceRawDatumToInvoiceEntity } from "../../../invoice/router/transformer";
 import { orderItemRawDatumToOrderItemEntity } from "../../../order_item/router/transformer";
 import { paymentRawDatumToPaymentEntity } from "../../../payment/router/transformer";
@@ -35,7 +36,7 @@ export function invoiceItemRawDatumToInvoiceItemEntity(raw: any): InvoiceItem {
     }
 
     if (raw.status) {
-        invoiceItem.status = raw.status;
+        invoiceItem.status = raw.status as InvoiceStatus;
     }
 
     return invoiceItem;

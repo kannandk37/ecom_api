@@ -1,9 +1,9 @@
 import { invoiceRecordToInvoiceEntity } from "../../../../invoice/data/persistor/transformer";
-import { PaymentStatus } from "../../../../payment/entity";
 import { InvoiceItem } from "../../../entity";
 import { ObjectId } from "mongodb";
 import { orderItemRecordToOrderItemEntity } from "../../../../order_item/data/persistor/transformer";
 import { paymentRecordToPaymentEntity } from "../../../../payment/data/persistor/transformer";
+import { InvoiceStatus } from "../../../../invoice/entity";
 
 export function invoiceItemRecordToInvoiceItemEntity(invoiceItemRecord: any): InvoiceItem {
     let invoiceItem = new InvoiceItem();
@@ -37,7 +37,7 @@ export function invoiceItemRecordToInvoiceItemEntity(invoiceItemRecord: any): In
     }
 
     if (invoiceItemRecord.status) {
-        invoiceItem.status = invoiceItemRecord.status as PaymentStatus;
+        invoiceItem.status = invoiceItemRecord.status as InvoiceStatus;
     }
 
     return invoiceItem;
