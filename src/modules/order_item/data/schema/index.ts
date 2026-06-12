@@ -3,8 +3,9 @@ import { PaymentStatus } from "../../../payment/entity";
 
 const OrderItemSchema = new Schema({
     product: { type: Schema.Types.ObjectId, ref: 'products', required: true },
-    price: { type: Number, required: true },
-    discount: { type: Number, required: true },
+    price: { type: Number, default: 0, required: true },
+    discount: { type: Number, default: 0 },
+    tax: { type: Number, default: 0 },
     deliveredOn: { type: Date },
     variant: { type: Schema.Types.ObjectId, ref: 'variants', index: true },
     quantity: { type: Number, required: true },

@@ -1,0 +1,198 @@
+import express, { Request, Response } from "express";
+import { createCanvas } from "canvas";
+import JsBarcode from "jsbarcode";
+
+const barcodeRouter = express.Router();
+
+/**
+ * GET /barcode/:value
+ * Returns a PNG image of the barcode for the given string.
+ *
+ * Query params (all optional):
+ *   format   - barcode format, default "CODE128"
+ *   width    - bar width in px, default 2
+ *   height   - bar height in px, default 100
+ *   display  - show text below barcode, default true
+ */
+barcodeRouter.get("/:value", (req: Request, res: Response) => {
+    try {
+        const value = req.params.value;
+        if (!value || value.trim() === "") {
+            res.status(400).json({ error: "Barcode value is required" });
+            return;
+        }
+
+        const format   = (req.query.format  as string) || "CODE128";
+        const width    = parseInt((req.query.width  as string) || "2");
+        const height   = parseInt((req.query.height as string) || "100");
+        const displayValue = req.query.display !== "false";
+
+        const canvas = createCanvas(0, 0);
+
+        JsBarcode(canvas, value, {
+            format,
+            width,
+            height,
+            displayValue,
+            margin: 10,
+            background: "#ffffff",
+            lineColor: "#000000",
+        });
+
+        const buffer = canvas.toBuffer("image/png");
+
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Content-Length", buffer.length);
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        res.send(buffer);
+    } catch (error: any) {
+        // JsBarcode throws if the value is invalid for the chosen format
+        res.status(400).json({ error: error.message || "Failed to generate barcode" });
+    }
+});
+
+/**
+ * POST /barcode
+ * Same as GET but accepts { value, format?, width?, height?, display? } in the body.
+ * Useful when the value contains characters that are awkward in a URL.
+ */
+barcodeRouter.post("/", (req: Request, res: Response) => {
+    try {
+        const { value, format = "CODE128", width = 2, height = 100, display = true } = req.body;
+
+        if (!value || String(value).trim() === "") {
+            res.status(400).json({ error: "Barcode value is required" });
+            return;
+        }
+
+        const canvas = createCanvas(0, 0);
+
+        JsBarcode(canvas, String(value), {
+            format,
+            width: Number(width),
+            height: Number(height),
+            displayValue: display,
+            margin: 10,
+            background: "#ffffff",
+            lineColor: "#000000",
+        });
+
+        const buffer = canvas.toBuffer("image/png");
+
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Content-Length", buffer.length);
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        res.send(buffer);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message || "Failed to generate barcode" });
+    }
+});
+
+export default barcodeRouter;
+
+
+.barcode-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.barcode-wrapper svg,
+.barcode-image {
+  display: block;
+  max-width: 100%;
+}
+
+.barcode-loading {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+}
+
+.barcode-error {
+  font-size: 0.85rem;
+  color: #c64949;
+  margin: 0;
+}
+
+
+
+ 
+interface ApiBarcodeProps {
+  value: string;
+  apiBase?: string;    // defaults to "/barcode"
+  format?: string;
+  width?: number;
+  height?: number;
+  displayValue?: boolean;
+  className?: string;
+}
+ 
+export const ApiBarcode: React.FC<ApiBarcodeProps> = ({
+  value,
+  apiBase = "/barcode",
+  format = "CODE128",
+  width = 2,
+  height = 100,
+  displayValue = true,
+  className = "",
+}) => {
+  const [src, setSrc] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+ 
+  useEffect(() => {
+    if (!value) return;
+ 
+    const controller = new AbortController();
+ 
+    const fetchBarcode = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+ 
+        const res = await fetch(apiBase, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value, format, width, height, display: displayValue }),
+          signal: controller.signal,
+        });
+ 
+        if (!res.ok) {
+          const json = await res.json();
+          throw new Error(json.error || "Failed to fetch barcode");
+        }
+ 
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        setSrc((prev) => {
+          if (prev) URL.revokeObjectURL(prev); // clean up previous blob
+          return objectUrl;
+        });
+      } catch (e: any) {
+        if (e.name !== "AbortError") setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+ 
+    fetchBarcode();
+    return () => controller.abort();
+  }, [value, apiBase, format, width, height, displayValue]);
+ 
+  if (!value) return null;
+ 
+  return (
+    <div className={`barcode-wrapper ${className}`}>
+      {loading && <p className="barcode-loading">Generating barcode…</p>}
+      {error   && <p className="barcode-error">{error}</p>}
+      {src && !loading && (
+        <img src={src} alt={`Barcode for ${value}`} className="barcode-image" />
+      )}
+    </div>
+  );
+};

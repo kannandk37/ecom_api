@@ -27,6 +27,10 @@ export function orderItemRecordToOrderItemEntity(orderItemRecord: any): OrderIte
         orderItem.discount = orderItemRecord.discount;
     }
 
+    if (orderItemRecord.tax !== undefined) {
+        orderItem.tax = orderItemRecord.tax;
+    }
+
     if (orderItemRecord.deliveredOn) {
         orderItem.deliveredOn = orderItemRecord.deliveredOn;
     }
@@ -75,6 +79,10 @@ export function orderItemEntityToOrderItemRecord(orderItem: OrderItem): object {
 
     if (orderItem.discount !== undefined) {
         record.discount = orderItem.discount;
+    }
+
+    if (orderItem.tax !== undefined) {
+        record.tax = orderItem.tax;
     }
 
     if (orderItem.deliveredOn) {

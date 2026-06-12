@@ -19,13 +19,14 @@ export class Order {
     id?: string;
     user?: User;
     profile?: Profile;
-    orderId: string;
+    cid?: string;
     orderItems?: OrderItem[];
     billingAddress?: Address;
     deliveryAddress?: Address;
     totalPrice?: number;
     totalTaxAmount: number;
     totalDiscount?: number;
+    finalAmount?: number;
     promocode?: string;
     invoice?: Invoice;
     status?: OrderStatus;

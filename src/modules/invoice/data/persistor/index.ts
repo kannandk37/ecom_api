@@ -56,14 +56,9 @@ export function invoiceItemsPopulate() {
     return {
         path: 'invoiceItems',
         model: InvoiceItemModel,
-        populate: [{
+        populate: {
             path: "payment",
             model: PaymentModel
-        },
-            // {
-            //     path: "variant",
-            //     model: VariantModel
-            // }
-        ]
+        }
     }
 }

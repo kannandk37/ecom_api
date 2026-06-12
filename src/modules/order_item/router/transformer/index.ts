@@ -26,6 +26,10 @@ export function orderItemRawDatumToOrderItemEntity(raw: any): OrderItem {
         orderItem.discount = raw.discount;
     }
 
+    if (raw.tax) {
+        orderItem.tax = raw.tax;
+    }
+
     if (raw.deliveredOn) {
         orderItem.deliveredOn = new Date(raw.deliveredOn);
     }

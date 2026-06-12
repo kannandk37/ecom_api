@@ -17,6 +17,10 @@ export function orderRecordToOrderEntity(orderRecord: any): Order {
         order.id = orderRecord._id?.toString();
     }
 
+    if (orderRecord.cid) {
+        order.cid = orderRecord.cid;
+    }
+
     if (orderRecord.user) {
         order.user = userRecordToUserEntity(orderRecord.user);
     }
@@ -41,6 +45,14 @@ export function orderRecordToOrderEntity(orderRecord: any): Order {
         order.totalPrice = orderRecord.totalPrice;
     }
 
+    if (orderRecord.totalTaxAmount !== undefined) {
+        order.totalTaxAmount = orderRecord.totalTaxAmount;
+    }
+
+    if (orderRecord.finalAmount !== undefined) {
+        order.finalAmount = orderRecord.finalAmount;
+    }
+
     if (orderRecord.totalDiscount !== undefined) {
         order.totalDiscount = orderRecord.totalDiscount;
     }
@@ -57,6 +69,10 @@ export function orderRecordToOrderEntity(orderRecord: any): Order {
         order.status = orderRecord.status as OrderStatus;
     }
 
+    if (orderRecord.snapShot) {
+        order.snapShot = orderRecord.snapShot;
+    }
+
     return order;
 }
 
@@ -69,6 +85,10 @@ export function orderEntityToOrderRecord(order: Order): object {
 
     if (order.id) {
         record._id = new ObjectId(order.id);
+    }
+
+    if (order.cid) {
+        record.cid = order.cid;
     }
 
     if (order.user?.id) {
@@ -95,6 +115,14 @@ export function orderEntityToOrderRecord(order: Order): object {
         record.totalPrice = order.totalPrice;
     }
 
+    if (order.totalTaxAmount !== undefined) {
+        record.totalTaxAmount = order.totalTaxAmount;
+    }
+
+    if (order.finalAmount !== undefined) {
+        record.finalAmount = order.finalAmount;
+    }
+
     if (order.totalDiscount !== undefined) {
         record.totalDiscount = order.totalDiscount;
     }
@@ -109,6 +137,10 @@ export function orderEntityToOrderRecord(order: Order): object {
 
     if (order.status) {
         record.status = order.status;
+    }
+
+    if (order.snapShot) {
+        record.snapShot = order.snapShot;
     }
 
     return record;

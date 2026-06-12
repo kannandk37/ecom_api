@@ -13,7 +13,7 @@ export class InvoiceItemManagement {
         })
     }
 
-    async updateInvoiceItemsByInvoiceIdWithInvoice(invoiceItemIds: string[], invoiceId: string): Promise<InvoiceItem[]> {
+    async updateInvoiceItemsByInvoiceItemIdsWithInvoice(invoiceItemIds: string[], invoiceId: string): Promise<InvoiceItem[]> {
         return new Promise<InvoiceItem[]>(async (resolve, reject) => {
             try {
                 let invoiceItemPersistor = new InvoiceItemPersistor();

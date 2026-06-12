@@ -16,6 +16,10 @@ export function orderRawDatumToOrderEntity(raw: any): Order {
         order.id = raw.id;
     }
 
+    if (raw.cid) {
+        order.cid = raw.cid;
+    }
+
     if (raw.user) {
         order.user = userRawDatumToUserEntity(raw.user);
     }
@@ -38,6 +42,14 @@ export function orderRawDatumToOrderEntity(raw: any): Order {
 
     if (raw.totalPrice) {
         order.totalPrice = raw.totalPrice;
+    }
+
+    if (raw.totalTaxAmount) {
+        order.totalTaxAmount = raw.totalTaxAmount;
+    }
+
+    if (raw.finalAmount) {
+        order.finalAmount = raw.finalAmount;
     }
 
     if (raw.totalDiscount) {

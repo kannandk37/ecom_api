@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { AddressManagement } from "../../address/business";
 import { InvoiceManagement } from "../../invoice/business";
-import { Invoice } from "../../invoice/entity";
+import { Invoice, InvoiceStatus } from "../../invoice/entity";
 import { OrderItemManagement } from "../../order_item/business";
 import { OrderItem } from "../../order_item/entity";
 import { PaymentStatus } from "../../payment/entity";
@@ -11,12 +11,14 @@ import { UserManagement } from "../../user/business";
 import { VariantManagement } from "../../variant/business";
 import { OrderPersistor } from "../data/persistor";
 import { Order, OrderStatus } from "../entity";
+import { InvoiceItem } from "../../invoice_item/entity";
 
 export class OrderManagement {
     async createOrder(order: Order): Promise<Order> {
         return new Promise<Order>(async (resolve, reject) => {
             try {
                 let orderPeristor = new OrderPersistor();
+                let totalTax = 0;
                 if (order.orderItems?.length > 0) {
                     let orderItemManagement = new OrderItemManagement()
                     let orderItems: OrderItem[] = [];
@@ -26,6 +28,7 @@ export class OrderManagement {
                         orderItem.paymentStatus = PaymentStatus.PENDING;
                         orderItem.deliveryStatus = 'pending';
                         orderItem.tax = orderItemTax;
+                        totalTax = totalTax + orderItemTax;
                         // TODO: need to add for discount
                         // orderItem.discount
                         let persistorOrderItem = await orderItemManagement.createOrderItem(orderItem);
@@ -40,15 +43,24 @@ export class OrderManagement {
                     let invoiceItems = order.invoice.invoiceItems;
                     for (const invoiceItem of invoiceItems) {
                         let orderItem = order.orderItems.find((orderItem: OrderItem) => orderItem?.product?.id == invoiceItem?.orderItem?.product?.id && orderItem?.variant?.id == invoiceItem?.orderItem?.variant?.id);
+                        invoiceItem.amount = orderItem.price + orderItem.tax; // future add shipping fee too;
                         invoiceItem.orderItem = orderItem;
                     }
-                    let invoiceData: Invoice = { ...order.invoice, invoiceItems: invoiceItems, createdAt: DateTime.now() };
+                    let invoiceData = new Invoice();
+                    invoiceData.createdAt = DateTime.now();
+                    invoiceData.invoiceItems = invoiceItems;
+                    invoiceData.status = InvoiceStatus.PENDING;
+                    invoiceData.totalAmount = invoiceItems.reduce((sum: number, invoiceItem: InvoiceItem) => invoiceItem.amount + sum, 0);
+
                     let invoice = await new InvoiceManagement().createInvoice(invoiceData);
                     order.invoice = invoice;
                 }
-                let orderId = await this.checkAndCreateOrderId();
-                order.orderId = orderId;
-                resolve(await orderPeristor.createOrder(order));
+                let cid = await this.checkAndCreateCid();
+                let finalAMount = (order.orderItems.reduce((sum: number, orderItem: OrderItem) => (((orderItem.variant.price * orderItem.quantity) + orderItem.tax) - (orderItem?.discount ?? 0)) + sum, 0)) ?? 0;
+                order.cid = cid;
+                order.finalAmount = finalAMount;
+                let persistedOrder = await orderPeristor.createOrder(order)
+                resolve(await this.orderById(persistedOrder?.id));
             } catch (error) {
                 reject(error);
             }
@@ -105,14 +117,14 @@ export class OrderManagement {
         });
     }
 
-    async checkAndCreateOrderId(): Promise<string> {
+    async checkAndCreateCid(): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
                 let orderPersistor = new OrderPersistor();
                 let count = await orderPersistor.ordersCount();
                 let newOrderid = count + 1;
                 while (true) {
-                    let existing = await orderPersistor.orderByOrderId(`${newOrderid}`);
+                    let existing = await orderPersistor.orderByCid(`${newOrderid}`);
                     if (!existing) {
                         resolve(`${newOrderid}`);
                         return;

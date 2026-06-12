@@ -16,6 +16,8 @@ export class InvoiceManagement {
                     for (const invoiceItem of invoice.invoiceItems) {
                         let paymentData = new Payment();
                         paymentData.status = PaymentStatus.PENDING;
+                        paymentData.paidAmount = invoiceItem.amount;
+                        paymentData.paymentMethod = invoiceItem.payment?.paymentMethod
                         let payment = await new PaymentManagement().createPayment(paymentData);
                         invoiceItem.payment = payment;
                         //TODO: need to check y added
@@ -27,7 +29,7 @@ export class InvoiceManagement {
                     invoice.invoiceItems = invoiceItems;
                 }
                 let persistedInvoice = await invoicePeristor.createInvoice(invoice);
-                await invoiceItemManagement.updateInvoiceItemsByInvoiceIdWithInvoice(invoiceItems.map((el: InvoiceItem) => el.id), persistedInvoice.id)
+                await invoiceItemManagement.updateInvoiceItemsByInvoiceItemIdsWithInvoice(invoiceItems.map((el: InvoiceItem) => el.id), persistedInvoice.id)
                 resolve(await this.invoiceById(persistedInvoice.id));
             } catch (error) {
                 reject(error);

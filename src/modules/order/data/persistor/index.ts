@@ -24,7 +24,7 @@ export class OrderPersistor {
     async orders(): Promise<Order[]> {
         return new Promise<Order[]>(async (resolve, reject) => {
             try {
-                let ordersRecords = await OrderModel.find().populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                let ordersRecords = await OrderModel.find().populate([userPopulate(), profilePopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
                 resolve(await ordersRecordsToOrdersEntities(ordersRecords));
             } catch (error) {
                 reject(error);
@@ -43,10 +43,10 @@ export class OrderPersistor {
         })
     }
 
-    async orderByOrderId(orderId: string): Promise<Order> {
+    async orderByCid(cid: string): Promise<Order> {
         return new Promise<Order>(async (resolve, reject) => {
             try {
-                let orderRecord = await OrderModel.findOne({ orderId: orderId }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                let orderRecord = await OrderModel.findOne({ cid: cid }).populate([userPopulate(), profilePopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
                 resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);
@@ -57,7 +57,7 @@ export class OrderPersistor {
     async orderById(id: string): Promise<Order> {
         return new Promise<Order>(async (resolve, reject) => {
             try {
-                let orderRecord = await OrderModel.findOne({ _id: new ObjectId(id) }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                let orderRecord = await OrderModel.findOne({ _id: new ObjectId(id) }).populate([userPopulate(), profilePopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
                 resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);
@@ -79,7 +79,7 @@ export class OrderPersistor {
     async ordersByUserId(userId: string): Promise<Order[]> {
         return new Promise<Order[]>(async (resolve, reject) => {
             try {
-                let ordersRecords = await OrderModel.find({ user: new ObjectId(userId) }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                let ordersRecords = await OrderModel.find({ user: new ObjectId(userId) }).populate([userPopulate(), profilePopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
                 resolve(await ordersRecordsToOrdersEntities(ordersRecords));
             } catch (error) {
                 reject(error);
@@ -90,7 +90,7 @@ export class OrderPersistor {
     async orderByIdAndUserId(id: string, userId: string): Promise<Order> {
         return new Promise<Order>(async (resolve, reject) => {
             try {
-                let orderRecord = await OrderModel.find({ _id: new ObjectId(id), user: new ObjectId(userId) }).populate([userPopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                let orderRecord = await OrderModel.find({ _id: new ObjectId(id), user: new ObjectId(userId) }).populate([userPopulate(), profilePopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
                 resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);
@@ -123,6 +123,13 @@ export function deliveryAddressPopulate() {
 export function invoicePopulate() {
     return {
         path: 'invoice',
+        model: InvoiceModel
+    }
+}
+
+export function profilePopulate() {
+    return {
+        path: 'profile',
         model: InvoiceModel
     }
 }

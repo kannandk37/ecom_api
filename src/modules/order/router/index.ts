@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
+import { AuthenticatedRequest, specificRolesOnly, verifyToken } from "../../../middlewares/authMiddleware";
 import { RoleName } from "../../role/entity";
 import { errorhandler } from "../../../exceptions/errorhandler";
 import { orderRawDatumToOrderEntity } from "./transformer";
@@ -23,6 +23,16 @@ orderRouter.post('/add', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleNam
 orderRouter.get('/', verifyToken, specificRolesOnly([RoleName.ADMIN, RoleName.CUSTOMER, RoleName.SUPERADMIN]), async (request: Request, response: Response) => {
     try {
         let orders = await new OrderManagement().orders();
+        response.status(StatusCodes.OK).send(new SuccessResponse(orders, "Orders List", StatusCodes.OK))
+    } catch (error: any) {
+        errorhandler(error, response);
+    }
+});
+
+orderRouter.get('/me', verifyToken, specificRolesOnly([RoleName.CUSTOMER]), async (request: AuthenticatedRequest, response: Response) => {
+    try {
+        let userId = request.user.id;
+        let orders = await new OrderManagement().ordersByUserId(userId);
         response.status(StatusCodes.OK).send(new SuccessResponse(orders, "Orders List", StatusCodes.OK))
     } catch (error: any) {
         errorhandler(error, response);
