@@ -2,11 +2,12 @@ import { OrderModel } from "../schema";
 import { Order } from "../../entity";
 import { orderEntityToOrderRecord, ordersRecordsToOrdersEntities, orderRecordToOrderEntity } from "./transformer";
 import { ObjectId } from "mongodb";
-import { UserModel } from "../../../user/data/schema";
 import { OrderItemModel } from "../../../order_item/data/schema";
 import { InvoiceModel } from "../../../invoice/data/schema";
 import { AddressModel } from "../../../address/data/schema";
 import { userPopulate } from "../../../address/data/persistor";
+import { InvoiceItemModel } from "../../../invoice_item/data/schema";
+import { PaymentModel } from "../../../payment/data/schema";
 
 export class OrderPersistor {
     async createOrder(order: Order): Promise<Order> {
@@ -57,7 +58,7 @@ export class OrderPersistor {
     async orderById(id: string): Promise<Order> {
         return new Promise<Order>(async (resolve, reject) => {
             try {
-                let orderRecord = await OrderModel.findOne({ _id: new ObjectId(id) }).populate([userPopulate(), profilePopulate(), orderItemsPopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
+                let orderRecord = await OrderModel.findOne({ _id: new ObjectId(id) }).populate([orderItemsPopulate(), userPopulate(), profilePopulate(), billingAddressPopulate(), deliveryAddressPopulate(), invoicePopulate()]);
                 resolve(await orderRecordToOrderEntity(orderRecord));
             } catch (error) {
                 reject(error);
@@ -123,7 +124,23 @@ export function deliveryAddressPopulate() {
 export function invoicePopulate() {
     return {
         path: 'invoice',
-        model: InvoiceModel
+        model: InvoiceModel,
+        populate: [
+            {
+                path: 'invoiceItems',
+                model: InvoiceItemModel,
+                populate: [
+                    {
+                        path: "orderItem",
+                        model: OrderItemModel
+                    },
+                    {
+                        path: "payment",
+                        model: PaymentModel
+                    }
+                ]
+            }
+        ]
     }
 }
 

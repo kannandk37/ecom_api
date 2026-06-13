@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 import { InvoiceStatus } from "../../../invoice/entity";
 
 const InvoiceItemSchema = new Schema({
-    ivoice: { type: Schema.Types.ObjectId, ref: 'invoices', index: true },
+    invoice: { type: Schema.Types.ObjectId, ref: 'invoices', index: true },
     orderItem: { type: Schema.Types.ObjectId, ref: 'orderItems', index: true },
     amount: { type: Number, required: true },
     payment: { type: Schema.Types.ObjectId, ref: 'payments', required: true, index: true },

@@ -21,7 +21,7 @@ export class InvoicePersistor {
     async invoices(): Promise<Invoice[]> {
         return new Promise<Invoice[]>(async (resolve, reject) => {
             try {
-                let invoicesRecords = await InvoiceModel.find().populate([invoiceItemsPopulate()]);
+                let invoicesRecords = await InvoiceModel.find().populate(invoiceItemsPopulate());
                 resolve(await invoicesRecordsToInvoicesEntities(invoicesRecords));
             } catch (error) {
                 reject(error);
@@ -32,7 +32,7 @@ export class InvoicePersistor {
     async invoiceById(id: string): Promise<Invoice> {
         return new Promise<Invoice>(async (resolve, reject) => {
             try {
-                let invoiceRecord = await InvoiceModel.findOne({ _id: new ObjectId(id) }).populate([invoiceItemsPopulate()]);
+                let invoiceRecord = await InvoiceModel.findOne({ _id: new ObjectId(id) }).populate(invoiceItemsPopulate());
                 resolve(await invoiceRecordToInvoiceEntity(invoiceRecord));
             } catch (error) {
                 reject(error);
@@ -43,7 +43,7 @@ export class InvoicePersistor {
     async invoicesByIds(ids: string[]): Promise<Invoice[]> {
         return new Promise<Invoice[]>(async (resolve, reject) => {
             try {
-                let invoiceRecords = await InvoiceModel.find({ _id: { $in: ids.map((id: string) => new ObjectId(id)) } }).populate([invoiceItemsPopulate()]);
+                let invoiceRecords = await InvoiceModel.find({ _id: { $in: ids.map((id: string) => new ObjectId(id)) } }).populate(invoiceItemsPopulate());
                 resolve(await invoicesRecordsToInvoicesEntities(invoiceRecords));
             } catch (error) {
                 reject(error);

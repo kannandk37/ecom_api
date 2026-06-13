@@ -14,8 +14,8 @@ export function invoiceRecordToInvoiceEntity(invoiceRecord: any): Invoice {
         invoice.id = invoiceRecord._id?.toString();
     }
 
-    if (invoiceRecord.invoiceItemIds && invoiceRecord.invoiceItemIds.length > 0) {
-        invoice.invoiceItems = invoiceItemsRecordsToInvoiceItemsEntities(invoiceRecord.invoiceItemIds);
+    if (invoiceRecord.invoiceItems && invoiceRecord.invoiceItems.length > 0) {
+        invoice.invoiceItems = invoiceItemsRecordsToInvoiceItemsEntities(invoiceRecord.invoiceItems);
     }
 
     if (invoiceRecord.totalAmount !== undefined) {

@@ -19,9 +19,9 @@ export class OrderManagement {
             try {
                 let orderPeristor = new OrderPersistor();
                 let totalTax = 0;
+                let orderItems: OrderItem[] = [];
                 if (order.orderItems?.length > 0) {
                     let orderItemManagement = new OrderItemManagement()
-                    let orderItems: OrderItem[] = [];
                     for (const orderItem of order.orderItems) {
                         //TODO: need to calculate actual tax;
                         let orderItemTax: number = (orderItem.price * (18 / 100));
@@ -39,10 +39,16 @@ export class OrderManagement {
                     order.orderItems = orderItems;
                 }
 
+                let finalAmount = orderItems?.reduce((sum: number, orderItem: OrderItem) => sum + (((orderItem.variant?.price ?? 0) * orderItem.quantity) + (orderItem.tax ?? 0) - (orderItem.discount ?? 0)), 0) ?? 0;
+                order.finalAmount = finalAmount;
+
+                let cid = await this.checkAndCreateCid();
+                order.cid = cid;
+
                 if (order.invoice) {
                     let invoiceItems = order.invoice.invoiceItems;
                     for (const invoiceItem of invoiceItems) {
-                        let orderItem = order.orderItems.find((orderItem: OrderItem) => orderItem?.product?.id == invoiceItem?.orderItem?.product?.id && orderItem?.variant?.id == invoiceItem?.orderItem?.variant?.id);
+                        let orderItem = orderItems.find((orderItem: OrderItem) => orderItem?.product?.id == invoiceItem?.orderItem?.product?.id && orderItem?.variant?.id == invoiceItem?.orderItem?.variant?.id);
                         invoiceItem.amount = orderItem.price + orderItem.tax; // future add shipping fee too;
                         invoiceItem.orderItem = orderItem;
                     }
@@ -55,10 +61,7 @@ export class OrderManagement {
                     let invoice = await new InvoiceManagement().createInvoice(invoiceData);
                     order.invoice = invoice;
                 }
-                let cid = await this.checkAndCreateCid();
-                let finalAMount = (order.orderItems.reduce((sum: number, orderItem: OrderItem) => (((orderItem.variant.price * orderItem.quantity) + orderItem.tax) - (orderItem?.discount ?? 0)) + sum, 0)) ?? 0;
-                order.cid = cid;
-                order.finalAmount = finalAMount;
+
                 let persistedOrder = await orderPeristor.createOrder(order)
                 resolve(await this.orderById(persistedOrder?.id));
             } catch (error) {
@@ -70,33 +73,82 @@ export class OrderManagement {
     async constructAndUpdateOrderWithSnapShotById(id: string, existingOrder?: Order): Promise<Order> {
         return new Promise<Order>(async (resolve, reject) => {
             try {
+                // let order = existingOrder ?? await this.orderById(id);
+                // const [user, profile, billingAddress, deliveryAddress, invoice] = await Promise.all([
+                //     new UserManagement().userById(order.user?.id),
+                //     new ProfileManagement().profileById(order?.profile?.id),
+                //     new AddressManagement().addressById(order?.billingAddress?.id),
+                //     new AddressManagement().addressById(order?.deliveryAddress?.id),
+                //     new InvoiceManagement().invoiceById(order?.invoice?.id),
+                // ]);
+                // const orderItems = await Promise.all(
+                //     order.orderItems.map(async (item) => {
+                //         const [orderItemData, product, variant] = await Promise.all([
+                //             new OrderItemManagement().orderItemById(item?.id),
+                //             new ProductManagement().productById(item?.product?.id),
+                //             new VariantManagement().variantById(item?.variant?.id),
+                //         ]);
+                //         return { ...orderItemData, product, variant };
+                //     })
+                // );
+                // order.user = user;
+                // order.profile = profile;
+                // order.billingAddress = billingAddress;
+                // order.deliveryAddress = deliveryAddress;
+                // order.orderItems = orderItems;
+                // order.invoice = invoice;
+                // let snapShot: any = {
+                //     ...order
+                // };
+                // const updatedOrder = await this.updateOrderWithSnapShotById(id, snapShot);
+                // resolve(updatedOrder);
+
                 let order = existingOrder ?? await this.orderById(id);
-                const [user, profile, billingAddress, deliveryAddress, invoice] = await Promise.all([
-                    new UserManagement().userById(order.user.id),
-                    new ProfileManagement().profileById(order.profile.id),
-                    new AddressManagement().addressById(order.billingAddress.id),
-                    new AddressManagement().addressById(order.deliveryAddress.id),
-                    new InvoiceManagement().invoiceById(order.invoice.id),
+
+                const userMgmt = new UserManagement();
+                const profileMgmt = new ProfileManagement();
+                const addressMgmt = new AddressManagement();
+                const invoiceMgmt = new InvoiceManagement();
+                const orderItemMgmt = new OrderItemManagement();
+                const productMgmt = new ProductManagement();
+                const variantMgmt = new VariantManagement();
+
+                const [
+                    user,
+                    profile,
+                    billingAddress,
+                    deliveryAddress,
+                    invoice,
+                    orderItems,
+                ] = await Promise.all([
+                    userMgmt.userById(order.user?.id),
+                    profileMgmt.profileById(order?.profile?.id),
+                    addressMgmt.addressById(order?.billingAddress?.id),
+                    addressMgmt.addressById(order?.deliveryAddress?.id),
+                    invoiceMgmt.invoiceById(order?.invoice?.id),
+
+                    Promise.all(
+                        order.orderItems.map(async (item) => {
+                            const [orderItemData, product, variant] = await Promise.all([
+                                orderItemMgmt.orderItemById(item?.id),
+                                productMgmt.productById(item?.product?.id),
+                                variantMgmt.variantById(item?.variant?.id),
+                            ]);
+                            return { ...orderItemData, product, variant };
+                        })
+                    ),
                 ]);
-                const orderItems = await Promise.all(
-                    order.orderItems.map(async (item) => {
-                        const [orderItemData, product, variant] = await Promise.all([
-                            new OrderItemManagement().orderItemById(item.id),
-                            new ProductManagement().productById(item.product.id),
-                            new VariantManagement().variantById(item.variant.id),
-                        ]);
-                        return { ...orderItemData, product, variant };
-                    })
-                );
-                order.user = user;
-                order.profile = profile;
-                order.billingAddress = billingAddress;
-                order.deliveryAddress = deliveryAddress;
-                order.orderItems = orderItems;
-                order.invoice = invoice;
-                let snapShot: any = {
-                    ...order
+
+                const snapShot: any = {
+                    ...order,
+                    user,
+                    profile,
+                    billingAddress,
+                    deliveryAddress,
+                    invoice,
+                    orderItems,
                 };
+
                 const updatedOrder = await this.updateOrderWithSnapShotById(id, snapShot);
                 resolve(updatedOrder);
             } catch (error) {

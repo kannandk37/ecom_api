@@ -6,7 +6,8 @@ export class OrderItemManagement {
         return new Promise<OrderItem>(async (resolve, reject) => {
             try {
                 let orderItemPeristor = new OrderItemPersistor();
-                resolve(await orderItemPeristor.createOrderItem(orderItem));
+                let persistedOrderItem = await orderItemPeristor.createOrderItem(orderItem)
+                resolve(await this.orderItemById(persistedOrderItem?.id));
             } catch (error) {
                 reject(error);
             }
